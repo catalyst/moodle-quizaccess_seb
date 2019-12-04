@@ -121,10 +121,10 @@ class quizaccess_seb extends quiz_access_rule_base {
                 . 'seb.regexallowed AS seb_regexallowed, '
                 . 'seb.expressionsblocked AS seb_expressionsblocked, '
                 . 'seb.regexblocked AS seb_regexblocked, '
-                . 'seb.suppresssebdownloadlink AS seb_suppresssebdownloadlink '
+                . 'seb.suppresssebdownloadlink AS seb_suppresssebdownloadlink, '
                 . 'sebtemplate.name AS seb_templatename '
-                , 'LEFT JOIN {quizaccess_seb_template} sebtemplate ON seb.templateid = sebtemplate.id '
-                . 'LEFT JOIN {quizaccess_seb_quizsettings} seb ON seb.quizid = quiz.id '
+                , 'LEFT JOIN {quizaccess_seb_quizsettings} seb ON seb.quizid = quiz.id '
+                . 'LEFT JOIN {quizaccess_seb_template} sebtemplate ON seb.templateid = sebtemplate.id '
                 , []
         ];
     }
