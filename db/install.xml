@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/quiz/accessrule/seb/db" VERSION="2019120400" COMMENT="XMLDB file for Moodle mod/quiz/accessrule/seb"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd">
+  <TABLES>
+    <TABLE NAME="quizaccess_seb_quizsettings" COMMENT="Stores the quiz level Safe Exam Browser configuration.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="quizid"/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Foreign key to quiz.id." PREVIOUS="id" NEXT="allowedkeys"/>
+        <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Foreign key to quizaccess_seb_template.id." PREVIOUS="quizid" NEXT="requiresafeexambrowser"/>
+        <FIELD NAME="requiresafeexambrowser" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool whether to require SEB." PREVIOUS="templateid" NEXT="sebconfigfile"/>
+        <FIELD NAME="sebconfigfile" TYPE="text" LENGTH="40" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" COMMENT="Item ID for config file on storage." PREVIOUS="requiresafeexambrowser" NEXT="showsebtaskbar"/>
+        <FIELD NAME="showsebtaskbar" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to show SEB task bar" PREVIOUS="sebconfigfile" NEXT="showwificontrol"/>
+        <FIELD NAME="showwificontrol" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to allow user to control networking." PREVIOUS="showsebtaskbar" NEXT="showreloadbutton"/>
+        <FIELD NAME="showreloadbutton" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to show reload button." PREVIOUS="showwificontrol" NEXT="showtime"/>
+        <FIELD NAME="showtime" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to show the clock." PREVIOUS="showreloadbutton" NEXT="showkeyboardlayout"/>
+        <FIELD NAME="showkeyboardlayout" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to show keyboard layout." PREVIOUS="showtime" NEXT="allowuserquitseb"/>
+        <FIELD NAME="allowuserquitseb" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to show quit button." PREVIOUS="showkeyboardlayout" NEXT="quitpassword"/>
+        <FIELD NAME="quitpassword" TYPE="text" LENGTH="40" NOTNULL="false" UNSIGNED="false" SEQUENCE="false" COMMENT="Quit password to exit SEB." PREVIOUS="allowuserquitseb" NEXT="linkquitseb"/>
+        <FIELD NAME="linkquitseb" TYPE="text" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Link to exit SEB." PREVIOUS="quitpassword" NEXT="userconfirmquit"/>
+        <FIELD NAME="userconfirmquit" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool whether confirm quit popup should appear." PREVIOUS="linkquitseb" NEXT="enableaudiocontrol"/>
+        <FIELD NAME="enableaudiocontrol" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool to show volume and audio controls." PREVIOUS="userconfirmquit" NEXT="muteonstartup"/>
+        <FIELD NAME="muteonstartup" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool whether browser starts muted." PREVIOUS="enableaudiocontrol" NEXT="allowspellchecking"/>
+        <FIELD NAME="allowspellchecking" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Bool whether spell checking will happen in SEB." PREVIOUS="muteonstartup" NEXT="allowreloadinexam"/>
+        <FIELD NAME="allowreloadinexam" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether user can reload." PREVIOUS="allowspellchecking" NEXT="activateurlfiltering"/>
+        <FIELD NAME="activateurlfiltering" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether URLs will be filtered." PREVIOUS="allowreloadinexam" NEXT="filterembeddedcontent"/>
+        <FIELD NAME="filterembeddedcontent" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool wither embedded content will be filtered" PREVIOUS="activateurlfiltering" NEXT="expressionsallowed"/>
+        <FIELD NAME="expressionsallowed" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma or newline separated list of allowed expressions" PREVIOUS="filterembeddedcontent" NEXT="regexallowed"/>
+        <FIELD NAME="regexallowed" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of allowed URLs" PREVIOUS="expressionsallowed" NEXT="expressionsblocked"/>
+        <FIELD NAME="expressionsblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma or newline separated list of blocked expressions" PREVIOUS="regexallowed" NEXT="regexblocked"/>
+        <FIELD NAME="regexblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of blocked URLs" PREVIOUS="expressionsblocked" NEXT="suppresssebdownloadlink"/>
+        <FIELD NAME="suppresssebdownloadlink" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether SEB download link should appear" PREVIOUS="regexblocked"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="quizid"/>
+        <KEY NAME="quizid" TYPE="foreign-unique" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id" PREVIOUS="primary" NEXT="templateid"/>
+        <KEY NAME="templateid" TYPE="foreign-unique" FIELDS="templateid" REFTABLE="quizaccess_seb_template" REFFIELDS="id" PREVIOUS="quizid"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="quizaccess_seb_template" COMMENT="Templates for Safe Exam Browser configuration.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="name"/>
+        <FIELD NAME="name" TYPE="text" LENGTH="255" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Name of the template" PREVIOUS="id" NEXT="content"/>
+        <FIELD NAME="content" TYPE="text" NOTNULL="true" UNSIGNED="false" SEQUENCE="false" COMMENT="Content of the template" PREVIOUS="name"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
