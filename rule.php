@@ -30,13 +30,18 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 class quizaccess_seb extends quiz_access_rule_base {
 
     /**
-     * quizaccess_seb constructor.
+     * Constructor for quizaccess_seb.
+     *
+     * @param quiz $quizobj Information about the quiz in question.
+     * @param int $timenow The time that should be considered as 'now'.
      */
-    public function __construct($quizobj, $timenow) {
+    public function __construct(quiz $quizobj, int $timenow) {
         parent::__construct($quizobj, $timenow);
     }
 
     /**
+     * Create the rule.
+     *
      * @param quiz $quizobj
      * @param int $timenow
      * @param bool $canignoretimelimits
@@ -65,7 +70,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return array
      */
     public static function validate_settings_form_fields(array $errors,
-                                                         array $data, $files, mod_quiz_mod_form $quizform) {
+                                                         array $data, $files, mod_quiz_mod_form $quizform) : array {
         return $errors;
     }
 
@@ -93,7 +98,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @param int $quizid
      * @return array
      */
-    public static function get_settings_sql($quizid) {
+    public static function get_settings_sql($quizid) : array {
         return [
                 'seb.requiresafeexambrowser AS seb_requiresafeexambrowser, '
                 . 'seb.sebconfigfile AS seb_sebconfigfile, '
