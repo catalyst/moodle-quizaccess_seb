@@ -17,12 +17,12 @@
 /**
  * Class cipher is for encrypting and decrypting SEB config files.
  *
- * @package    quizaccess_safeexambrowser
+ * @package    quizaccess_seb
  * @copyright  2018 Nicholas Hoobin <nicholashoobin@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_safeexambrowser;
+namespace quizaccess_seb;
 
 use RNCryptor\RNCryptor\Cryptor;
 use RNCryptor\RNCryptor\Decryptor;

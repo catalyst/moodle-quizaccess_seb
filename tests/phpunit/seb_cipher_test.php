@@ -17,13 +17,13 @@
 /**
  * PHPUnit Tests for the SEB cipher.
  *
- * @package    quizaccess_safeexambrowser
+ * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use quizaccess_safeexambrowser\seb_cipher;
+use quizaccess_seb\seb_cipher;
 
 defined('MOODLE_INTERNAL') || die();
 
