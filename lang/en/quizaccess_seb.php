@@ -27,13 +27,13 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'Safe Exam Browser templates and settings';
 
-// Privacy
+// Privacy.
 $string['privacy:metadata'] = 'The Safe Exam Browser quiz access rule plugin does not store any personal data.';
 
-// Admin settings
+// Admin settings.
 $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
 
-// Quiz form settings
+// Quiz form settings.
 $string['seb'] = 'Safe Exam Browser';
 $string['seb_activateurlfiltering'] = 'Activate URL filtering';
 $string['seb_activateurlfiltering_help'] = 'If enabled, URLs will be filtered when loading web pages. The filter set has to be defined below.';
