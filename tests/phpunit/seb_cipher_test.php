@@ -43,17 +43,47 @@ class seb_cipher_testcase extends advanced_testcase {
     }
 
     /**
-     * Test that an unencrypted SEB config file is encrypted correctly with a password.
+     * Test that an unencrypted SEB config file is encrypted correctly into 'pswd' format with a password.
      *
      * Both the encrypted and unencrypted files were created with the SEB config tool, Windows v2.3. Only change was
      * to use the encrypted salt in unencrypted file. Rest of settings unchanged.
      */
-    public function test_file_encrypted() {
+    public function test_file_encrypted_with_password() {
         $unencryptedcontents = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $encryptedcontents = seb_cipher::encrypt($unencryptedcontents, 'test');
 
         // As the binary will be unique, we need to unencrypt it again to test it.
         $decryptedcontents = seb_cipher::decrypt($encryptedcontents, 'test');
+
+        // Massage the data back to expected format.
+        // These replacements are for converting XML to PList representation.
+        $replacements = [
+            "<dict></dict>" => "<dict />",
+            "<data></data>" => "<data />",
+            "<true/>" => "<true />",
+            "<false/>" => "<false />",
+            "\n" => "\r\n",  // Convert UNIX to DOS line endings.
+        ];
+
+        foreach ($replacements as $key => $replacement) {
+            $decryptedcontents = str_replace($key, $replacement, $decryptedcontents);
+        }
+
+        $this->assertEquals($unencryptedcontents, $decryptedcontents);
+    }
+
+    /**
+     * Test that an unencrypted SEB config file is processed correctly into 'plnd' format without a password.
+     *
+     * Both the encrypted and unencrypted files were created with the SEB config tool, Windows v2.3. Only change was
+     * to use the encrypted salt in unencrypted file. Rest of settings unchanged.
+     */
+    public function test_file_encrypted_without_password() {
+        $unencryptedcontents = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $encryptedcontents = seb_cipher::encrypt($unencryptedcontents, '');
+
+        // As the binary will be unique, we need to unencrypt it again to test it.
+        $decryptedcontents = seb_cipher::decrypt($encryptedcontents, '');
 
         // Massage the data back to expected format.
         // These replacements are for converting XML to PList representation.
