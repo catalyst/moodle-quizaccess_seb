@@ -81,3 +81,6 @@ $string['seb_sebconfigfile'] = 'Upload Safe Exam Browser config';
 $string['seb_sebconfigfile_help'] = 'Please upload your own Safe Exam Browser config file for this quiz.';
 $string['seb_userconfirmquit'] = 'Ask user to confirm quitting';
 $string['seb_userconfirmquit_help'] = 'If enabled, users have to confirm quitting of SEB when a quit link is detected.';
+
+// Exceptions.
+$string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
