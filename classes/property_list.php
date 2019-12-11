@@ -26,9 +26,11 @@
 namespace quizaccess_seb;
 
 use CFPropertyList\CFArray;
+use CFPropertyList\CFBoolean;
 use CFPropertyList\CFData;
 use CFPropertyList\CFDate;
 use CFPropertyList\CFDictionary;
+use CFPropertyList\CFNumber;
 use CFPropertyList\CFPropertyList;
 use CFPropertyList\CFString;
 use CFPropertyList\CFType;
@@ -51,25 +53,16 @@ class property_list {
      * @throws \CFPropertyList\PListException
      * @throws \DOMException
      */
-    public function __construct(string $xml) {
+    public function __construct(string $xml = '') {
         $this->cfpropertylist = new CFPropertyList();
-        $this->cfpropertylist->parse($xml, CFPropertyList::FORMAT_XML);
-    }
 
-    /**
-     * Create an empty property list.
-     *
-     * @return property_list Return a property list with a empty root dictionary set up.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
-     */
-    public static function create() {
-        $cfpropertylist = new CFPropertyList();
-        // Add main dict.
-        $cfpropertylist->add(new CFDictionary([]));
-        return new self($cfpropertylist->toXML());
+        if (empty($xml)) {
+            // If xml not provided, create a blank PList with root dictionary set up.
+            $this->cfpropertylist->add(new CFDictionary([]));
+        } else {
+            // Parse the XML into a PList object.
+            $this->cfpropertylist->parse($xml, CFPropertyList::FORMAT_XML);
+        }
     }
 
     /**
@@ -97,10 +90,10 @@ class property_list {
                 $result = $elvalue->getValue();
             }
         }, $this->cfpropertylist->getValue());
-        // Turn PList dicts and arrays into PHP array for export.
+
         if (is_array($result)) {
-            $result = new CFDictionary($result); // Convert back to CFDictionary so serialization is recursive.
-            $result = $result->toArray(); // Serialize.
+            // Turn CFType elements in PHP elements.
+            $result = $this->array_serialize_cftypes($result);
         }
         return $result;
     }
@@ -108,14 +101,31 @@ class property_list {
     /**
      * Update the value of any element with matching key.
      *
+     * Only allow string, number and boolean elements to be updated.
+     *
      * @param string $key Key of element to update.
      * @param mixed $value  Value to update element with.
      */
     public function update_element_value(string $key, $value) {
+        if (is_array($value)) {
+            debugging('property_list: Can\'t call update_element_value with array. Use update_element_array instead.',
+                    DEBUG_DEVELOPER);
+            return;
+        }
         $this->plist_map( function($elvalue, $elkey, $parent) use ($key, $value) {
             // Set new value.
             if ($key === $elkey) {
-                $parent->get($elkey)->setValue($value);
+                $element = $parent->get($elkey);
+                // Limit update to boolean and strings types, and check value matches expected type.
+                if (($element instanceof CFString && is_string($value))
+                        || ($element instanceof CFNumber && is_numeric($value))
+                        || ($element instanceof CFBoolean && is_bool($value))) {
+                    $element->setValue($value);
+                } else {
+                    debugging('property_list: Can only update strings, numbers and bools with corresponding type.',
+                        DEBUG_DEVELOPER);
+                    return;
+                }
             }
         }, $this->cfpropertylist->getValue());
     }
@@ -129,6 +139,13 @@ class property_list {
      * @param array $value  Array to update element with.
      */
     public function update_element_array(string $key, array $value) {
+        // Validate new array.
+        foreach ($value as $element) {
+            // If any element is not a CFType instance, then do nothing.
+            if (!($element instanceof CFType)) {
+                return;
+            }
+        }
         $this->plist_map( function($elvalue, $elkey, $parent) use ($key, $value) {
             if ($key === $elkey) {
                 $element = $parent->get($elkey);
@@ -173,7 +190,27 @@ class property_list {
      * See the developer documention for SEB for more information on the requirements on generating a SEB Config Key.
      * https://safeexambrowser.org/developer/seb-config-key.html
      *
+     * 1. Don't add any whitespace or line formatting to the SEB-JSON string.
+     * 2. Don't add character escaping (also backshlashes "\" as found in URL filter rules should not be escaped).
+     * 3. All <dict> elements from the plist XML must be ordered (alphabetically sorted) by their key names. Use a
+     * recursive method to apply ordering also to nested dictionaries contained in the root-level dictionary and in
+     * arrays. Use non-localized (culture invariant), non-ASCII value based case insensitive ordering. For example the
+     * key <key>allowWlan</key> comes before <key>allowWLAN</key>. Cocoa/Obj-C and .NET/C# usually use this case
+     * insensitive ordering as default, but PHP for example doesn't.
+     * 4. Remove empty <dict> elements (key/value). Current versions of SEB clients should anyways not generate empty
+     * dictionaries, but this was possible with outdated versions. If config files have been generated that time, such
+     * elements might still be around.
+     * 5. All string elements must be UTF8 encoded.
+     * 6. Base16 strings should use lower-case a-f characters, even though this isn't relevant in the current
+     * implementation of the Config Key calculation.
+     * 7. <data> plist XML elements must be converted to Base64 strings.
+     * 8. <date> plist XML elements must be converted to ISO 8601 formatted strings.
+     *
      * @return string A json encoded string.
+     *
+     * @throws \CFPropertyList\IOException
+     * @throws \CFPropertyList\PListException
+     * @throws \DOMException
      */
     public function to_json() : string {
         // Create a clone of the PList, so main list isn't mutated.
@@ -185,18 +222,18 @@ class property_list {
         $this->encode_dates_and_strings($jsonplist->getValue());
 
         // Serialize PList to array.
-        $array = $jsonplist->toArray();
+        $plistarray = $jsonplist->toArray();
 
-        // Remove empty arrays.
-        $array = $this->array_remove_empty_arrays($array);
+        // Remove empty arrays. See point 4 for more information.
+        $plistarray = $this->array_remove_empty_arrays($plistarray);
 
-        // Sort alphabetically.
-        $array = $this->array_sort($array);
+        // Sort array alphabetically by key using case insensitive, natural sorting. See point 3 for more information.
+        $plistarray = $this->array_sort($plistarray);
 
         // Encode in JSON with following rules from SEB docs.
         // 1. Don't add any whitespace or line formatting to the SEB-JSON string.
         // 2. Don't add character escaping.
-        return json_encode($array, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+        return json_encode($plistarray, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
     }
 
     /**
@@ -291,5 +328,17 @@ class property_list {
         }
 
         return $array;
+    }
+
+    /**
+     * If an array contains CFType objects, wrap array in a CFDictionary to allow recursive serialization of data
+     * into a standard PHP array.
+     *
+     * @param array $array Array containing CFType objects.
+     * @return array Standard PHP array.
+     */
+    private function array_serialize_cftypes(array $array) : array {
+        $array = new CFDictionary($array); // Convert back to CFDictionary so serialization is recursive.
+        return $array->toArray(); // Serialize.
     }
 }
