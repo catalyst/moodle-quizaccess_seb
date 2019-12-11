@@ -120,17 +120,22 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
      * @param string $key Key of element to try and update.
      * @param mixed $value Bad value to try to update with.
      * @param mixed $expected Expected value of element after update is called.
+     * @param string $exceptionmessage Message of exception expected to be thrown.
+
      * @dataProvider bad_update_data_provider
      */
-    public function test_updating_element_value_with_bad_data(string $xml, string $key, $value, $expected, $debugcount) {
+    public function test_updating_element_value_with_bad_data(string $xml, string $key, $value, $expected, $exceptionmessage) {
         $xml = $this->get_plist_xml_header()
             . $xml
             . $this->get_plist_xml_footer();
         $plist = new property_list($xml);
+
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage($exceptionmessage);
+
         $plist->update_element_value($key, $value);
         $plistarray = json_decode($plist->to_json()); // Export elements.
         $this->assertEquals($expected, $plistarray->$key);
-        $this->assertDebuggingCalledCount($debugcount);
     }
 
     /**
@@ -161,6 +166,10 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
             . "</dict>"
             . $this->get_plist_xml_footer();
         $plist = new property_list($xml);
+
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage('New array must only contain CFType objects.');
+
         $plist->update_element_array('testDict', [false]);
         $this->assertEquals(['testKey' => 'testValue'], $plist->get_element_value('testDict'));
         $this->assertDebuggingCalled('property_list: If updating an array in PList, it must only contain CFType objects.',
@@ -243,22 +252,35 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
     public function bad_update_data_provider() : array {
 
         return [
-            'Update string with bool' => ['<key>testKey</key><string>testValue</string>', 'testKey', true, 'testValue', 1],
-            'Update string with number' => ['<key>testKey</key><string>testValue</string>', 'testKey', 999, 'testValue', 1],
-            'Update string with null' => ['<key>testKey</key><string>testValue</string>', 'testKey', null, 'testValue', 1],
-            'Update string with array' => ['<key>testKey</key><string>testValue</string>', 'testKey', ['arrayValue'],
-                    'testValue', 1],
-            'Update bool with string' => ['<key>testKey</key><true/>', 'testKey', 'testValue', true, 1],
-            'Update bool with number' => ['<key>testKey</key><true/>', 'testKey', 999, true, 1],
-            'Update bool with null' => ['<key>testKey</key><true/>', 'testKey', null, true, 1],
-            'Update bool with array' => ['<key>testKey</key><true/>', 'testKey', ['testValue'], true, 1],
-            'Update number with string' => ['<key>testKey</key><real>888</real>', 'testKey', 'string', 888, 1],
-            'Update number with bool' => ['<key>testKey</key><real>888</real>', 'testKey', true, 888, 1],
-            'Update number with null' => ['<key>testKey</key><real>888</real>', 'testKey', null, 888, 1],
-            'Update number with array' => ['<key>testKey</key><real>888</real>', 'testKey', ['testValue'], 888, 1],
+            'Update string with bool' => ['<key>testKey</key><string>testValue</string>', 'testKey', true, 'testValue',
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFString'],
+            'Update string with number' => ['<key>testKey</key><string>testValue</string>', 'testKey', 999, 'testValue',
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFString'],
+            'Update string with null' => ['<key>testKey</key><string>testValue</string>', 'testKey', null, 'testValue',
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFString'],
+            'Update string with array' => ['<key>testKey</key><string>testValue</string>', 'testKey', ['arrayValue'], 'testValue',
+                    'Use update_element_array to update a collection.'],
+            'Update bool with string' => ['<key>testKey</key><true/>', 'testKey', 'testValue', true,
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFBool'],
+            'Update bool with number' => ['<key>testKey</key><true/>', 'testKey', 999, true,
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFBool'],
+            'Update bool with null' => ['<key>testKey</key><true/>', 'testKey', null, true,
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFBool'],
+            'Update bool with array' => ['<key>testKey</key><true/>', 'testKey', ['testValue'], true,
+                    'Use update_element_array to update a collection.'],
+            'Update number with string' => ['<key>testKey</key><real>888</real>', 'testKey', 'string', 888,
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFNumber'],
+            'Update number with bool' => ['<key>testKey</key><real>888</real>', 'testKey', true, 888,
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFNumber'],
+            'Update number with null' => ['<key>testKey</key><real>888</real>', 'testKey', null, 888,
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFNumber'],
+            'Update number with array' => ['<key>testKey</key><real>888</real>', 'testKey', ['testValue'], 888,
+                    'Use update_element_array to update a collection.'],
             'Update date with string' => ['<key>testKey</key><date>1940-10-09T22:13:56Z</date>', 'testKey', 'string',
-                '1940-10-10T06:13:56+08:00', 1],
-            'Update data with number' => ['<key>testKey</key><data>testData</data>', 'testKey', 789, 'testData', 1],
+                    '1940-10-10T06:13:56+08:00',
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFDate'],
+            'Update data with number' => ['<key>testKey</key><data>testData</data>', 'testKey', 789, 'testData',
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFData'],
         ];
     }
 

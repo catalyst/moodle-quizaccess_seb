@@ -104,13 +104,13 @@ class property_list {
      * Only allow string, number and boolean elements to be updated.
      *
      * @param string $key Key of element to update.
-     * @param mixed $value  Value to update element with.
+     * @param mixed $value Value to update element with.
+     *
+     * @throws \invalid_parameter_exception
      */
     public function update_element_value(string $key, $value) {
         if (is_array($value)) {
-            debugging('property_list: Can\'t call update_element_value with array. Use update_element_array instead.',
-                    DEBUG_DEVELOPER);
-            return;
+            throw new \invalid_parameter_exception('Use update_element_array to update a collection.');
         }
         $this->plist_map( function($elvalue, $elkey, $parent) use ($key, $value) {
             // Set new value.
@@ -122,9 +122,9 @@ class property_list {
                         || ($element instanceof CFBoolean && is_bool($value))) {
                     $element->setValue($value);
                 } else {
-                    debugging('property_list: Can only update strings, numbers and bools with corresponding type.',
-                        DEBUG_DEVELOPER);
-                    return;
+                    throw new \invalid_parameter_exception(
+                            'Only string, number and boolean elements can be updated, or value type does not match element type: '
+                            . get_class($element));
                 }
             }
         }, $this->cfpropertylist->getValue());
@@ -136,16 +136,16 @@ class property_list {
      * Will replace array.
      *
      * @param string $key Key of element to update.
-     * @param array $value  Array to update element with.
+     * @param array $value Array to update element with.
+     *
+     * @throws \invalid_parameter_exception
      */
     public function update_element_array(string $key, array $value) {
         // Validate new array.
         foreach ($value as $element) {
-            // If any element is not a CFType instance, then do nothing.
+            // If any element is not a CFType instance, then throw exception.
             if (!($element instanceof CFType)) {
-                debugging('property_list: If updating an array in PList, it must only contain CFType objects.',
-                    DEBUG_DEVELOPER);
-                return;
+                throw new \invalid_parameter_exception('New array must only contain CFType objects.');
             }
         }
         $this->plist_map( function($elvalue, $elkey, $parent) use ($key, $value) {
