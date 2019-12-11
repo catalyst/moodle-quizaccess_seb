@@ -143,6 +143,8 @@ class property_list {
         foreach ($value as $element) {
             // If any element is not a CFType instance, then do nothing.
             if (!($element instanceof CFType)) {
+                debugging('property_list: If updating an array in PList, it must only contain CFType objects.',
+                    DEBUG_DEVELOPER);
                 return;
             }
         }

@@ -163,6 +163,8 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
         $plist = new property_list($xml);
         $plist->update_element_array('testDict', [false]);
         $this->assertEquals(['testKey' => 'testValue'], $plist->get_element_value('testDict'));
+        $this->assertDebuggingCalled('property_list: If updating an array in PList, it must only contain CFType objects.',
+                DEBUG_DEVELOPER);
     }
 
     /**
