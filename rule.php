@@ -23,6 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\config_settings;
+use quizaccess_seb\settings_manager;
+
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
@@ -62,6 +65,39 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @param MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function add_settings_form_fields(mod_quiz_mod_form $quizform, MoodleQuickForm $mform) {
+        global $DB, $USER;
+        $settingsmanager = new settings_manager();
+        $elements = $settingsmanager->get_quiz_element_types();
+        $defaults = $settingsmanager->get_quiz_defaults();
+        $hideifs = $settingsmanager->get_quiz_hideifs();
+
+        // Get existing form data.
+        $quizid = $quizform->get_coursemodule()->instance;
+        $existingsettings = $DB->get_record('quizaccess_seb_quizsettings', ['quizid' => $quizid], '*');
+
+        // Insert all the form elements before the 'security' section as a group.
+        foreach ($elements as $name => $type) {
+            // Create element.
+            $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
+
+            // Insert element.
+            $mform->insertElementBefore($element, 'security');
+            unset($element); // We need to make sure each &element only references the current element in loop.
+
+            $mform->addHelpButton($name, $name, 'quizaccess_seb');
+
+            // Set defaults.
+            if (isset($defaults[$name])) {
+                $mform->setDefault($name, $defaults[$name]);
+            }
+
+            // Set hideifs.
+            if (isset($hideifs[$name])) {
+                foreach ($hideifs[$name] as $dependantname => $dependantvalue) {
+                    $mform->hideIf($name, $dependantname, 'eq', $dependantvalue);
+                }
+            }
+        }
     }
 
     /**
@@ -86,6 +122,18 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      which is the id of the quiz being saved.
      */
     public static function save_settings($quiz) {
+        $settingsmanager = new settings_manager();
+
+        $defaults = $settingsmanager->get_quiz_defaults();
+        // Set each required setting to default it not provided.
+        foreach ($defaults as $name => $defaultvalue) {
+            if (!isset($quiz->$name)) {
+                $quiz->$name = $defaultvalue;
+            }
+        }
+
+        // Save/update settings from form.
+        config_settings::with_form_data($quiz)->save_settings();
     }
 
     /**
@@ -96,6 +144,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      which is the id of the quiz being deleted.
      */
     public static function delete_settings($quiz) {
+        config_settings::with_quizid($quiz->id)->delete_settings();
     }
 
     /**
