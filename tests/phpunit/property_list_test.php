@@ -253,34 +253,45 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
 
         return [
             'Update string with bool' => ['<key>testKey</key><string>testValue</string>', 'testKey', true, 'testValue',
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFString'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFString'],
             'Update string with number' => ['<key>testKey</key><string>testValue</string>', 'testKey', 999, 'testValue',
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFString'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFString'],
             'Update string with null' => ['<key>testKey</key><string>testValue</string>', 'testKey', null, 'testValue',
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFString'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFString'],
             'Update string with array' => ['<key>testKey</key><string>testValue</string>', 'testKey', ['arrayValue'], 'testValue',
                     'Use update_element_array to update a collection.'],
             'Update bool with string' => ['<key>testKey</key><true/>', 'testKey', 'testValue', true,
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFBool'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFBool'],
             'Update bool with number' => ['<key>testKey</key><true/>', 'testKey', 999, true,
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFBool'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFBool'],
             'Update bool with null' => ['<key>testKey</key><true/>', 'testKey', null, true,
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFBool'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFBool'],
             'Update bool with array' => ['<key>testKey</key><true/>', 'testKey', ['testValue'], true,
                     'Use update_element_array to update a collection.'],
             'Update number with string' => ['<key>testKey</key><real>888</real>', 'testKey', 'string', 888,
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFNumber'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFNumber'],
             'Update number with bool' => ['<key>testKey</key><real>888</real>', 'testKey', true, 888,
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFNumber'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFNumber'],
             'Update number with null' => ['<key>testKey</key><real>888</real>', 'testKey', null, 888,
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFNumber'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFNumber'],
             'Update number with array' => ['<key>testKey</key><real>888</real>', 'testKey', ['testValue'], 888,
                     'Use update_element_array to update a collection.'],
             'Update date with string' => ['<key>testKey</key><date>1940-10-09T22:13:56Z</date>', 'testKey', 'string',
                     '1940-10-10T06:13:56+08:00',
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFDate'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFDate'],
             'Update data with number' => ['<key>testKey</key><data>testData</data>', 'testKey', 789, 'testData',
-                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, or value type does not match element type: CFPropertyList\CFData'],
+                    'Invalid parameter value detected (Only string, number and boolean elements can be updated, '
+                    . 'or value type does not match element type: CFPropertyList\CFData'],
         ];
     }
 
