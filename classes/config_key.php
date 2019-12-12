@@ -44,6 +44,8 @@ class config_key {
     /**
      * Generate the Config Key hash from an SEB Config XML string.
      *
+     * See  https://safeexambrowser.org/developer/seb-config-key.html for more information about the process.
+     *
      * @param string $xml A PList XML string, representing SEB config.
      * @return config_key This config key instance.
      *
@@ -52,9 +54,11 @@ class config_key {
      * @throws \DOMException
      */
     public static function generate(string $xml) {
-        $hash = '';
         $plist = new property_list($xml);
+        // Remove the key "originatorVersion" first. This key is exempted from the SEB-JSON hash (it's a special key
+        // which doesn't have any functionality, it's just meta data indicating which SEB version saved the config file).
         $plist->delete_element('originatorVersion');
+        // Convert the plist XML of a decrypted/unencrypted SEB config file to a ordered JSON-like "SEB-JSON" object.
         $hash = $plist->to_json();
         // Hash the JSON with SHA256. Defaults to required Base16 encoding.
         $hash = hash('SHA256', $hash);
