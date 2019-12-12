@@ -35,6 +35,7 @@ $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
 
 // Quiz form settings.
 $string['seb'] = 'Safe Exam Browser';
+$string['seb_help'] = 'Setup quiz to use the Safe Exam Browser.';
 $string['seb_activateurlfiltering'] = 'Activate URL filtering';
 $string['seb_activateurlfiltering_help'] = 'If enabled, URLs will be filtered when loading web pages. The filter set has to be defined below.';
 $string['seb_allowreloadinexam'] = 'Allow reload in exam';
