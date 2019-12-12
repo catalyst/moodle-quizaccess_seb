@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Controller for managing quiz settings.
+ * Class for providing quiz settings, to make setting up form manageable.
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
@@ -27,28 +27,7 @@ namespace quizaccess_seb;
 
 defined('MOODLE_INTERNAL') || die();
 
-class settings_manager {
-
-    /**
-     * Get all form elements that are a 'filepicker' type.
-     *
-     * @param bool $strippedprefix Defaults to true.
-     * @return array
-     */
-    public function get_file_picker_elements($strippedprefix = true) : array {
-        $formelements = $this->get_quiz_element_types();
-        $filepickers = [];
-        foreach ($formelements as $name => $type) {
-            if ($type == 'filepicker') {
-                if ($strippedprefix) {
-                    // Strip key prefix.
-                    $name = preg_replace("/^seb_/", "", $name);
-                }
-                $filepickers[] = $name;
-            }
-        }
-        return $filepickers;
-    }
+class settings_provider {
 
     /**
      * Get the type of element for each of the form elements in quiz settings.
@@ -57,7 +36,7 @@ class settings_manager {
      *
      * @return array All quiz form elements to be added and their types.
      */
-    public function get_quiz_element_types() : array {
+    public static function get_quiz_element_types() : array {
         return [
             'seb' => 'header',
             'seb_requiresafeexambrowser' => 'selectyesno',
@@ -94,7 +73,7 @@ class settings_manager {
      *
      * @return array List of settings and their defaults.
      */
-    public function get_quiz_defaults() : array {
+    public static function get_quiz_defaults() : array {
         return [
             'seb_requiresafeexambrowser' => 0,
             'seb_sebconfigtemplate' => 0,
@@ -131,7 +110,7 @@ class settings_manager {
      *
      * @return array List of rules per element.
      */
-    public function get_quiz_hideifs() : array {
+    public static function get_quiz_hideifs() : array {
         return [
             'seb_sebconfigtemplate' => [
                 'seb_requiresafeexambrowser' => 0,
