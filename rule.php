@@ -23,8 +23,12 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\quiz_settings;
+use quizaccess_seb\settings_provider;
+
 defined('MOODLE_INTERNAL') || die();
 
+global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
 class quizaccess_seb extends quiz_access_rule_base {
@@ -60,8 +64,36 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @param mod_quiz_mod_form $quizform the quiz settings form that is being built.
      * @param MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     *
+     * @throws coding_exception
      */
     public static function add_settings_form_fields(mod_quiz_mod_form $quizform, MoodleQuickForm $mform) {
+        $defaults = settings_provider::get_quiz_defaults();
+        $hideifs = settings_provider::get_quiz_hideifs();
+
+        // Insert all the form elements before the 'security' section as a group.
+        foreach (settings_provider::get_quiz_element_types() as $name => $type) {
+            // Create element.
+            $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
+
+            // Insert element.
+            $mform->insertElementBefore($element, 'security');
+            unset($element); // We need to make sure each &element only references the current element in loop.
+
+            $mform->addHelpButton($name, $name, 'quizaccess_seb');
+
+            // Set defaults.
+            if (isset($defaults[$name])) {
+                $mform->setDefault($name, $defaults[$name]);
+            }
+
+            // Set hideifs.
+            if (isset($hideifs[$name])) {
+                foreach ($hideifs[$name] as $dependantname => $dependantvalue) {
+                    $mform->hideIf($name, $dependantname, 'eq', $dependantvalue);
+                }
+            }
+        }
     }
 
     /**
@@ -72,9 +104,23 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @param array $files information about any uploaded files.
      * @param mod_quiz_mod_form $quizform the quiz form object.
      * @return array $errors the updated $errors array.
+     *
+     * @throws coding_exception
      */
     public static function validate_settings_form_fields(array $errors,
                                                          array $data, $files, mod_quiz_mod_form $quizform) : array {
+        $settings = self::filter_plugin_settings((object) $data);
+
+        // Validate basic settings using persistent class.
+        $quizsettings = (new quiz_settings())->from_record($settings);
+        $quizsettings->validate();
+
+        // Add any errors to list.
+        foreach ($quizsettings->get_errors() as $name => $error) {
+            $name = self::add_prefix($name); // Re-add prefix to match form element.
+            $errors[$name] = $error->out();
+        }
+
         return $errors;
     }
 
@@ -84,8 +130,32 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @param object $quiz the data from the quiz form, including $quiz->id
      *      which is the id of the quiz being saved.
+     *
+     * @throws coding_exception
      */
     public static function save_settings($quiz) {
+
+        $settings = self::filter_plugin_settings($quiz);
+
+        // Associate settings with quiz.
+        $settings->quizid = $quiz->id;
+
+        // TODO: Process sebconfigtemplate into templateid.
+        $settings->templateid = 0;
+
+        // Get existing settings or create new settings if none exist.
+        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        if (!$quizsettings) {
+            $quizsettings = new quiz_settings(0, $settings);
+        } else {
+            $settings->id = $quizsettings->get('id');
+            $quizsettings->from_record($settings);
+        }
+
+        // Validate and save settings. Settings should already be validated by validate_settings_form_fields but
+        // the validation method also adds in default fields which is useful here.
+        $quizsettings->validate();
+        $quizsettings->save();
     }
 
     /**
@@ -94,8 +164,15 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @param object $quiz the data from the database, including $quiz->id
      *      which is the id of the quiz being deleted.
+     *
+     * @throws coding_exception
      */
     public static function delete_settings($quiz) {
+        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        // Check that there are existing settings.
+        if ($quizsettings !== false) {
+            $quizsettings->delete();
+        }
     }
 
     /**
@@ -184,5 +261,61 @@ class quizaccess_seb extends quiz_access_rule_base {
         $page->set_popup_notification_allowed(false); // Prevent message notifications.
         $page->set_heading($page->title);
         $page->set_pagelayout('secure');
+    }
+
+    /**
+     * Strip the seb_ prefix from each setting key.
+     *
+     * @param \stdClass $settings Object containing settings.
+     * @return \stdClass The modified settings object.
+     */
+    private static function strip_all_prefixes(\stdClass $settings) : \stdClass {
+        $newsettings = new \stdClass();
+        foreach ($settings as $name => $setting) {
+            $newname = preg_replace("/^seb_/", "", $name);
+            $newsettings->$newname = $setting; // Add new key.
+        }
+        return $newsettings;
+    }
+
+    /**
+     * Add prefix to string.
+     *
+     * @param string $name String to add prefix to.
+     * @return string String with prefix.
+     */
+    private static function add_prefix(string $name) : string {
+        if (strpos($name, 'seb_') !== 0) {
+            $name = 'seb_' . $name;
+        }
+        return $name;
+    }
+
+    /**
+     * Filter a standard class by prefix.
+     *
+     * @param stdClass $settings Quiz settings object.
+     * @return stdClass Filtered object.
+     */
+    private static function filter_by_prefix(\stdClass $settings) : \stdClass {
+        $newsettings = new \stdClass();
+        foreach ($settings as $name => $setting) {
+            // Only add it, if not there.
+            if (strpos($name, "seb_") === 0) {
+                $newsettings->$name = $setting; // Add new key.
+            }
+        }
+        return $newsettings;
+    }
+
+    /**
+     * Filter quiz settings for this plugin only.
+     *
+     * @param stdClass $settings Quiz settings.
+     * @return stdClass Filtered settings.
+     */
+    private static function filter_plugin_settings(stdClass $settings) {
+        $settings = self::filter_by_prefix($settings);
+        return self::strip_all_prefixes($settings);
     }
 }

@@ -35,6 +35,7 @@ $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
 
 // Quiz form settings.
 $string['seb'] = 'Safe Exam Browser';
+$string['seb_help'] = 'Setup quiz to use the Safe Exam Browser.';
 $string['seb_activateurlfiltering'] = 'Activate URL filtering';
 $string['seb_activateurlfiltering_help'] = 'If enabled, URLs will be filtered when loading web pages. The filter set has to be defined below.';
 $string['seb_allowreloadinexam'] = 'Allow reload in exam';
@@ -81,3 +82,6 @@ $string['seb_sebconfigfile'] = 'Upload Safe Exam Browser config';
 $string['seb_sebconfigfile_help'] = 'Please upload your own Safe Exam Browser config file for this quiz.';
 $string['seb_userconfirmquit'] = 'Ask user to confirm quitting';
 $string['seb_userconfirmquit_help'] = 'If enabled, users have to confirm quitting of SEB when a quit link is detected.';
+
+// Exceptions.
+$string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
