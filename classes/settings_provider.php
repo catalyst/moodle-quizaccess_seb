@@ -15,7 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Class for providing quiz settings, to make setting up form manageable.
+ * Class for providing quiz settings, to make setting up quiz form manageable.
+ *
+ * To make sure there are no inconsistencies between data sets, run tests in tests/phpunit/settings_provider_test.php.
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
