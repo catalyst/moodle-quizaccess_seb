@@ -45,7 +45,6 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         $this->assertTrue(array_key_exists('seb', $diffelements)); // Table header.
         $this->assertTrue(array_key_exists('sebconfigtemplate', $diffelements)); // Used to compute templateid.
 
-
         // Unset expected fields.
         unset($diffelements['seb']);
         unset($diffelements['sebconfigtemplate']);
