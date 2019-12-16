@@ -81,6 +81,14 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that an element's value can be retrieved.
+     */
+    public function test_get_element_value_if_not_exists() {
+        $plist = new property_list();
+        $this->assertEmpty($plist->get_element_value('testKey'));
+    }
+
+    /**
      * Test an element's value can be retrieved if it is an array.
      */
     public function test_get_element_value_if_array() {
@@ -190,6 +198,23 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\"><dict/></plist>", $generatedxml);
+    }
+
+    /**
+     * Test that an element can be deleted.
+     */
+    public function test_delete_element_if_not_exists() {
+        $xml = $this->get_plist_xml_header()
+            . "<key>testKey</key>"
+            . "<string>testValue</string>"
+            . $this->get_plist_xml_footer();
+        $plist = new property_list($xml);
+        $plist->delete_element('nonExistentKey');
+        $generatedxml = trim($plist->to_xml());
+        // The xml should be unaltered.
+        $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\"><dict><key>testKey</key><string>testValue</string></dict></plist>", $generatedxml);
     }
 
     /**
