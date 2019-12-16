@@ -34,12 +34,16 @@ use CFPropertyList\CFNumber;
 use CFPropertyList\CFPropertyList;
 use CFPropertyList\CFString;
 use CFPropertyList\CFType;
+use \DateTime;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 class property_list {
+
+    /** A random 4 character unicode string to replace backslashes during json_encode. */
+    private const BACKSLASH_SUBSTITUTE = "ؼҷҍԴ";
 
     /** @var CFPropertyList $cfpropertylist */
     private $cfpropertylist;
@@ -219,23 +223,25 @@ class property_list {
         $jsonplist = new CFPropertyList();
         $jsonplist->parse($this->cfpropertylist->toXML(), CFPropertyList::FORMAT_XML);
 
-        // Pass root dict to recursively convert dates to ISO 8601 format, encode strings to UTF-8
-        // and lock data to Base 64 encoding.
-        $this->encode_dates_and_strings($jsonplist->getValue());
+        // Pass root dict to recursively convert dates to ISO 8601 format, encode strings to UTF-8,
+        // lock data to Base 64 encoding and remove empty dictionaries.
+        $this->prepare_plist_for_json_encoding($jsonplist->getValue());
 
         // Serialize PList to array.
         $plistarray = $jsonplist->toArray();
-
-        // Remove empty arrays. See point 4 for more information.
-        $plistarray = $this->array_remove_empty_arrays($plistarray);
 
         // Sort array alphabetically by key using case insensitive, natural sorting. See point 3 for more information.
         $plistarray = $this->array_sort($plistarray);
 
         // Encode in JSON with following rules from SEB docs.
         // 1. Don't add any whitespace or line formatting to the SEB-JSON string.
-        // 2. Don't add character escaping.
-        return json_encode($plistarray, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+        // 2. Don't add unicode or slash escaping.
+        $json = json_encode($plistarray, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+
+        // There is no way to prevent json_encode from escaping backslashes. We replace each backslash with a unique string
+        // prior to encoding in prepare_plist_for_json_encoding(). We can then replace the substitute with a single backslash.
+        $json = str_replace(self::BACKSLASH_SUBSTITUTE, "\\", $json);
+        return $json;
     }
 
     /**
@@ -243,22 +249,32 @@ class property_list {
      *
      * This will mutate the PList.
      */
-    private function encode_dates_and_strings($root) {
+    private function prepare_plist_for_json_encoding($root) {
         $this->plist_map( function($value, $key, $parent) {
-            // Convert date to iso 8601 if date object.
+            // Convert date to ISO 8601 if date object.
             if ($value instanceof CFDate) {
-                $value->setValue(date('c', $value->getValue()));
+                $date = DateTime::createFromFormat('U', $value->getValue());
+                $date->setTimezone(new \DateTimeZone('UTC')); // Zulu timezone a.k.a. UTC+00.
+                $isodate = $date->format('c');
+                $value->setValue($isodate);
             }
             // Make sure strings are UTF 8 encoded.
             if ($value instanceof CFString) {
-                $value->setValue(mb_convert_encoding($value->getValue(), 'UTF-8'));
+                // As literal backslashes will be lost during encoding, we must replace them with a unique substitute to be
+                // reverted after JSON encoding.
+                $string = str_replace("\\", self::BACKSLASH_SUBSTITUTE, $value->getValue());
+                $value->setValue(mb_convert_encoding($string, 'UTF-8'));
             }
             // Data should remain base 64 encoded, so convert to base encoded string for export. Otherwise
             // CFData will decode the data when serialized.
             if ($value instanceof CFData) {
-                $data = $value->getCodedValue();
+                $data = trim($value->getCodedValue());
                 $parent->del($key);
                 $parent->add($key, new CFString($data));
+            }
+            // Empty dictionaries should be removed.
+            if ($value instanceof CFDictionary && empty($value->getValue())) {
+                $parent->del($key);
             }
         }, $root);
 
@@ -306,7 +322,7 @@ class property_list {
             }
         }
         // Sort array. From SEB docs - "Use non-localized (culture invariant), non-ASCII value based case insensitive ordering."
-        ksort($array, SORT_NATURAL | SORT_FLAG_CASE);
+        ksort($array, SORT_STRING | SORT_FLAG_CASE);
 
         return $array;
     }

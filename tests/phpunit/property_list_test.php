@@ -81,6 +81,14 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that an element's value can be retrieved.
+     */
+    public function test_get_element_value_if_not_exists() {
+        $plist = new property_list();
+        $this->assertEmpty($plist->get_element_value('testKey'));
+    }
+
+    /**
      * Test an element's value can be retrieved if it is an array.
      */
     public function test_get_element_value_if_array() {
@@ -193,6 +201,23 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that an element can be deleted.
+     */
+    public function test_delete_element_if_not_exists() {
+        $xml = $this->get_plist_xml_header()
+            . "<key>testKey</key>"
+            . "<string>testValue</string>"
+            . $this->get_plist_xml_footer();
+        $plist = new property_list($xml);
+        $plist->delete_element('nonExistentKey');
+        $generatedxml = trim($plist->to_xml());
+        // The xml should be unaltered.
+        $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\"><dict><key>testKey</key><string>testValue</string></dict></plist>", $generatedxml);
+    }
+
+    /**
      * Test that json is exported correctly according to SEB Config Key requirements.
      *
      * @param string $xml PList XML used to generate CFPropertyList.
@@ -207,6 +232,18 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
         $plist = new property_list($xml);
         $generatedjson = $plist->to_json();
         $this->assertEquals($expectedjson, $generatedjson);
+    }
+
+    /**
+     * Test that the xml is exported to JSON from a real SEB config file. Expected JSON extracted from SEB logs.
+     */
+    public function test_export_to_json_full_file() {
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted_mac_001.seb');
+        $plist = new property_list($xml);
+        $plist->delete_element('originatorVersion'); // JSON should not contain originatorVersion key.
+        $generatedjson = $plist->to_json();
+        $json = trim(file_get_contents(__DIR__ . '/sample_data/JSON_unencrypted_mac_001.txt'));
+        $this->assertEquals($json, $generatedjson);
     }
 
     /**
@@ -304,10 +341,10 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
      * 1. Date should be in ISO 8601 format.
      * 2. Data should be base 64 encoded.
      * 3. String should be UTF-8 encoded.
-     * 4, 5, 6. No requirements for bools, arrays or dicts.
-     * 7. Empty arrays should not be included.
-     * 8. JSON key ordering should be case insenstive, and use natural ordering.
-     * 9. URL forward slashes should not be escaped.
+     * 4, 5, 6, 7. No requirements for bools, arrays or dicts.
+     * 8. Empty dicts should not be included.
+     * 9. JSON key ordering should be case insensitive, and use string ordering.
+     * 10. URL forward slashes should not be escaped.
      *
      * @return array
      */
@@ -316,15 +353,26 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
         $base64data = base64_encode($data);
 
         return [
-            'date' => ["<key>date</key><date>1940-10-09T22:13:56Z</date>", "{\"date\":\"1940-10-10T06:13:56+08:00\"}"],
+            'date' => ["<key>date</key><date>1940-10-09T22:13:56Z</date>", "{\"date\":\"1940-10-09T22:13:56+00:00\"}"],
             'data' => ["<key>data</key><data>$base64data</data>", "{\"data\":\"$base64data\"}"],
             'string' => ["<key>string</key><string>hello wörld</string>", "{\"string\":\"hello wörld\"}"],
+            'string with 1 backslash' => ["<key>string</key><string>ws:\localhost</string>", "{\"string\":\"ws:\localhost\"}"],
+            'string with 2 backslashes' => ["<key>string</key><string>ws:\\localhost</string>",
+                    '{"string":"ws:\\localhost"}'],
+            'string with 3 backslashes' => ["<key>string</key><string>ws:\\\localhost</string>",
+                    '{"string":"ws:\\\localhost"}'],
+            'string with 4 backslashes' => ["<key>string</key><string>ws:\\\\localhost</string>",
+                    '{"string":"ws:\\\\localhost"}'],
+            'string with 5 backslashes' => ["<key>string</key><string>ws:\\\\\localhost</string>",
+                    '{"string":"ws:\\\\\localhost"}'],
             'bool' => ["<key>bool</key><true/>", "{\"bool\":true}"],
-            'array' => ["<key>dict</key><array><key>dictbool</key><false/><key>dictbool2</key><true/></array>"
-                    , "{\"dict\":[false,true]}"],
+            'array' => ["<key>array</key><array><key>arraybool</key><false/><key>arraybool2</key><true/></array>"
+                    , "{\"array\":[false,true]}"],
+            'empty array' => ["<key>bool</key><true/><key>array</key><array/>"
+                    , "{\"array\":[],\"bool\":true}"],
             'dict' => ["<key>dict</key><dict><key>dictbool</key><false/><key>dictbool2</key><true/></dict>"
                     , "{\"dict\":{\"dictbool\":false,\"dictbool2\":true}}"],
-            'empty array' => ["<key>bool</key><true/><key>emptydict</key><dict/>", "{\"bool\":true}"],
+            'empty dict' => ["<key>bool</key><true/><key>emptydict</key><dict/>", "{\"bool\":true}"],
             'unordered elements' => ["<key>testKey</key>"
                     . "<string>testValue</string>"
                     . "<key>allowWLAN</key>"
