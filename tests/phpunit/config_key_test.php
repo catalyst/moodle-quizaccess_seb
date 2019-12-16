@@ -33,6 +33,16 @@ class quizaccess_seb_config_key_testcase extends advanced_testcase {
      * Test that the Config Key hash is generated.
      *
      * The file was generated using SEB 2.1.4 (Mac OS), and the expected Config Key extracted from the config tool.
+     *
+     * To create a sample unencrypted config file and hash:
+     * 1. Open up the SEB config tool editor in a version that uses the Config Key (See readme for versions).
+     * 2. Go to the 'Exam' tab and click the checkbox to 'Use Config Key and Browser Exam Key'.
+     * 3. Go to the Config File tab and select the radio button so settings are for 'starting an exam'.
+     * 4. Save the settings without setting a password. This is the unencrypted config file.
+     * 5. Go back to the 'Exam' tab and copy the Config Key that has been generated.
+     *
+     * To extract the JSON used to create the CK, verbose level logging needs to enabled in the 'Security' tab. On mac
+     * you can find the logs in the 'console' app. Search logs for "JSON for Config Key:".
      */
     public function test_config_key_hash_generated() {
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted_mac_001.seb');
