@@ -26,57 +26,35 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Serve the files from the quizaccess_seb file areas.
+ * Serve a seb config file for a particular quiz.
  *
- * This function is called by the core pluginfile function.
- *
- * @param stdClass $course The course object.
- * @param stdClass $cm The course module object.
- * @param stdClass $context The context.
- * @param string $filearea The name of the file area.
- * @param array $args Extra arguments (itemid, path).
- * @param bool $forcedownload Whether or not force download.
- * @param array $options Additional options affecting the file serving.
- * @return bool False if the file is not found, just send the file otherwise and do not return anything.
- *
- * @throws coding_exception
- * @throws moodle_exception
- * @throws require_login_exception
+ * @param string $cmid The course module ID for a quiz with config.
+ * @param int $cachelifetime Time in seconds til cached file expires.
+ * @return bool Whether the file was created and served.
  */
-function quizaccess_seb_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    $validfileareas = [
-        'config',
-    ];
+function serve_quiz_config_xml(string $cmid, $cachelifetime = 300) {
+    // Check that the course module exists, user is logged into course and can access course module.
+    try {
+        // Try and get the course module.
+        $cm = get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
 
-    // Check the contextlevel is as expected.
-    if ($context->contextlevel != CONTEXT_MODULE) {
+        // Make sure the user is logged in and has access to the module.
+        require_login($cm->course, false, $cm);
+    } catch (moodle_exception $e) {
+        debugging($e->getMessage(), DEBUG_DEVELOPER);
         return false;
     }
 
-    // Make sure the filearea is one of those used by the plugin.
-    if (!in_array($filearea, $validfileareas)) {
-        return false;
-    }
+    // Retrieve the config.
+    // TODO: Issue #27 - Once the config generator is set up to store the XML, update this to attempt to retrieve it.
+    $config = '';
 
-    // Make sure the user is logged in and has access to the module.
-    require_login($course, true, $cm);
-
-    // Extract the filename / filepath from the $args array.
-    $filename = array_pop($args); // The last item in the $args array.
-    if (!$args) {
-        $filepath = '/'; // Var $args is empty => the path is '/'.
-    } else {
-        $filepath = '/'.implode('/', $args).'/'; // Var $args contains elements of the filepath.
-    }
-
-    // Retrieve the file from the Files API.
-    $fs = get_file_storage();
-    $file = $fs->get_file($context->id, 'quizaccess_seb', $filearea, 0, $filepath, $filename);
-    if (!$file) {
-        return false; // The file does not exist.
-    }
-
-    // We can now send the file back to the browser - in this case with a cache lifetime of 1 day and no filtering.
-    send_stored_file($file, 86400, 0, $forcedownload, $options);
+    // We can now send the file back to the browser - in this case with a cache lifetime of 5 minutes.
+    header("Cache-Control: private, max-age=$cachelifetime, no-transform");
+    header('Expires: '. gmdate('D, d M Y H:i:s', time() + $cachelifetime) .' GMT');
+    header('Pragma: ');
+    header('Content-Disposition: attachment; filename=config.seb');
+    header('Content-Type: text/xml');
+    echo($config);
     return true;
 }
