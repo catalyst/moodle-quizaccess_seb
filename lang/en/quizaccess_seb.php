@@ -85,3 +85,6 @@ $string['seb_userconfirmquit_help'] = 'If enabled, users have to confirm quittin
 
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
+
+// Capabilities.
+$string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
