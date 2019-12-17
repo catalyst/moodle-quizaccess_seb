@@ -44,10 +44,9 @@ class quizaccess_seb_link_generator_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $generator = new link_generator($quiz->cmid);
         $this->assertEquals(
             "http://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid",
-            $generator->get_http_link(false));
+            link_generator::get_link($quiz->cmid, false, false));
     }
 
     /**
@@ -57,10 +56,9 @@ class quizaccess_seb_link_generator_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $generator = new link_generator($quiz->cmid);
         $this->assertEquals(
             "https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid",
-            $generator->get_http_link());
+            link_generator::get_link($quiz->cmid, false));
     }
 
     /**
@@ -70,10 +68,9 @@ class quizaccess_seb_link_generator_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $generator = new link_generator($quiz->cmid);
         $this->assertEquals(
             "seb://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid",
-            $generator->get_seb_link(false));
+            link_generator::get_link($quiz->cmid, true, false));
     }
 
     /**
@@ -83,10 +80,9 @@ class quizaccess_seb_link_generator_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        $generator = new link_generator($quiz->cmid);
         $this->assertEquals(
             "sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid",
-            $generator->get_seb_link());
+            link_generator::get_link($quiz->cmid, true));
     }
 
     /**
@@ -95,6 +91,6 @@ class quizaccess_seb_link_generator_testcase extends advanced_testcase {
     public function test_course_module_does_not_exist() {
         $this->expectException(dml_exception::class);
         $this->expectExceptionMessageRegExp("/^Can't find data record in database.*/");
-        $generator = new link_generator(123456);
+        $generator = link_generator::get_link(123456, false);
     }
 }

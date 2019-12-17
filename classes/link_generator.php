@@ -31,49 +31,27 @@ defined('MOODLE_INTERNAL') || die();
 
 class link_generator {
 
-    /** @var string $cmid Course module ID of a quiz. */
-    private $cmid;
-
-    /**
-     * link_generator constructor.
-     *
-     * @param string $cmid Context module ID of a quiz activity.
-     *
-     * @throws \coding_exception
-     */
-    public function __construct(string $cmid) {
-        // Check if course module exists.
-        get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
-        $this->cmid = $cmid;
-    }
-
     /**
      * Get a link to force the download of the file over https.
      *
+     * @param string $cmid Course module ID.
+     * @param bool $seb Whether to use a seb:// scheme or fall back to http:// scheme.
      * @param bool $secure Whether to use HTTPS or HTTP protocol.
      * @return string A URL.
      *
      * @throws \coding_exception
      * @throws \moodle_exception
      */
-    public function get_http_link(bool $secure = true) : string {
-        $url = new moodle_url('/mod/quiz/accessrule/seb/config.php?cmid=' . $this->cmid);
-        $secure ? $url->set_scheme('https') : $url->set_scheme('http');
-        return $url->out();
-    }
+    public static function get_link(string $cmid, bool $seb = false, bool $secure = true) : string {
+        // Check if course module exists.
+        get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
 
-    /**
-     * Get a link that if SEB is installed and has a compatible version, will run with the file as configuration settings.
-     *
-     * @param bool $secure Whether to use SEBS or SEB protocol.
-     * @return string A URL.
-     *
-     * @throws \coding_exception
-     * @throws \moodle_exception
-     */
-    public function get_seb_link(bool $secure = true) : string {
-        $url = new moodle_url('/mod/quiz/accessrule/seb/config.php?cmid=' . $this->cmid);
-        $secure ? $url->set_scheme('sebs') : $url->set_scheme('seb');
+        $url = new moodle_url('/mod/quiz/accessrule/seb/config.php?cmid=' . $cmid);
+        if ($seb) {
+            $secure ? $url->set_scheme('sebs') : $url->set_scheme('seb');
+        } else {
+            $secure ? $url->set_scheme('https') : $url->set_scheme('http');
+        }
         return $url->out();
     }
 }
