@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the quizaccess_seb plugin.
+ * Define capabilities for plugin.
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
@@ -25,8 +25,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2019121700;
-$plugin->release = 2019121700; // Match to version.
-$plugin->requires = 2019052000; // Moodle 3.7.
-$plugin->component = 'quizaccess_seb';
-$plugin->maturity = MATURITY_ALPHA;
+$capabilities = array(
+    'quizaccess/seb:bypassseb' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+ );
