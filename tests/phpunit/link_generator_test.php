@@ -73,6 +73,19 @@ class quizaccess_seb_link_generator_testcase extends advanced_testcase {
         $generator = new link_generator($quiz->cmid);
         $this->assertEquals(
             "seb://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid",
+            $generator->get_seb_link(false));
+    }
+
+    /**
+     * Test that a sebs link is generated correctly.
+     */
+    public function test_sebs_link_generated() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        $generator = new link_generator($quiz->cmid);
+        $this->assertEquals(
+            "sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid",
             $generator->get_seb_link());
     }
 

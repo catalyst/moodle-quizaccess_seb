@@ -65,13 +65,15 @@ class link_generator {
     /**
      * Get a link that if SEB is installed and has a compatible version, will run with the file as configuration settings.
      *
+     * @param bool $secure Whether to use SEBS or SEB protocol.
      * @return string A URL.
      *
+     * @throws \coding_exception
      * @throws \moodle_exception
      */
-    public function get_seb_link() : string {
+    public function get_seb_link(bool $secure = true) : string {
         $url = new moodle_url('/mod/quiz/accessrule/seb/config.php?cmid=' . $this->cmid);
-        $url->set_scheme('seb');
+        $secure ? $url->set_scheme('sebs') : $url->set_scheme('seb');
         return $url->out();
     }
 }
