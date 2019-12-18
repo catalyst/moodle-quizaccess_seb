@@ -113,6 +113,8 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Validate basic settings using persistent class.
         $quizsettings = (new quiz_settings())->from_record($settings);
+        // Set non-form fields.
+        $quizsettings->set('quizid', $data['instance']);
         $quizsettings->validate();
 
         // Add any errors to list.
