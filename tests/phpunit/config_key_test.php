@@ -63,6 +63,14 @@ class quizaccess_seb_config_key_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that a config key is generated with empty configuration. SEB would be using defaults for all settings.
+     */
+    public function test_config_key_hash_generated_with_empty_string() {
+        $hash = config_key::generate('')->get_hash();
+        $this->assertEquals('4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', $hash);
+    }
+
+    /**
      * Check that the Config Key hash is not altered if the originatorVersion is present in the XML or not.
      */
     public function test_presence_of_originator_version_does_not_effect_hash() {
