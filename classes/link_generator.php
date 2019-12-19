@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
 class link_generator {
 
     /**
-     * Get a link to force the download of the file over https.
+     * Get a link to force the download of the file over https or sebs protocols.
      *
      * @param string $cmid Course module ID.
      * @param bool $seb Whether to use a seb:// scheme or fall back to http:// scheme.
