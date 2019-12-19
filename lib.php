@@ -33,6 +33,8 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool Whether the file was created and served.
  */
 function serve_quiz_config_xml(string $cmid, $cachelifetime = 300) {
+    global $DB;
+
     // Check that the course module exists, user is logged into course and can access course module.
     try {
         // Try and get the course module.
@@ -45,9 +47,12 @@ function serve_quiz_config_xml(string $cmid, $cachelifetime = 300) {
         return false;
     }
 
-    // Retrieve the config.
-    // TODO: Issue #27 - Once the config generator is set up to store the XML, update this to attempt to retrieve it.
-    $config = '';
+    // Retrieve the config for quiz.
+    $config = $DB->get_field('quizaccess_seb_quizsettings', 'config', ['quizid' => $cm->instance]);
+    if (empty($config)) {
+        debugging('quizaccess_seb - Could not find SEB config for quiz with cmid: ' . $cm->id, DEBUG_DEVELOPER);
+        return false;
+    }
 
     // We can now send the file back to the browser - in this case with a cache lifetime of 5 minutes.
     header("Cache-Control: private, max-age=$cachelifetime, no-transform");
