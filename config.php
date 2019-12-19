@@ -26,7 +26,7 @@
 require_once(__DIR__ . '/../../../../config.php');
 require_once('lib.php');
 
-$cmid = optional_param('cmid', '', PARAM_RAW);
+$cmid = required_param('cmid', PARAM_RAW);
 
 $config = quizaccess_seb_get_config($cmid);
 
