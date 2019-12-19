@@ -29,37 +29,42 @@ defined('MOODLE_INTERNAL') || die();
  * Serve a seb config file for a particular quiz.
  *
  * @param string $cmid The course module ID for a quiz with config.
- * @param int $cachelifetime Time in seconds til cached file expires.
- * @return bool Whether the file was created and served.
+ * @return string SEB config string.
+ *
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
+ * @throws require_login_exception
  */
-function serve_quiz_config_xml(string $cmid, $cachelifetime = 0) {
-    global $DB;
+function quizaccess_seb_get_config(string $cmid) : string {
+    // Try and get the course module.
+    $cm = get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
 
-    // Check that the course module exists, user is logged into course and can access course module.
-    try {
-        // Try and get the course module.
-        $cm = get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
-
-        // Make sure the user is logged in and has access to the module.
-        require_login($cm->course, false, $cm);
-    } catch (moodle_exception $e) {
-        debugging($e->getMessage(), DEBUG_DEVELOPER);
-        return false;
-    }
+    // Make sure the user is logged in and has access to the module.
+    require_login($cm->course, false, $cm);
 
     // Retrieve the config for quiz.
-    $config = $DB->get_field('quizaccess_seb_quizsettings', 'config', ['quizid' => $cm->instance]);
-    if (empty($config)) {
-        debugging('quizaccess_seb - Could not find SEB config for quiz with cmid: ' . $cm->id, DEBUG_DEVELOPER);
-        return false;
+    $settings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $cm->instance]);
+    // If no settings found, config is false, otherwise get config.
+    $config = $settings !== false ? $settings->get('config') : false;
+   if (empty($config)) {
+        throw new moodle_exception('noconfigfound', 'quizaccess_seb', '', $cm->id);
     }
+    return $config;
+}
 
+/**
+ * Serve a file to browser for download.
+ *
+ * @param string $contents Contents of file.
+ */
+function quizaccess_seb_send_file(string $contents) {
     // We can now send the file back to the browser.
-    header("Cache-Control: private, max-age=" . ($cachelifetime + 1) . ", no-transform");
-    header('Expires: '. gmdate('D, d M Y H:i:s', time() + $cachelifetime) .' GMT');
-    header('Pragma: ');
+    header("Cache-Control: private, max-age=1, no-transform");
+    header('Expires: '. gmdate('D, d M Y H:i:s', time()) .' GMT');
+    header('Pragma: no-cache');
     header('Content-Disposition: attachment; filename=config.seb');
     header('Content-Type: text/xml');
-    echo($config);
-    return true;
+
+    echo($contents);
 }

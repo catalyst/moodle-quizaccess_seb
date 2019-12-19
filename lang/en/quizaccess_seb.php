@@ -85,6 +85,7 @@ $string['seb_userconfirmquit_help'] = 'If enabled, users have to confirm quittin
 
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
+$string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a}';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';

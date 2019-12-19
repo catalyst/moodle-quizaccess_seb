@@ -28,4 +28,6 @@ require_once('lib.php');
 
 $cmid = optional_param('cmid', '', PARAM_RAW);
 
-serve_quiz_config_xml($cmid);
+$config = quizaccess_seb_get_config($cmid);
+
+quizaccess_seb_send_file($config);
