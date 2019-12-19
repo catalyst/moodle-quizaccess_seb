@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
 class quizaccess_seb extends quiz_access_rule_base {
 
-    /** @var  */
+    /** @var access_manager $accessmanager Instance to manage the access to the quiz for this plugin. */
     private $accessmanager;
 
     /**
@@ -256,6 +256,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         } else {
             // Add error message.
             $errormessage .= get_string('invalidkeys', 'quizaccess_seb');
+            // TODO: Issue #8 - Trigger event if access is prevented.
         }
 
         return $errormessage;

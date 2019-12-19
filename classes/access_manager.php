@@ -34,8 +34,10 @@ defined('MOODLE_INTERNAL') || die();
 
 class access_manager {
 
+    /** Header sent by Safe Exam Browser containing the Config Key hash. */
     private const CONFIG_KEY_HEADER = 'HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH';
 
+    /** Header sent by Safe Exam Browser containing the Browser Exam Key hash. */
     private const BROWSER_EXAM_KEY_HEADER = 'HTTP_X_SAFEEXAMBROWSER_REQUESTHASH';
 
     /** @var quiz $quiz A quiz object containing all information pertaining to current quiz. */
@@ -81,7 +83,7 @@ class access_manager {
             return false;
         }
 
-        return self::check_key($configkey, self::get_this_page_url(),
+        return self::check_key($configkey, $this->get_this_page_url(),
                 trim($_SERVER[self::CONFIG_KEY_HEADER]));
     }
 
@@ -124,7 +126,7 @@ class access_manager {
      * @param string $header the value of the X-SafeExamBrowser-RequestHash to check.
      * @return bool true if the hash matches.
      */
-    private function check_keys(array $keys, $url, $header) : bool {
+    private function check_keys(array $keys, string $url, string $header) : bool {
         foreach ($keys as $key) {
             if (self::check_key($key, $url, $header)) {
                 return true;
