@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $cachelifetime Time in seconds til cached file expires.
  * @return bool Whether the file was created and served.
  */
-function serve_quiz_config_xml(string $cmid, $cachelifetime = 300) {
+function serve_quiz_config_xml(string $cmid, $cachelifetime = 0) {
     global $DB;
 
     // Check that the course module exists, user is logged into course and can access course module.
@@ -54,8 +54,8 @@ function serve_quiz_config_xml(string $cmid, $cachelifetime = 300) {
         return false;
     }
 
-    // We can now send the file back to the browser - in this case with a cache lifetime of 5 minutes.
-    header("Cache-Control: private, max-age=$cachelifetime, no-transform");
+    // We can now send the file back to the browser.
+    header("Cache-Control: private, max-age=" . ($cachelifetime + 1) . ", no-transform");
     header('Expires: '. gmdate('D, d M Y H:i:s', time() + $cachelifetime) .' GMT');
     header('Pragma: ');
     header('Content-Disposition: attachment; filename=config.seb');
