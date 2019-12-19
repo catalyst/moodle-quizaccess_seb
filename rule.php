@@ -255,7 +255,7 @@ class quizaccess_seb extends quiz_access_rule_base {
             return false;
         } else {
             // Add error message.
-            $errormessage .= get_string('invalidkeys', 'quizaccess_seb') . "\n";
+            $errormessage .= get_string('invalidkeys', 'quizaccess_seb');
         }
 
         return $errormessage;

@@ -24,10 +24,13 @@
  */
 
 use quizaccess_seb\access_manager;
+use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
-class quizacces_seb_access_manager_testcase extends advanced_testcase {
+require_once(__DIR__ . '/base.php');
+
+class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
 
     /**
      * Called before every test.
@@ -122,38 +125,5 @@ class quizacces_seb_access_manager_testcase extends advanced_testcase {
         $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
 
         $this->assertFalse($accessmanager->validate_access_keys());
-    }
-
-    /**
-     * Assign a capability to $USER
-     * The function creates a student $USER if $USER->id is empty
-     *
-     * @param string $capability Capability name.
-     * @param int $contextid Context ID.
-     * @param int $roleid Role ID.
-     * @return int The role id - mainly returned for creation, so calling function can reuse it.
-     *
-     * @throws coding_exception
-     */
-    private function assign_user_capability($capability, $contextid, $roleid = null) {
-        global $USER;
-
-        // Create a new student $USER if $USER doesn't exist.
-        if (empty($USER->id)) {
-            $user  = self::getDataGenerator()->create_user();
-            self::setUser($user);
-        }
-
-        if (empty($roleid)) {
-            $roleid = create_role('Dummy role', 'dummyrole', 'dummy role description');
-        }
-
-        assign_capability($capability, CAP_ALLOW, $roleid, $contextid);
-
-        role_assign($roleid, $USER->id, $contextid);
-
-        accesslib_clear_all_caches_for_unit_testing();
-
-        return $roleid;
     }
 }
