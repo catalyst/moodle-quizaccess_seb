@@ -72,7 +72,7 @@ class access_manager {
      *
      * @throws \coding_exception
      */
-    public function validate_access_keys() : bool {
+    public function validate_access_keys(string $pageurl = '') : bool {
         $configkey = $this->quizsettings->get('configkey');
         if (empty($configkey)) {
             return false;
@@ -83,7 +83,10 @@ class access_manager {
             return false;
         }
 
-        return self::check_key($configkey, $this->get_this_page_url(),
+        if (empty($pageurl)) {
+            $pageurl = $this->get_this_page_url();
+        }
+        return self::check_key($configkey, $pageurl,
                 trim($_SERVER[self::CONFIG_KEY_HEADER]));
     }
 
