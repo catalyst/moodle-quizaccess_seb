@@ -47,8 +47,8 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
 
         // Create a new student $USER if $USER doesn't exist.
         if (empty($USER->id)) {
-            $user  = self::getDataGenerator()->create_user();
-            self::setUser($user);
+            $user = $this->getDataGenerator()->create_user();
+            $this->setUser($user);
         }
 
         if (empty($roleid)) {

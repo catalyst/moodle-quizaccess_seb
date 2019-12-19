@@ -86,7 +86,7 @@ class access_manager {
         if (empty($pageurl)) {
             $pageurl = $this->get_this_page_url();
         }
-        return self::check_key($configkey, $pageurl,
+        return $this->check_key($configkey, $pageurl,
                 trim($_SERVER[self::CONFIG_KEY_HEADER]));
     }
 
@@ -131,7 +131,7 @@ class access_manager {
      */
     private function check_keys(array $keys, string $url, string $header) : bool {
         foreach ($keys as $key) {
-            if (self::check_key($key, $url, $header)) {
+            if ($this->check_key($key, $url, $header)) {
                 return true;
             }
         }
