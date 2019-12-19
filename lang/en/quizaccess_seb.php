@@ -89,3 +89,6 @@ $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
+
+// Quiz access errors.
+$string['invalidkeys'] = "The config key or browser exam keys could not be validated. Please ensure you are using the Safe Exam Browser with correct configuration file.";

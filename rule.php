@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\access_manager;
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\settings_provider;
 
@@ -33,6 +34,9 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
 class quizaccess_seb extends quiz_access_rule_base {
 
+    /** @var access_manager $accessmanager Instance to manage the access to the quiz for this plugin. */
+    private $accessmanager;
+
     /**
      * Create an instance of this rule for a particular quiz.
      *
@@ -41,6 +45,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      */
     public function __construct (quiz $quizobj, int $timenow) {
         parent::__construct($quizobj, $timenow);
+        $this->accessmanager = new access_manager($quizobj);
     }
 
     /**
@@ -234,9 +239,27 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @return string false if access should be allowed, a message explaining the
      *      reason if access should be prevented.
+     *
+     * @throws coding_exception
      */
     public function prevent_access() {
-        return false;
+        $errormessage = '';
+
+        // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
+        if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
+            return false;
+        }
+
+        // Check if the quiz can be validated with the quiz Config Key or Browser Exam Keys.
+        if ($this->accessmanager->validate_access_keys()) {
+            return false;
+        } else {
+            // Add error message.
+            $errormessage .= get_string('invalidkeys', 'quizaccess_seb');
+            // TODO: Issue #8 - Trigger event if access is prevented.
+        }
+
+        return $errormessage;
     }
 
     /**
