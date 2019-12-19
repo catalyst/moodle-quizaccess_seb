@@ -47,7 +47,7 @@ function quizaccess_seb_get_config(string $cmid) : string {
     $settings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $cm->instance]);
     // If no settings found, config is false, otherwise get config.
     $config = $settings !== false ? $settings->get('config') : false;
-   if (empty($config)) {
+    if (empty($config)) {
         throw new moodle_exception('noconfigfound', 'quizaccess_seb', '', $cm->id);
     }
     return $config;
