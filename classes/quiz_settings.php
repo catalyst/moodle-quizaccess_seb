@@ -43,6 +43,25 @@ class quiz_settings extends persistent {
     private $plist;
 
     /**
+     * Create an instance of this class.
+     *
+     * @param int $id If set, this is the id of an existing record, used to load the data.
+     * @param \stdClass $record If set will be passed to {@link self::from_record()}.
+     *
+     * @throws \CFPropertyList\IOException
+     * @throws \CFPropertyList\PListException
+     * @throws \DOMException
+     * @throws \coding_exception
+     */
+    public function __construct($id = 0, \stdClass $record = null) {
+        parent::__construct($id, $record);
+        // Get existing config.
+        $config = $this->get('config');
+        // Parse basic settings into a property list.
+        $this->plist = new property_list($config);
+    }
+
+    /**
      * Return the definition of the properties of this model.
      *
      * @return array
@@ -220,12 +239,6 @@ class quiz_settings extends persistent {
      * @throws \coding_exception
      */
     private function compute_config() {
-        $settings = $this->to_record();
-        // Get existing config.
-        $config = $this->get('config');
-        // Parse basic settings into a property list.
-        $this->plist = new property_list($config);
-
         // Process all settings that are boolean.
         $this->process_bool_settings();
 
