@@ -68,6 +68,7 @@ class access_manager {
     /**
      * Check if the current request contains the required key hashes in header.
      *
+     * @param string $pageurl URL to validate keys on.
      * @return bool true if the user is using a browser with a permitted key, false if not.
      *
      * @throws \coding_exception
