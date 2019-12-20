@@ -24,6 +24,7 @@
  */
 
 use quizaccess_seb\access_manager;
+use quizaccess_seb\output\action_buttons;
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\settings_provider;
 
@@ -306,18 +307,20 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @throws moodle_exception
      */
     private function get_action_buttons() {
-        // Get data for buttons.
-        $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, $this->is_site_secure());
-        $sebdata = (object) ['text' => 'Launch Safe Exam Browser', 'link' => $seblink];
-        $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, $this->is_site_secure());
-        $httpdata = (object) ['text' => 'Download Configuration', 'link' => $httplink];
-        $downloaddata = (object) ['text' => 'Download Safe Exam Browser', 'link' => 'https://safeexambrowser.org/download_en.html'];
+        global $PAGE;
+        $renderer = $PAGE->get_renderer('quizaccess_seb');
+        $buttons = new action_buttons();
 
-        return "<div class='seb-buttons'>"
-                . get_string('downloadbutton', 'quizaccess_seb', $downloaddata)
-                . get_string('downloadbutton', 'quizaccess_seb', $sebdata)
-                . get_string('downloadbutton', 'quizaccess_seb', $httpdata)
-                . "</div>";
+        // Get data for buttons.
+        $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
+        $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, is_https());
+
+        $buttons->add_button(get_string('sebdownloadlink', 'quizaccess_seb'),
+                get_string('sebdownloadbutton', 'quizaccess_seb'));
+        $buttons->add_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
+        $buttons->add_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+
+        return $renderer->render_action_buttons($buttons);
     }
 
     /**
@@ -374,15 +377,5 @@ class quizaccess_seb extends quiz_access_rule_base {
     private static function filter_plugin_settings(stdClass $settings) {
         $settings = self::filter_by_prefix($settings);
         return self::strip_all_prefixes($settings);
-    }
-
-    /**
-     * Check if Moodle site is using HTTPS.
-     *
-     * @return bool True if HTTPS is detected.
-     */
-    private function is_site_secure() {
-        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (!empty($_SERVER['SERVER_PORT']) && ($_SERVER['SERVER_PORT'] == 443));
     }
 }

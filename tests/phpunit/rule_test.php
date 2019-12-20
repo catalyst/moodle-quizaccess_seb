@@ -117,12 +117,12 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Check that correct error message is returned.
         $this->assertEquals("The config key or browser exam keys could not be validated. "
                 . "Please ensure you are using the Safe Exam Browser with correct configuration file."
-                . "<div class='seb-buttons'>"
-                . "<a class=\"btn btn-secondary\" role=\"button\" href=\"https://safeexambrowser.org/download_en.html\">Download Safe Exam Browser</a>"
-                . "<a class=\"btn btn-secondary\" role=\"button\" "
-                . "href=\"seb://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid\">Launch Safe Exam Browser</a>"
-                . "<a class=\"btn btn-secondary\" role=\"button\" "
-                . "href=\"http://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid\">Download Configuration</a>"
+                . "<div>\n"
+                . "    <a class=\"btn btn-secondary mx-1\" role=\"button\" href=\"https://safeexambrowser.org/download_en.html\">Download Safe Exam Browser</a>\n"
+                . "    <a class=\"btn btn-secondary mx-1\" role=\"button\" "
+                . "href=\"sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid\">Launch Safe Exam Browser</a>\n"
+                . "    <a class=\"btn btn-secondary mx-1\" role=\"button\" "
+                . "href=\"https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php?cmid=$quiz->cmid\">Download Configuration</a>\n"
                 . "</div>"
                 , $rule->prevent_access());
     }

@@ -93,4 +93,7 @@ $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Bro
 // Quiz access information.
 $string['invalidkeys'] = "The config key or browser exam keys could not be validated. Please ensure you are using the Safe Exam Browser with correct configuration file.";
 $string['sebrequired'] = "This quiz has been configured so that students may only attempt it using the Safe Exam Browser.";
-$string['downloadbutton'] = '<a class="btn btn-secondary mx-1" role="button" href="{$a->link}">{$a->text}</a>';
+$string['sebdownloadlink'] = 'https://safeexambrowser.org/download_en.html';
+$string['sebdownloadbutton'] = 'Download Safe Exam Browser';
+$string['seblinkbutton'] = 'Launch Safe Exam Browser';
+$string['httplinkbutton'] = 'Download Configuration';
