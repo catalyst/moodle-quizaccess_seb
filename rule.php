@@ -59,6 +59,11 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return quiz_access_rule_base|null the rule, if applicable, else null.
      */
     public static function make (quiz $quizobj, $timenow, $canignoretimelimits) {
+        $accessmanager = new access_manager($quizobj);
+        // If Safe Exam Browser is not required, this access rule is not applicable.
+        if (!$accessmanager->seb_required()) {
+            return null;
+        }
         return new self($quizobj, $timenow);
     }
 
@@ -259,6 +264,8 @@ class quizaccess_seb extends quiz_access_rule_base {
             // TODO: Issue #8 - Trigger event if access is prevented.
         }
 
+        // Display action buttons to assist user in gaining access to quiz.
+        $errormessage .= $this->get_action_buttons();
         return $errormessage;
     }
 
@@ -271,7 +278,9 @@ class quizaccess_seb extends quiz_access_rule_base {
      *         (may be '' if no message is appropriate).
      */
     public function description() {
-        return '';
+        return [
+            get_string('sebrequired', 'quizaccess_seb'),
+        ];
     }
 
     /**
@@ -286,6 +295,29 @@ class quizaccess_seb extends quiz_access_rule_base {
         $page->set_popup_notification_allowed(false); // Prevent message notifications.
         $page->set_heading($page->title);
         $page->set_pagelayout('secure');
+    }
+
+    /**
+     * Get buttons to prompt user to download SEB or config file.
+     *
+     * @return string Button html as a block.
+     *
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    private function get_action_buttons() {
+        // Get data for buttons.
+        $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, $this->is_site_secure());
+        $sebdata = (object) ['text' => 'Launch Safe Exam Browser', 'link' => $seblink];
+        $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, $this->is_site_secure());
+        $httpdata = (object) ['text' => 'Download Configuration', 'link' => $httplink];
+        $downloaddata = (object) ['text' => 'Download Safe Exam Browser', 'link' => 'https://safeexambrowser.org/download_en.html'];
+
+        return "<div class='seb-buttons'>"
+                . get_string('downloadbutton', 'quizaccess_seb', $downloaddata)
+                . get_string('downloadbutton', 'quizaccess_seb', $sebdata)
+                . get_string('downloadbutton', 'quizaccess_seb', $httpdata)
+                . "</div>";
     }
 
     /**
@@ -342,5 +374,14 @@ class quizaccess_seb extends quiz_access_rule_base {
     private static function filter_plugin_settings(stdClass $settings) {
         $settings = self::filter_by_prefix($settings);
         return self::strip_all_prefixes($settings);
+    }
+
+    /**
+     * Check if Moodle site is using HTTPS.
+     *
+     * @return bool True if HTTPS is detected.
+     */
+    private function is_site_secure() {
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
     }
 }
