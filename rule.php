@@ -382,6 +382,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return bool True if HTTPS is detected.
      */
     private function is_site_secure() {
-        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                || (!empty($_SERVER['SERVER_PORT']) && ($_SERVER['SERVER_PORT'] == 443));
     }
 }
