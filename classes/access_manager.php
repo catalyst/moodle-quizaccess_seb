@@ -19,7 +19,7 @@
  *
  * @package    quizaccess_seb
  * @author     Tim Hunt
- * @author     Luca Bosch
+ * @author     Luca Bösch <luca.boesch@bfh.ch>
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
