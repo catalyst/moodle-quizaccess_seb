@@ -34,6 +34,11 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
 class quizaccess_seb extends quiz_access_rule_base {
 
+    /**
+     * Default URL to download SEB browser.
+     */
+    const DEFAULT_SEB_DOWNLOAD_URL = 'https://safeexambrowser.org/download_en.html';
+
     /** @var access_manager $accessmanager Instance to manage the access to the quiz for this plugin. */
     private $accessmanager;
 
@@ -59,6 +64,11 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return quiz_access_rule_base|null the rule, if applicable, else null.
      */
     public static function make (quiz $quizobj, $timenow, $canignoretimelimits) {
+        $accessmanager = new access_manager($quizobj);
+        // If Safe Exam Browser is not required, this access rule is not applicable.
+        if (!$accessmanager->seb_required()) {
+            return null;
+        }
         return new self($quizobj, $timenow);
     }
 
@@ -259,6 +269,8 @@ class quizaccess_seb extends quiz_access_rule_base {
             // TODO: Issue #8 - Trigger event if access is prevented.
         }
 
+        // Display action buttons to assist user in gaining access to quiz.
+        $errormessage .= $this->get_action_buttons();
         return $errormessage;
     }
 
@@ -271,7 +283,9 @@ class quizaccess_seb extends quiz_access_rule_base {
      *         (may be '' if no message is appropriate).
      */
     public function description() {
-        return '';
+        return [
+            get_string('sebrequired', 'quizaccess_seb'),
+        ];
     }
 
     /**
@@ -286,6 +300,41 @@ class quizaccess_seb extends quiz_access_rule_base {
         $page->set_popup_notification_allowed(false); // Prevent message notifications.
         $page->set_heading($page->title);
         $page->set_pagelayout('secure');
+    }
+
+    /**
+     * Get buttons to prompt user to download SEB or config file.
+     *
+     * @return string Button html as a block.
+     *
+     * @throws coding_exception
+     * @throws moodle_exception
+     */
+    private function get_action_buttons() {
+        global $OUTPUT;
+        $buttons = '';
+
+        // Get data for buttons.
+        $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
+        $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, is_https());
+
+        $buttons .= html_writer::start_div();
+        $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+        $buttons .= $OUTPUT->single_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
+        $buttons .= $OUTPUT->single_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+        $buttons .= html_writer::end_div();
+
+        return $buttons;
+    }
+
+    /**
+     * Returns SEB download URL.
+     *
+     * @return string
+     */
+    private function get_seb_download_url() {
+        // TODO: Issue #9 - Admin setting or download SEB url.
+        return self::DEFAULT_SEB_DOWNLOAD_URL;
     }
 
     /**

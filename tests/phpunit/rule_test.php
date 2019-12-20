@@ -115,8 +115,13 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
         // Check that correct error message is returned.
-        $this->assertEquals("The config key or browser exam keys could not be validated. Please ensure you are using the Safe Exam Browser with correct configuration file."
-                , $rule->prevent_access());
+        $errormsg = $rule->prevent_access();
+        $this->assertNotEmpty($errormsg);
+        $this->assertContains("The config key or browser exam keys could not be validated. "
+                . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
+        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
+        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
     }
 
     /**
