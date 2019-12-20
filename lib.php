@@ -68,3 +68,22 @@ function quizaccess_seb_send_file(string $contents) {
 
     echo($contents);
 }
+
+/**
+ * Create missing SEB settings for quizzes that don't have them.
+ */
+function quizaccess_seb_create_missing_settings() {
+    global $DB;
+
+    $quizzes = $DB->get_recordset('quiz');
+
+    foreach ($quizzes as $quiz) {
+        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
+        if ($quizsettings == false) {
+            $quizsettings = new \quizaccess_seb\quiz_settings(0, (object)['quizid' => $quiz->id]);
+            $quizsettings->create();
+        }
+    }
+
+    $quizzes->close();
+}

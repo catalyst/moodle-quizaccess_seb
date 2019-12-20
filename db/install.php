@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the quizaccess_seb plugin.
+ * Install script for plugin.
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
@@ -25,8 +25,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2019122100;
-$plugin->release = 2019122100; // Match to version.
-$plugin->requires = 2019052000; // Moodle 3.7.
-$plugin->component = 'quizaccess_seb';
-$plugin->maturity = MATURITY_ALPHA;
+require_once($CFG->dirroot  . '/mod/quiz/accessrule/seb/lib.php');
+
+/**
+ * Custom code to be run on installing the plugin.
+ */
+function xmldb_quizaccess_seb_install() {
+    quizaccess_seb_create_missing_settings();
+    return true;
+}

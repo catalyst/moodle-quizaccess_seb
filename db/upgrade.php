@@ -25,6 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->dirroot  . '/mod/quiz/accessrule/seb/lib.php');
+
 /**
  * Function to upgrade quizaccess_seb plugin.
  *
@@ -62,6 +64,13 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
 
         // Seb savepoint reached.
         upgrade_plugin_savepoint(true, 2019122000, 'quizaccess', 'seb');
+    }
+
+    if ($oldversion < 2019122100) {
+        // Create missing settings for all existing quizzes.
+        quizaccess_seb_create_missing_settings();
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2019122100, 'quizaccess', 'seb');
     }
 
     return true;
