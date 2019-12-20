@@ -307,20 +307,21 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @throws moodle_exception
      */
     private function get_action_buttons() {
-        global $PAGE;
-        $renderer = $PAGE->get_renderer('quizaccess_seb');
-        $buttons = new action_buttons();
+        global $OUTPUT;
+        $buttons = '';
 
         // Get data for buttons.
         $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
         $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, is_https());
 
-        $buttons->add_button(get_string('sebdownloadlink', 'quizaccess_seb'),
+        $buttons .= html_writer::start_div();
+        $buttons .= $OUTPUT->single_button(get_string('sebdownloadlink', 'quizaccess_seb'),
                 get_string('sebdownloadbutton', 'quizaccess_seb'));
-        $buttons->add_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
-        $buttons->add_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+        $buttons .= $OUTPUT->single_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
+        $buttons .= $OUTPUT->single_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+        $buttons .= html_writer::end_div();
 
-        return $renderer->render_action_buttons($buttons);
+        return $buttons;
     }
 
     /**
