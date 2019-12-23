@@ -19,6 +19,7 @@
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -89,7 +90,11 @@ class quizaccess_seb extends quiz_access_rule_base {
         // Insert all the form elements before the 'security' section as a group.
         foreach (settings_provider::get_quiz_element_types() as $name => $type) {
             // Create element.
-            $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
+            if (is_array($type)) {
+                $element = $mform->createElement($type[0], $name, get_string($name, 'quizaccess_seb'), $type[1]);
+            } else {
+                $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
+            }
 
             // Insert element.
             $mform->insertElementBefore($element, 'security');
@@ -104,8 +109,13 @@ class quizaccess_seb extends quiz_access_rule_base {
 
             // Set hideifs.
             if (isset($hideifs[$name])) {
-                foreach ($hideifs[$name] as $dependantname => $dependantvalue) {
-                    $mform->hideIf($name, $dependantname, 'eq', $dependantvalue);
+                foreach ($hideifs[$name] as $hideif) {
+                    $mform->hideIf(
+                        $hideif->get_element(),
+                        $hideif->get_dependantname(),
+                        $hideif->get_condition(),
+                        $hideif->get_dependantvalue()
+                    );
                 }
             }
         }

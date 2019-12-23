@@ -21,6 +21,7 @@
  * @author     Tim Hunt
  * @author     Luca Bösch <luca.boesch@bfh.ch>
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -99,7 +100,7 @@ class access_manager {
      * @throws \coding_exception
      */
     public function seb_required() : bool {
-        return $this->quizsettings->get('requiresafeexambrowser') == true;
+        return $this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CONFIG_MANUALLY;
     }
 
     /**

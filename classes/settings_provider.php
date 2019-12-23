@@ -22,6 +22,7 @@
  * @package    quizaccess_seb
  * @author     Luca Bösch <luca.boesch@bfh.ch>
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -33,6 +34,31 @@ defined('MOODLE_INTERNAL') || die();
 class settings_provider {
 
     /**
+     * No SEB should be used.
+     */
+    const USE_SEB_NO = 0;
+
+    /**
+     * Use SEB and configure it manually.
+     */
+    const USE_SEB_CONFIG_MANUALLY = 1;
+
+    /**
+     * Use SEB config from pre configured template.
+     */
+    const USE_SEB_TEMPLATE = 2;
+
+    /**
+     * Use SEB config from uploaded config file.
+     */
+    const USE_SEB_UPLOAD_CONFIG = 3;
+
+    /**
+     * Use client config. Not SEB config is required.
+     */
+    const USE_SEB_CLIENT_CONFIG = 4;
+
+    /**
      * Get the type of element for each of the form elements in quiz settings.
      *
      * Contains all setting elements. Array key is name of 'form element'/'database column (excluding prefix)'.
@@ -42,8 +68,8 @@ class settings_provider {
     public static function get_quiz_element_types() : array {
         return [
             'seb' => 'header',
-            'seb_requiresafeexambrowser' => 'selectyesno',
-            'seb_sebconfigtemplate' => 'select',
+            'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options()],
+            'seb_sebconfigtemplate' => ['select', self::get_template_options()],
             'seb_sebconfigfile' => 'filepicker',
             'seb_suppresssebdownloadlink' => 'selectyesno',
             'seb_linkquitseb' => 'selectyesno',
@@ -69,6 +95,33 @@ class settings_provider {
     }
 
     /**
+     * Returns a list of all options of SEB usage.
+     * @return array
+     */
+    public static function get_requiresafeexambrowser_options() : array {
+        $options[self::USE_SEB_NO] = get_string('no');
+        $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
+
+        // @codingStandardsIgnoreStart
+        // TODO: Implement following features and uncomment options.
+        //$options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
+        //$options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
+        //$options[self::USE_SEB_CLIENT_CONFIG] = get_string('seb_use_client', 'quizaccess_seb');
+        // @codingStandardsIgnoreEnd
+
+        return $options;
+    }
+
+    /**
+     * Returns a list of templates.
+     * @return array
+     */
+    public static function get_template_options() {
+        // TODO: implement as part of Issue #19.
+        return [];
+    }
+
+    /**
      * Get the default values of the quiz settings.
      *
      * Array key is name of 'form element'/'database column (excluding prefix)'.
@@ -78,7 +131,7 @@ class settings_provider {
      */
     public static function get_quiz_defaults() : array {
         return [
-            'seb_requiresafeexambrowser' => 0,
+            'seb_requiresafeexambrowser' => self::USE_SEB_NO,
             'seb_sebconfigtemplate' => 0,
             'seb_sebconfigfile' => null,
             'seb_suppresssebdownloadlink' => 0,
@@ -108,90 +161,131 @@ class settings_provider {
      * Get the conditions that an element should be hid in the form. Expects matching using 'eq'.
      *
      * Array key is name of 'form element'/'database column (excluding prefix)'.
-     * Values of main array contain array of name => condition pairs. When matching, element should be hidden.
-     * E.g. If requiresafeexambrowser is set to false, all other settings are hidden.
+     * Values are instances of hideif_rule class.
      *
-     * @return array List of rules per element.
+     * @return \quizaccess_seb\hideif_rule[] List of rules per element.
      */
     public static function get_quiz_hideifs() : array {
         return [
             'seb_sebconfigtemplate' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_sebconfigtemplate', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_TEMPLATE),
             ],
             'seb_sebconfigfile' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),
             ],
             'seb_showsebtaskbar' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_showwificontrol' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_showsebtaskbar' => 0,
+                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_showwificontrol', 'seb_showsebtaskbar', 'eq', 0),
             ],
             'seb_showreloadbutton' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_showsebtaskbar' => 0,
+                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_showreloadbutton', 'seb_showsebtaskbar', 'eq', 0),
             ],
             'seb_showtime' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_showsebtaskbar' => 0,
+                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_showtime', 'seb_showsebtaskbar', 'eq', 0),
             ],
             'seb_showkeyboardlayout' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_showsebtaskbar' => 0,
+                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_showkeyboardlayout', 'seb_showsebtaskbar', 'eq', 0),
             ],
             'seb_allowuserquitseb' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_quitpassword' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_allowuserquitseb' => 0,
+                new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_quitpassword', 'seb_allowuserquitseb', 'eq', 0),
             ],
             'seb_linkquitseb' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_userconfirmquit' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_linkquitseb' => 0,
+                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_userconfirmquit', 'seb_linkquitseb', 'eq', 0),
             ],
             'seb_enableaudiocontrol' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_muteonstartup' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_enableaudiocontrol' => 0,
+                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_muteonstartup', 'seb_enableaudiocontrol', 'eq', 0),
             ],
             'seb_allowspellchecking' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_allowreloadinexam' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+
             ],
             'seb_activateurlfiltering' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_filterembeddedcontent' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_activateurlfiltering' => 0,
+                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_filterembeddedcontent', 'seb_activateurlfiltering', 'eq', 0),
             ],
             'seb_expressionsallowed' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_activateurlfiltering' => 0,
+                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_expressionsallowed', 'seb_activateurlfiltering', 'eq', 0),
             ],
             'seb_regexallowed' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_activateurlfiltering' => 0,
+                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_regexallowed', 'seb_activateurlfiltering', 'eq', 0),
             ],
             'seb_expressionsblocked' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_activateurlfiltering' => 0,
+                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_expressionsblocked', 'seb_activateurlfiltering', 'eq', 0),
             ],
             'seb_regexblocked' => [
-                'seb_requiresafeexambrowser' => 0,
-                'seb_activateurlfiltering' => 0,
+                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+                new hideif_rule('seb_regexblocked', 'seb_activateurlfiltering', 'eq', 0),
             ],
             'seb_suppresssebdownloadlink' => [
-                'seb_requiresafeexambrowser' => 0,
+                new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
+                new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+
             ],
         ];
     }

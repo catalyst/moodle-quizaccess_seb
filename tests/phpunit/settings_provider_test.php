@@ -78,10 +78,11 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         // Check no diff for elements to hide.
         $this->assertEmpty($diffelements);
 
-        // Check each element's tohide conditions that each condition refers to element in settings types.
+        // Check each element's to hide conditions that each condition refers to element in settings types.
         foreach ($settinghideifs as $conditions) {
-            $diffelements = array_diff_key($conditions, $settingtypes);
-            $this->assertEmpty($diffelements);
+            foreach ($conditions as $condition) {
+                $this->assertTrue(array_key_exists($condition->get_element(), $settingtypes));
+            }
         }
     }
 
