@@ -18,6 +18,7 @@
  * Strings for the quizaccess_seb plugin.
  *
  * @package    quizaccess_seb
+ * @author     Luca Bösch <luca.boesch@bfh.ch>
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -36,13 +37,13 @@ $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
 // Quiz form settings.
 $string['seb'] = 'Safe Exam Browser';
 $string['seb_help'] = 'Setup quiz to use the Safe Exam Browser.';
-$string['seb_activateurlfiltering'] = 'Activate URL filtering';
+$string['seb_activateurlfiltering'] = 'Enable URL filtering';
 $string['seb_activateurlfiltering_help'] = 'If enabled, URLs will be filtered when loading web pages. The filter set has to be defined below.';
-$string['seb_allowreloadinexam'] = 'Allow reload in exam';
+$string['seb_allowreloadinexam'] = 'Enable reload in exam';
 $string['seb_allowreloadinexam_help'] = 'If enabled, page reload is allowed (reload button in SEB task bar, browser tool bar, iOS side slider menu, keyboard shortcut F5/cmd+R). Offline caching might break when the user tries to reload a page without internet connection.';
-$string['seb_allowspellchecking'] = 'Allow spell checking';
+$string['seb_allowspellchecking'] = 'Enable spell checking';
 $string['seb_allowspellchecking_help'] = 'If enabled, spell checking in the SEB browser is allowed.';
-$string['seb_allowuserquitseb'] = 'Allow user to quit SEB';
+$string['seb_allowuserquitseb'] = 'Enable quitting of SEB';
 $string['seb_allowuserquitseb_help'] = 'If enabled, users can quit SEB with the “Quit” button in the SEB task bar or by pressing the keys Ctrl-Q or by clicking the main browser window close button.';
 $string['seb_enableaudiocontrol'] = 'Enable Audio Controls';
 $string['seb_enableaudiocontrol_help'] = 'If enabled, the audio control icon is shown in the SEB task bar.';
@@ -56,7 +57,7 @@ $string['seb_linkquitseb'] = 'Link to quit SEB after exam';
 $string['seb_linkquitseb_help'] = 'If enabled, a link to quit SEB will appear after the exam is submitted. When clicking the link, it is possible to quit SEB without having to press the ”Quit” button and to enter a quit password.';
 $string['seb_muteonstartup'] = 'Mute on startup';
 $string['seb_muteonstartup_help'] = 'If enabled, audio is initially muted when starting SEB.';
-$string['seb_quitpassword'] = 'Quit/unlock password';
+$string['seb_quitpassword'] = 'Quit password';
 $string['seb_quitpassword_help'] = 'This password is prompted when users try to quit SEB with the ”Quit” button, Ctrl-Q or the close button in the main browser window. If no quit password is set, then SEB just prompts “Are you sure you want to quit SEB?”.';
 $string['seb_regexallowed'] = 'Regex allowed';
 $string['seb_regexallowed_help'] = 'A text field which contains the filtering expressions for allowed URLs in a regular expression (Regex) format.';
@@ -76,8 +77,8 @@ $string['seb_showtime'] = 'Show time';
 $string['seb_showtime_help'] = 'If enabled, the current time is displayed in the SEB task bar.';
 $string['seb_showwificontrol'] = 'Show Wifi control';
 $string['seb_showwificontrol_help'] = 'If enabled, a WiFi control button appears in the SEB task bar. The button allows to reconnect to WiFi networks which have previously been connected to.';
-$string['seb_suppresssebdownloadlink'] = 'Suppress Safe Exam Browser download link';
-$string['seb_suppresssebdownloadlink_help'] = 'If enabled, no download link for Safe Exam Browser will be shown on the quiz start page.';
+$string['seb_suppresssebdownloadlink'] = 'Suppress Safe Exam Browser download button';
+$string['seb_suppresssebdownloadlink_help'] = 'If enabled, no button for Safe Exam Browser download will be shown on the quiz start page.';
 $string['seb_sebconfigfile'] = 'Upload Safe Exam Browser config';
 $string['seb_sebconfigfile_help'] = 'Please upload your own Safe Exam Browser config file for this quiz.';
 $string['seb_userconfirmquit'] = 'Ask user to confirm quitting';
