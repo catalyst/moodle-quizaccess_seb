@@ -78,11 +78,24 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         // Check no diff for elements to hide.
         $this->assertEmpty($diffelements);
 
-        // Check each element's tohide conditions that each condition refers to element in settings types.
+        // Check each element's to hide conditions that each condition refers to element in settings types.
         foreach ($settinghideifs as $conditions) {
-            $diffelements = array_diff_key($conditions, $settingtypes);
-            $this->assertEmpty($diffelements);
+            foreach ($conditions as $condition) {
+                $this->assertTrue(array_key_exists($condition->get_element(), $settingtypes));
+            }
         }
+    }
+
+    /**
+     * Test SEB usage options.
+     */
+    public function test_get_requiresafeexambrowser_options() {
+        $this->assertCount(2, settings_provider::get_requiresafeexambrowser_options());
+        $this->assertTrue(array_key_exists(0, settings_provider::get_requiresafeexambrowser_options()));
+        $this->assertTrue(array_key_exists(1, settings_provider::get_requiresafeexambrowser_options()));
+        $this->assertFalse(array_key_exists(2, settings_provider::get_requiresafeexambrowser_options()));
+        $this->assertFalse(array_key_exists(3, settings_provider::get_requiresafeexambrowser_options()));
+        $this->assertFalse(array_key_exists(4, settings_provider::get_requiresafeexambrowser_options()));
     }
 
     /**

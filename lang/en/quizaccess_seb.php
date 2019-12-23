@@ -20,6 +20,7 @@
  * @package    quizaccess_seb
  * @author     Luca Bösch <luca.boesch@bfh.ch>
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -83,6 +84,10 @@ $string['seb_sebconfigfile'] = 'Upload Safe Exam Browser config';
 $string['seb_sebconfigfile_help'] = 'Please upload your own Safe Exam Browser config file for this quiz.';
 $string['seb_userconfirmquit'] = 'Ask user to confirm quitting';
 $string['seb_userconfirmquit_help'] = 'If enabled, users have to confirm quitting of SEB when a quit link is detected.';
+$string['seb_use_manually'] = 'Yes - Configure manually';
+$string['seb_use_template'] = 'Yes - Use an existing template';
+$string['seb_use_upload'] = 'Yes - Upload my own config';
+$string['seb_use_client'] = 'Yes - Use SEB client config';
 
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
