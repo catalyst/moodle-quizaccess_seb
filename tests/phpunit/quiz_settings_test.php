@@ -266,7 +266,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             'showkeyboardlayout' => '1',
             'allowuserquitseb' => '1',
             'quitpassword' => 'test',
-            'linkquitseb' => '0',
+            'linkquitseb' => '',
             'userconfirmquit' => '1',
             'enableaudiocontrol' => '1',
             'muteonstartup' => '0',

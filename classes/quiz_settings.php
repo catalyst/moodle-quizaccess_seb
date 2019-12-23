@@ -114,7 +114,7 @@ class quiz_settings extends persistent {
                 'null' => NULL_ALLOWED,
             ],
             'linkquitseb' => [
-                'type' => PARAM_TEXT,
+                'type' => PARAM_URL,
                 'default' => '',
             ],
             'userconfirmquit' => [
