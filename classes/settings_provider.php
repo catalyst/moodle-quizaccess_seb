@@ -20,6 +20,7 @@
  * To make sure there are no inconsistencies between data sets, run tests in tests/phpunit/settings_provider_test.php.
  *
  * @package    quizaccess_seb
+ * @author     Luca Bösch <luca.boesch@bfh.ch>
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -44,26 +45,26 @@ class settings_provider {
             'seb_requiresafeexambrowser' => 'selectyesno',
             'seb_sebconfigtemplate' => 'select',
             'seb_sebconfigfile' => 'filepicker',
+            'seb_suppresssebdownloadlink' => 'selectyesno',
+            'seb_linkquitseb' => 'selectyesno',
+            'seb_userconfirmquit' => 'selectyesno',
+            'seb_allowuserquitseb' => 'selectyesno',
+            'seb_quitpassword' => 'passwordunmask',
+            'seb_allowreloadinexam' => 'selectyesno',
             'seb_showsebtaskbar' => 'selectyesno',
-            'seb_showwificontrol' => 'selectyesno',
             'seb_showreloadbutton' => 'selectyesno',
             'seb_showtime' => 'selectyesno',
             'seb_showkeyboardlayout' => 'selectyesno',
-            'seb_allowuserquitseb' => 'selectyesno',
-            'seb_quitpassword' => 'passwordunmask',
-            'seb_linkquitseb' => 'selectyesno',
-            'seb_userconfirmquit' => 'selectyesno',
+            'seb_showwificontrol' => 'selectyesno',
             'seb_enableaudiocontrol' => 'selectyesno',
             'seb_muteonstartup' => 'selectyesno',
             'seb_allowspellchecking' => 'selectyesno',
-            'seb_allowreloadinexam' => 'selectyesno',
             'seb_activateurlfiltering' => 'selectyesno',
             'seb_filterembeddedcontent' => 'selectyesno',
             'seb_expressionsallowed' => 'textarea',
             'seb_regexallowed' => 'textarea',
             'seb_expressionsblocked' => 'textarea',
             'seb_regexblocked' => 'textarea',
-            'seb_suppresssebdownloadlink' => 'selectyesno',
         ];
     }
 
@@ -80,26 +81,26 @@ class settings_provider {
             'seb_requiresafeexambrowser' => 0,
             'seb_sebconfigtemplate' => 0,
             'seb_sebconfigfile' => null,
+            'seb_suppresssebdownloadlink' => 0,
+            'seb_linkquitseb' => 0,
+            'seb_userconfirmquit' => 1,
+            'seb_allowuserquitseb' => 1,
+            'seb_quitpassword' => '',
+            'seb_allowreloadinexam' => 1,
             'seb_showsebtaskbar' => 1,
-            'seb_showwificontrol' => 0,
             'seb_showreloadbutton' => 1,
             'seb_showtime' => 1,
             'seb_showkeyboardlayout' => 1,
-            'seb_allowuserquitseb' => 1,
-            'seb_quitpassword' => '',
-            'seb_linkquitseb' => 0,
-            'seb_userconfirmquit' => 1,
+            'seb_showwificontrol' => 0,
             'seb_enableaudiocontrol' => 0,
             'seb_muteonstartup' => 0,
             'seb_allowspellchecking' => 0,
-            'seb_allowreloadinexam' => 1,
             'seb_activateurlfiltering' => 0,
             'seb_filterembeddedcontent' => 0,
             'seb_expressionsallowed' => '',
             'seb_regexallowed' => '',
             'seb_expressionsblocked' => '',
             'seb_regexblocked' => '',
-            'seb_suppresssebdownloadlink' => 0,
         ];
     }
 
