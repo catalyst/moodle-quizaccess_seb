@@ -116,7 +116,7 @@ class settings_provider {
      * Returns a list of templates.
      * @return array
      */
-    public static function get_template_options() {
+    public static function get_template_options() : array {
         // TODO: implement as part of Issue #19.
         return [];
     }
