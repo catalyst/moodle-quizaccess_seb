@@ -89,6 +89,13 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Insert all the form elements before the 'security' section as a group.
         foreach (settings_provider::get_quiz_element_types() as $name => $type) {
+            // Check capability of user.
+            if (!has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
+                // Don't show the setting. If the setting has already been set, it will keep this state, otherwise it will
+                // be initialized with a default.
+                continue;
+            }
+
             // Create element.
             if (is_array($type)) {
                 $element = $mform->createElement($type[0], $name, get_string($name, 'quizaccess_seb'), $type[1]);
