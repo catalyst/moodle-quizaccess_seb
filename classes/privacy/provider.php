@@ -25,17 +25,30 @@
 
 namespace quizaccess_seb\privacy;
 
+use core_privacy\local\metadata\collection;
+
 defined('MOODLE_INTERNAL') || die();
 
-class provider implements \core_privacy\local\metadata\null_provider {
+class provider implements \core_privacy\local\metadata\provider {
 
     /**
-     * Get the language string identifier with the component's language
-     * file to explain why this plugin stores no data.
+     * Retrieve the user metadata stored by plugin.
      *
-     * @return string Explanation of why this plugin stores no data.
+     * @param collection $collection Collection of metadata.
+     * @return collection Collection of metadata.
      */
-    public static function get_reason() : string {
-        return 'privacy:metadata';
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_database_table(
+            'quizaccess_seb_quizsettings',
+             [
+                'usermodified' => 'privacy:metadata:quizaccess_seb_quizsettings:usermodified',
+                'timecreated' => 'privacy:metadata:quizaccess_seb_quizsettings:timecreated',
+                'timemodified' => 'privacy:metadata:quizaccess_seb_quizsettings:timemodified',
+                'quizid' => 'privacy:metadata:quizaccess_seb_quizsettings:quizid',
+             ],
+            'privacy:metadata:quizaccess_seb_quizsettings'
+        );
+
+        return $collection;
     }
 }
