@@ -35,6 +35,7 @@ $string['privacy:metadata:quizaccess_seb_quizsettings:usermodified'] = 'ID of us
 $string['privacy:metadata:quizaccess_seb_quizsettings:timecreated'] = 'Unix time that the settings were created.';
 $string['privacy:metadata:quizaccess_seb_quizsettings:timemodified'] = 'Unix time that the settings were last modified.';
 $string['privacy:metadata:quizaccess_seb_quizsettings:quizid'] = 'ID of the quiz the settings exist for.';
+$string['quizsettings'] = 'Quiz settings';
 
 // Admin settings.
 $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
