@@ -116,8 +116,8 @@ class access_manager {
     private function validate_config_key(string $pageurl = '') : bool {
         // If using client config, or with no requirement, then no check required.
         $requiredtype = $this->quizsettings->get('requiresafeexambrowser');
-        if ($requiredtype === settings_provider::USE_SEB_NO
-                || $requiredtype === settings_provider::USE_SEB_CLIENT_CONFIG) {
+        if ($requiredtype == settings_provider::USE_SEB_NO
+                || $requiredtype == settings_provider::USE_SEB_CLIENT_CONFIG) {
             return true;
         }
 
@@ -165,7 +165,11 @@ class access_manager {
      * what we need for verifying the X-SafeExamBrowser-RequestHash header.
      */
     private function get_this_page_url() : string {
-        global $FULLME;
+        global $CFG, $FULLME;
+        // If $FULLME not set fall back to wwwroot.
+        if ($FULLME == null) {
+            return $CFG->wwwroot;
+        }
         return $FULLME;
     }
 
