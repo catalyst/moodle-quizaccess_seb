@@ -24,6 +24,8 @@
  */
 
 use quizaccess_seb\access_manager;
+use quizaccess_seb\quiz_settings;
+use quizaccess_seb\settings_provider;
 use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 
 defined('MOODLE_INTERNAL') || die();
@@ -32,43 +34,46 @@ require_once(__DIR__ . '/base.php');
 
 class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
 
+    /** @var stdClass $course Test course to contain quiz. */
+    private $course;
+
+    /** @var stdClass $quiz A test quiz. */
+    private $quiz;
+
     /**
      * Called before every test.
      */
     public function setUp() {
         parent::setUp();
         $this->resetAfterTest();
+        $this->course = $this->getDataGenerator()->create_course();
+        $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
+        // Set the quiz to require SEB with manual config.
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $settings->save();
     }
 
     /**
-     * Test that SEB access check is required.
+     * Test that SEB is not required.
      */
-    public function test_seb_check_required() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
-        // Set quiz setting to require seb.
-        $quizsetting = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsetting->set('requiresafeexambrowser', 0);
+    public function test_seb_check_not_required() {
+        // Set quiz setting to not require seb.
+        $quizsetting = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsetting->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
         $quizsetting->save();
 
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
         $this->assertFalse($accessmanager->seb_required());
     }
 
     /**
-     * Test that SEB access check is not required.
+     * Test that SEB is required.
      */
-    public function test_seb_check_not_required() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
-        // Set quiz setting to require seb.
-        $quizsetting = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsetting->set('requiresafeexambrowser', 1);
-        $quizsetting->save();
-
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+    public function test_seb_check_required() {
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
         $this->assertTrue($accessmanager->seb_required());
     }
 
@@ -76,13 +81,11 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      * Test that user has capability to bypass SEB check.
      */
     public function test_user_can_bypass_seb_check() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
         // Set the bypass SEB check capability to $USER.
-        $this->assign_user_capability('quizaccess/seb:bypassseb', context_module::instance($quiz->cmid)->id);
+        $this->assign_user_capability('quizaccess/seb:bypassseb', context_module::instance($this->quiz->cmid)->id);
 
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
         $this->assertTrue($accessmanager->can_bypass_seb());
     }
 
@@ -90,10 +93,8 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      * Test user does not have capability to bypass SEB check.
      */
     public function test_user_cannot_bypass_seb_check() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
         $this->assertFalse($accessmanager->can_bypass_seb());
     }
 
@@ -102,11 +103,10 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      */
     public function test_access_keys_validate_with_config_key() {
         global $FULLME;
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
 
-        $configkey = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id])->get('configkey');
+        $configkey = quiz_settings::get_record(['quizid' => $this->quiz->id])->get('configkey');
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
@@ -120,11 +120,82 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      * Test that the quiz Config Key does not match the incoming request header.
      */
     public function test_access_keys_fail_to_validate_with_config_key() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
 
         $this->assertFalse($accessmanager->validate_access_keys());
+    }
+
+    /**
+     * Test that config key is not checked when using client configuration with SEB.
+     */
+    public function test_config_key_not_checked_if_client_requirement_is_selected() {
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $settings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertTrue($accessmanager->validate_access_keys());
+    }
+
+    /**
+     * Test that if there are no browser exam keys for quiz, check is skipped.
+     */
+    public function test_no_browser_exam_keys_cause_check_to_be_skipped() {
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $settings->set('allowedbrowserexamkeys', '');
+        $settings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertTrue($accessmanager->validate_access_keys());
+    }
+
+    /**
+     * Test that access fails if there is no hash in header.
+     */
+    public function test_access_keys_fail_if_browser_exam_key_header_does_not_exist() {
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $settings->set('allowedbrowserexamkeys', hash('sha256', 'one') . "\n" . hash('sha256', 'two'));
+        $settings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertFalse($accessmanager->validate_access_keys());
+    }
+
+    /**
+     * Test that access fails if browser exam key doesn't match hash in header.
+     */
+    public function test_access_keys_fail_if_browser_exam_key_header_does_not_match_provided_hash() {
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $settings->set('allowedbrowserexamkeys', hash('sha256', 'one') . "\n" . hash('sha256', 'two'));
+        $settings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = hash('sha256', 'notwhatyouwereexpectinghuh');
+        $this->assertFalse($accessmanager->validate_access_keys());
+    }
+
+    /**
+     * Test that browser exam key matches hash in header.
+     */
+    public function test_browser_exam_keys_match_header_hash() {
+        global $FULLME;
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $browserexamkey = hash('sha256', 'browserexamkey');
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $settings->set('allowedbrowserexamkeys', $browserexamkey); // Add a hashed BEK.
+        $settings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $browserexamkey);
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
+        $this->assertTrue($accessmanager->validate_access_keys());
     }
 
     /**
@@ -132,15 +203,12 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      */
     public function test_exception_thrown_if_there_are_no_seb_settings_for_a_quiz() {
         global $DB;
-
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
         // Delete created settings.
-        $DB->delete_records('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]);
 
         $this->expectException('moodle_exception');
-        $this->expectExceptionMessage('No SEB config could be found for quiz with cmid: ' . $quiz->cmid);
-        $accessmanager = new access_manager(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+        $this->expectExceptionMessage('No SEB config could be found for quiz with cmid: ' . $this->quiz->cmid);
+        new access_manager(new quiz($this->quiz,
+                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
     }
 }

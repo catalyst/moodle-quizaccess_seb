@@ -144,6 +144,46 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     }
 
     /**
+     * Test that browser keys are validated and retrieved as an array instead of string.
+     */
+    public function test_browser_exam_keys_are_retrieved_as_array() {
+        $quizsettings = new quiz_settings();
+        $quizsettings->set('allowedbrowserexamkeys', "one two,three\nfour");
+        $retrievedkeys = $quizsettings->get('allowedbrowserexamkeys');
+        $this->assertEquals(['one', 'two', 'three', 'four'], $retrievedkeys);
+    }
+
+    /**
+     * @param $bek
+     * @param $expectederrorstring
+     *
+     * @dataProvider bad_browser_exam_key_provider
+     */
+    public function test_browser_exam_keys_validation_errors($bek, $expectederrorstring) {
+        $quizsettings = new quiz_settings();
+        $quizsettings->set('allowedbrowserexamkeys', $bek);
+        $quizsettings->validate();
+        $errors = $quizsettings->get_errors();
+        $this->assertContains($expectederrorstring, $errors);
+    }
+
+    /**
+     * Bad browser exam key data provider.
+     *
+     * @return array
+     */
+    public function bad_browser_exam_key_provider() : array {
+        return [
+            'Short string' => ['fdsf434r',
+                    'A key should be a 64-character hex string.'],
+            'Non hex string' => ['aadf6799aadf6789aadf6789aadf6789aadf6789aadf6789aadf6789aadf678!',
+                    'A key should be a 64-character hex string.'],
+            'Non unique' => ["aadf6799aadf6789aadf6789aadf6789aadf6789aadf6789aadf6789aadf6789"
+                    . "\naadf6799aadf6789aadf6789aadf6789aadf6789aadf6789aadf6789aadf6789", 'The keys must all be different.'],
+        ];
+    }
+
+    /**
      * Provide settings for different filter rules.
      *
      * @return array Test data.
