@@ -31,6 +31,7 @@ use CFPropertyList\CFDictionary;
 use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
 use core\persistent;
+use lang_string;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -169,6 +170,10 @@ class quiz_settings extends persistent {
                 'type' => PARAM_INT,
                 'default' => 0,
             ],
+            'allowedbrowserexamkeys' => [
+                'type' => PARAM_TEXT,
+                'default' => '',
+            ],
             'configkey' => [
                 'type' => PARAM_TEXT,
                 'default' => '',
@@ -180,6 +185,39 @@ class quiz_settings extends persistent {
                 'null' => NULL_ALLOWED,
             ],
         ];
+    }
+
+    /**
+     * Validate the browser exam keys string.
+     *
+     * @param string $keys Newline separated browser exam keys.
+     * @return true|lang_string If there is an error, an error string is returned.
+     *
+     * @throws \coding_exception
+     */
+    protected function validate_allowedbrowserexamkeys($keys) {
+        $keys = $this->split_keys($keys);
+        foreach ($keys as $i => $key) {
+            if (!preg_match('~^[a-f0-9]{64}$~', $key)) {
+                return new lang_string('allowedbrowserkeyssyntax', 'quizaccess_seb');
+            }
+        }
+        if (count($keys) != count(array_unique($keys))) {
+            return new lang_string('allowedbrowserkeysdistinct', 'quizaccess_seb');
+        }
+        return true;
+    }
+
+    /**
+     * Get the browser exam keys as a pre-split array instead of just as a string.
+     *
+     * @return array
+     *
+     * @throws \coding_exception
+     */
+    protected function get_allowedbrowserexamkeys() : array {
+        $keysstring = $this->raw_get('allowedbrowserexamkeys');
+        return $this->split_keys($keysstring);
     }
 
     /**
@@ -348,5 +386,19 @@ class quiz_settings extends persistent {
             'showwificontrol' => 'allowWlan',
             'userconfirmquit' => 'quitURLConfirm',
         ];
+    }
+
+    /**
+     * This helper method takes list of browser exam keys in a string and splits it into an array of separate keys.
+     *
+     * @param string $keys the allowed keys.
+     * @return array of string, the separate keys.
+     */
+    private function split_keys($keys) : array {
+        $keys = preg_split('~[ \t\n\r,;]+~', $keys, -1, PREG_SPLIT_NO_EMPTY);
+        foreach ($keys as $i => $key) {
+            $keys[$i] = strtolower($key);
+        }
+        return $keys;
     }
 }
