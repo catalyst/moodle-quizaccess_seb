@@ -217,6 +217,7 @@ class quiz_settings extends persistent {
      */
     protected function get_allowedbrowserexamkeys() : array {
         $keysstring = $this->raw_get('allowedbrowserexamkeys');
+        $keysstring = empty($keysstring) ? '' : $keysstring;
         return $this->split_keys($keysstring);
     }
 
@@ -394,7 +395,7 @@ class quiz_settings extends persistent {
      * @param string $keys the allowed keys.
      * @return array of string, the separate keys.
      */
-    private function split_keys($keys) : array {
+    private function split_keys(string $keys) : array {
         $keys = preg_split('~[ \t\n\r,;]+~', $keys, -1, PREG_SPLIT_NO_EMPTY);
         foreach ($keys as $i => $key) {
             $keys[$i] = strtolower($key);
