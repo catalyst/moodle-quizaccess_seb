@@ -270,25 +270,33 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @throws coding_exception
      */
     public function prevent_access() {
-        $errormessage = '';
-
         // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
         if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
             return false;
+        }
+
+        // If using client configuration, do basic check that user is using Safe Exam Browser in case no other access rules
+        // apply.
+        if ($this->quiz->requiresafeexambrowser == settings_provider::USE_SEB_CLIENT_CONFIG
+                && !$this->accessmanager->validate_basic_header()) {
+            // Return error message with download link.
+            $errormessage = get_string('clientrequiresseb', 'quizaccess_seb')
+                    . $this->get_download_button_only();
+            // TODO: Issue #8 - Trigger event if access is prevented.
+            return $errormessage;
         }
 
         // Check if the quiz can be validated with the quiz Config Key or Browser Exam Keys.
         if ($this->accessmanager->validate_access_keys()) {
             return false;
         } else {
-            // Add error message.
-            $errormessage .= get_string('invalidkeys', 'quizaccess_seb');
+            // Return error message with download link and links to get the seb config.
+            $errormessage = get_string('invalidkeys', 'quizaccess_seb')
+                    . $this->get_action_buttons();
+            // Display action buttons to assist user in gaining access to quiz.
             // TODO: Issue #8 - Trigger event if access is prevented.
+            return $errormessage;
         }
-
-        // Display action buttons to assist user in gaining access to quiz.
-        $errormessage .= $this->get_action_buttons();
-        return $errormessage;
     }
 
     /**
@@ -339,6 +347,24 @@ class quizaccess_seb extends quiz_access_rule_base {
         $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
         $buttons .= $OUTPUT->single_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
         $buttons .= $OUTPUT->single_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+        $buttons .= html_writer::end_div();
+
+        return $buttons;
+    }
+
+    /**
+     * Get button that links to Safe Exam Browser download.
+     *
+     * @return string HTML for button.
+     *
+     * @throws coding_exception
+     */
+    private function get_download_button_only() {
+        global $OUTPUT;
+        $buttons = '';
+
+        $buttons .= html_writer::start_div();
+        $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
         $buttons .= html_writer::end_div();
 
         return $buttons;
