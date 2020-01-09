@@ -278,9 +278,10 @@ class quizaccess_seb extends quiz_access_rule_base {
             return false;
         }
 
-        // If using client configuration, do basic check that user is using Safe Exam Browser in case no other access rules
-        // apply.
+        // If using client configuration with no browser exam keys, do basic check that user is using Safe Exam Browser.
+        // It is more secure to use Browser Exam Keys than to rely on this check.
         if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG
+                && empty($quizsettings->get('allowedbrowserexamkeys'))
                 && !$this->accessmanager->validate_basic_header()) {
             // Return error message with download link.
             $errormessage = get_string('clientrequiresseb', 'quizaccess_seb')
