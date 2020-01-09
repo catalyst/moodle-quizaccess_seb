@@ -125,9 +125,9 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test access not prevented if access keys match headers.
+     * Test access not prevented if config key matches header.
      */
-    public function test_access_allowed_if_access_keys_valid() {
+    public function test_access_allowed_if_config_key_valid() {
         global $FULLME;
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
@@ -143,6 +143,31 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
         $expectedhash = hash('sha256', $FULLME . $configkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+
+        $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
+        // Check that correct error message is returned.
+        $this->assertFalse($rule->prevent_access());
+    }
+
+    /**
+     * Test access not prevented if browser exam keys match headers.
+     */
+    public function test_access_allowed_if_browser_exam_keys_valid() {
+        global $FULLME;
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Set quiz setting to require seb and save BEK.
+        $browserexamkey = hash('sha256', 'testkey');
+        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG); // Doesn't check config key.
+        $quizsettings->set('allowedbrowserexamkeys', $browserexamkey);
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $browserexamkey);
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
 
         $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
         // Check that correct error message is returned.
