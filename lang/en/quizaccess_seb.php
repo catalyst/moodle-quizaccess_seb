@@ -106,6 +106,30 @@ $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
+$string['seb:managetemplates'] = 'Manage Safe Exam Browser configuration templates.';
+$string['seb:manage_seb_requiresafeexambrowser'] = 'Modify Safe Exam Browser quiz setting: Require Safe Exam Browser';
+$string['seb:manage_seb_sebconfigtemplate'] = 'Modify Safe Exam Browser quiz setting: Select SEB template.';
+$string['seb:manage_seb_sebconfigfile'] = 'Modify Safe Exam Browser quiz setting: Select SEB config file.';
+$string['seb:manage_seb_suppresssebdownloadlink'] = 'Modify Safe Exam Browser quiz setting: Suppress download link.';
+$string['seb:manage_seb_linkquitseb'] = 'Modify Safe Exam Browser quiz setting: Quit link.';
+$string['seb:manage_seb_userconfirmquit'] = 'Modify Safe Exam Browser quiz setting: Confirm on quit.';
+$string['seb:manage_seb_allowuserquitseb'] = 'Modify Safe Exam Browser quiz setting: Allow quit.';
+$string['seb:manage_seb_quitpassword'] = 'Modify Safe Exam Browser quiz setting: Quit password.';
+$string['seb:manage_seb_allowreloadinexam'] = 'Modify Safe Exam Browser quiz setting: Allow reload.';
+$string['seb:manage_seb_showsebtaskbar'] = 'Modify Safe Exam Browser quiz setting: Show task bar.';
+$string['seb:manage_seb_showreloadbutton'] = 'Modify Safe Exam Browser quiz setting: Show reload button.';
+$string['seb:manage_seb_showtime'] = 'Modify Safe Exam Browser quiz setting: Show time.';
+$string['seb:manage_seb_showkeyboardlayout'] = 'Modify Safe Exam Browser quiz setting: Show keyboard layout.';
+$string['seb:manage_seb_showwificontrol'] = 'Modify Safe Exam Browser quiz setting: Show Wi-Fi control.';
+$string['seb:manage_seb_enableaudiocontrol'] = 'Modify Safe Exam Browser quiz setting: Enable audio control.';
+$string['seb:manage_seb_muteonstartup'] = 'Modify Safe Exam Browser quiz setting: Mute on startup.';
+$string['seb:manage_seb_allowspellchecking'] = 'Modify Safe Exam Browser quiz setting: Enable spell checking.';
+$string['seb:manage_seb_activateurlfiltering'] = 'Modify Safe Exam Browser quiz setting: Activate URL filtering.';
+$string['seb:manage_seb_filterembeddedcontent'] = 'Modify Safe Exam Browser quiz setting: Filter embedded content.';
+$string['seb:manage_seb_expressionsallowed'] = 'Modify Safe Exam Browser quiz setting: Simple expressions allowed.';
+$string['seb:manage_seb_regexallowed'] = 'Modify Safe Exam Browser quiz setting: Regex expressions allowed.';
+$string['seb:manage_seb_expressionsblocked'] = 'Modify Safe Exam Browser quiz setting: Simple expressions blocked.';
+$string['seb:manage_seb_regexblocked'] = 'Modify Safe Exam Browser quiz setting: Regex expressions blocked.';
 
 // Quiz access information.
 $string['invalidkeys'] = "The config key or browser exam keys could not be validated. Please ensure you are using the Safe Exam Browser with correct configuration file.";

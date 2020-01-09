@@ -33,4 +33,23 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW
         )
     ),
- );
+    'quizaccess/seb:managetemplates' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+    ),
+);
+
+// Individual setting capabilities.
+$settings = \quizaccess_seb\settings_provider::get_quiz_element_types();
+foreach ($settings as $name => $type) {
+    // Don't add a capability for the header element.
+    if ($type !== 'header') {
+        $capabilities["quizaccess/seb:manage_$name"] = array(
+            'captype' => 'write',
+            'contextlevel' => CONTEXT_MODULE,
+            'archetypes' => array(
+                'editingteacher' => CAP_ALLOW
+            )
+        );
+    }
+}
