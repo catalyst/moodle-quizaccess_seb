@@ -268,8 +268,11 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      reason if access should be prevented.
      *
      * @throws coding_exception
+     * @throws moodle_exception
      */
     public function prevent_access() {
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+
         // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
         if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
             return false;
@@ -277,7 +280,7 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // If using client configuration, do basic check that user is using Safe Exam Browser in case no other access rules
         // apply.
-        if ($this->quiz->requiresafeexambrowser == settings_provider::USE_SEB_CLIENT_CONFIG
+        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG
                 && !$this->accessmanager->validate_basic_header()) {
             // Return error message with download link.
             $errormessage = get_string('clientrequiresseb', 'quizaccess_seb')
