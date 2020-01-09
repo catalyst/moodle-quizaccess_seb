@@ -30,7 +30,12 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Safe Exam Browser templates and settings';
 
 // Privacy.
-$string['privacy:metadata'] = 'The Safe Exam Browser quiz access rule plugin does not store any personal data.';
+$string['privacy:metadata:quizaccess_seb_quizsettings'] = 'Safe Exam Browser settings for a quiz. This includes the ID of the last user to create or modify the settings.';
+$string['privacy:metadata:quizaccess_seb_quizsettings:usermodified'] = 'ID of user who last created or modified the settings.';
+$string['privacy:metadata:quizaccess_seb_quizsettings:timecreated'] = 'Unix time that the settings were created.';
+$string['privacy:metadata:quizaccess_seb_quizsettings:timemodified'] = 'Unix time that the settings were last modified.';
+$string['privacy:metadata:quizaccess_seb_quizsettings:quizid'] = 'ID of the quiz the settings exist for.';
+$string['quizsettings'] = 'Quiz settings';
 
 // Admin settings.
 $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
