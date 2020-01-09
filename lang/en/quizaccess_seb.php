@@ -54,8 +54,8 @@ $string['seb_expressionsblocked'] = 'Expressions blocked';
 $string['seb_expressionsblocked_help'] = 'A text field which contains the filtering expressions for the blocked URLs. Use of the wildcard char \'\*\' is possible. Examples for expressions: \'example.com\' or \'example.com/stuff/\*\'. \'example.com\' matches \'example.com\', \'www.example.com\' and \'www.mail.example.com\' \'example.com/stuff/\*\' matches all requests to any subdomain of \'example.com\' that have \'stuff\' as the first segment of the path.';
 $string['seb_filterembeddedcontent'] = 'Filter also embedded content';
 $string['seb_filterembeddedcontent_help'] = 'If enabled, also all embedded resources will be filtered using the filter set.';
-$string['seb_linkquitseb'] = 'Link to quit SEB after exam';
-$string['seb_linkquitseb_help'] = 'If enabled, a link to quit SEB will appear after the exam is submitted. When clicking the link, it is possible to quit SEB without having to press the ”Quit” button and to enter a quit password.';
+$string['seb_linkquitseb'] = 'Show Exit Safe Exam Browser button, configured with this quit link';
+$string['seb_linkquitseb_help'] = 'In this field you can enter the link to quit SEB. It will be used on an “Exit Safe Exam Browser” button on the page that appears after the exam is submitted. When clicking the button or the link placed wherever you want to put it, it is possible to quit SEB without having to enter a quit password. If no link is entered, then the “Exit Safe Exam Browser” button does not appear and there is no link set to quit SEB.';
 $string['seb_muteonstartup'] = 'Mute on startup';
 $string['seb_muteonstartup_help'] = 'If enabled, audio is initially muted when starting SEB.';
 $string['seb_quitpassword'] = 'Quit password';
@@ -65,9 +65,15 @@ $string['seb_regexallowed_help'] = 'A text field which contains the filtering ex
 $string['seb_regexblocked'] = 'Regex blocked';
 $string['seb_regexblocked_help'] = 'A text field which contains the filtering expressions for blocked URLs in a regular expression (Regex) format.';
 $string['seb_requiresafeexambrowser'] = 'Require the use of Safe Exam Browser';
-$string['seb_requiresafeexambrowser_help'] = 'If enabled, students can only attempt the quiz using the Safe Exam Browser.';
+$string['seb_requiresafeexambrowser_help'] = "If enabled, students can only attempt the quiz using the Safe Exam Browser.
+The available options are:
+- No – Safe Exam Browser is not required to attempt the quiz
+- Yes, Use existing template – A template for the configuration of Safe Exam Browser can be used. Templates are managed by the Moodle Administrator. Your manual settings overwrite the settings in the template.
+- Yes, Configure manually – No template for the configuration of Safe Exam Browser will be used. You can configure Safe Exam Browser manually.
+- Yes, Upload my own config file – You can upload your own Safe Exam Browser configuration file. All manual settings and the use of templates will be disabled.
+- Yes, Use SEB client config file -  No configurations of Safe Exam Browser are on Moodle side. The quiz can be attempted with any configuration of Safe Exam Browser.";
 $string['seb_sebconfigtemplate'] = 'Safe Exam Browser config template';
-$string['seb_sebconfigtemplate_help'] = 'The settings in the selected config template will be used for the configuration of the Safe Exam Browser while attempting the quiz.';
+$string['seb_sebconfigtemplate_help'] = 'The settings in the selected config template will be used for the configuration of the Safe Exam Browser while attempting the quiz. You may overwrite the settings in the template with your manual settings.';
 $string['seb_showkeyboardlayout'] = 'Show keyboard layout';
 $string['seb_showkeyboardlayout_help'] = 'If enabled, the current keyboard layout is shown in the SEB task bar. It allows you to switch to other keyboard layouts, which have been enabled in the operating system.';
 $string['seb_showreloadbutton'] = 'Show reload button';
@@ -80,7 +86,7 @@ $string['seb_showwificontrol'] = 'Show Wi-Fi control';
 $string['seb_showwificontrol_help'] = 'If enabled, a Wi-Fi control button appears in the SEB task bar. The button allows to reconnect to Wi-Fi networks which have previously been connected to.';
 $string['seb_suppresssebdownloadlink'] = 'Suppress Safe Exam Browser download button';
 $string['seb_suppresssebdownloadlink_help'] = 'If enabled, no button for Safe Exam Browser download will be shown on the quiz start page.';
-$string['seb_sebconfigfile'] = 'Upload Safe Exam Browser config';
+$string['seb_sebconfigfile'] = 'Upload Safe Exam Browser config file';
 $string['seb_sebconfigfile_help'] = 'Please upload your own Safe Exam Browser config file for this quiz.';
 $string['seb_userconfirmquit'] = 'Ask user to confirm quitting';
 $string['seb_userconfirmquit_help'] = 'If enabled, users have to confirm quitting of SEB when a quit link is detected.';
