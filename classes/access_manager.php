@@ -100,7 +100,7 @@ class access_manager {
      * @throws \coding_exception
      */
     public function seb_required() : bool {
-        return $this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CONFIG_MANUALLY;
+        return $this->quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO;
     }
 
     /**
