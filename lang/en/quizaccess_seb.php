@@ -101,12 +101,15 @@ $string['seb_use_manually'] = 'Yes - Configure manually';
 $string['seb_use_template'] = 'Yes - Use an existing template';
 $string['seb_use_upload'] = 'Yes - Upload my own config';
 $string['seb_use_client'] = 'Yes - Use SEB client config';
+$string['disabledsettings'] = 'Disabled settings.';
+$string['disabledsettings_help'] = 'Safe Exam Browser quiz settings are unable to be updated if there is one or more existing quiz attempts. To re-enable settings, all quiz attempts must be deleted.';
 
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
 $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a}';
 $string['allowedbrowserkeysdistinct'] = 'The keys must all be different.';
 $string['allowedbrowserkeyssyntax'] = 'A key should be a 64-character hex string.';
+$string['settingsfrozen'] = 'Due to there being at least one quiz attempt, the Safe Exam Browser settings can no longer be updated.';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';

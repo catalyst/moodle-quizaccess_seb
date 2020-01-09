@@ -84,6 +84,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @throws coding_exception
      */
     public static function add_settings_form_fields(mod_quiz_mod_form $quizform, MoodleQuickForm $mform) {
+        global $DB;
         $defaults = settings_provider::get_quiz_defaults();
         $hideifs = settings_provider::get_quiz_hideifs();
 
@@ -91,7 +92,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         foreach (settings_provider::get_quiz_element_types() as $name => $type) {
 
             // Check if the user has capability to edit setting, otherwise use hidden setting type.
-            if (!has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
+            if ($type != 'header' && !has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
                 $type = 'hidden'; // A disabled element may be more appropriate but does not currently exist.
             }
 
@@ -125,6 +126,13 @@ class quizaccess_seb extends quiz_access_rule_base {
                 }
             }
         }
+
+        // If there have been any quiz attempts, freeze SEB settings, and explain why in section tooltip.
+        $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
+        if (!empty($attempts)) {
+            $mform->hardFreeze(array_keys(settings_provider::get_quiz_element_types()));
+            $mform->addHelpButton('seb', 'disabledsettings', 'quizaccess_seb');
+        }
     }
 
     /**
@@ -140,6 +148,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      */
     public static function validate_settings_form_fields(array $errors,
                                                          array $data, $files, mod_quiz_mod_form $quizform) : array {
+        global $DB;
         $settings = self::filter_plugin_settings((object) $data);
 
         // Validate basic settings using persistent class.
@@ -152,6 +161,12 @@ class quizaccess_seb extends quiz_access_rule_base {
         foreach ($quizsettings->get_errors() as $name => $error) {
             $name = self::add_prefix($name); // Re-add prefix to match form element.
             $errors[$name] = $error->out();
+        }
+
+        // If there have been any quiz attempts, prevent settings being saved.
+        $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
+        if (!empty($attempts)) {
+            $errors['seb'] = get_string('settingsfrozen', 'quizaccess_seb');
         }
 
         return $errors;
