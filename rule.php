@@ -368,7 +368,10 @@ class quizaccess_seb extends quiz_access_rule_base {
         $buttons = '';
 
         $buttons .= html_writer::start_div();
-        $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+        // If suppresssebdownloadlink setting is enabled, do not show download button.
+        if (empty($this->quiz->seb_suppresssebdownloadlink)) {
+            $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+        }
         $buttons .= html_writer::end_div();
 
         return $buttons;
