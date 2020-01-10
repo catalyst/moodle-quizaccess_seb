@@ -106,7 +106,7 @@ class settings_provider {
         // @codingStandardsIgnoreStart
         // TODO: Implement following features and uncomment options.
         //$options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
-        //$options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
+        $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
         $options[self::USE_SEB_CLIENT_CONFIG] = get_string('seb_use_client', 'quizaccess_seb');
         // @codingStandardsIgnoreEnd
 
