@@ -251,6 +251,7 @@ class quizaccess_seb extends quiz_access_rule_base {
                 . 'seb.regexallowed AS seb_regexallowed, '
                 . 'seb.expressionsblocked AS seb_expressionsblocked, '
                 . 'seb.regexblocked AS seb_regexblocked, '
+                . 'seb.allowedbrowserexamkeys AS seb_allowedbrowserexamkeys, '
                 . 'seb.suppresssebdownloadlink AS seb_suppresssebdownloadlink, '
                 . 'sebtemplate.name AS seb_templatename '
                 , 'LEFT JOIN {quizaccess_seb_quizsettings} seb ON seb.quizid = quiz.id '

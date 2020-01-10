@@ -91,6 +91,7 @@ class settings_provider {
             'seb_regexallowed' => 'textarea',
             'seb_expressionsblocked' => 'textarea',
             'seb_regexblocked' => 'textarea',
+            'seb_allowedbrowserexamkeys' => 'textarea',
         ];
     }
 
@@ -154,6 +155,7 @@ class settings_provider {
             'seb_regexallowed' => '',
             'seb_expressionsblocked' => '',
             'seb_regexblocked' => '',
+            'seb_allowedbrowserexamkeys' => '',
         ];
     }
 
@@ -285,8 +287,11 @@ class settings_provider {
                 new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
                 new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
                 new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-
             ],
+            'seb_allowedbrowserexamkeys' => [
+                new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+                new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+            ]
         ];
     }
 }

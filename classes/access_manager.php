@@ -75,9 +75,55 @@ class access_manager {
      * @throws \coding_exception
      */
     public function validate_access_keys(string $pageurl = '') : bool {
+        return $this->validate_browser_exam_keys($pageurl) && $this->validate_config_key($pageurl);
+    }
+
+    /**
+     * Check if the browser exam key hash in header matches one of the listed browser exam keys from quiz settings.
+     *
+     * @param string $pageurl URL of page that is attempting to access restricted quiz.
+     * @return bool True if header key matches one of the saved keys.
+     *
+     * @throws \coding_exception
+     */
+    private function validate_browser_exam_keys(string $pageurl = '') : bool {
+        // If browser exam keys are entered in settings, check they match the header.
+        $browserexamkeys = $this->quizsettings->get('allowedbrowserexamkeys');
+        if (empty($browserexamkeys)) {
+            return true; // If no browser exam keys, no check required.
+        }
+
+        // If the Browser Exam Key header isn't present, prevent access.
+        if (!array_key_exists(self::BROWSER_EXAM_KEY_HEADER, $_SERVER)) {
+            return false;
+        }
+
+        if (empty($pageurl)) {
+            $pageurl = $this->get_this_page_url();
+        }
+
+        return $this->check_browser_exam_keys($browserexamkeys, $pageurl, trim($_SERVER[self::BROWSER_EXAM_KEY_HEADER]));
+    }
+
+    /**
+     * Check if the config key hash in header matches quiz settings.
+     *
+     * @param string $pageurl URL of page that is attempting to access restricted quiz.
+     * @return bool True if header key matches saved key.
+     *
+     * @throws \coding_exception
+     */
+    private function validate_config_key(string $pageurl = '') : bool {
+        // If using client config, or with no requirement, then no check required.
+        $requiredtype = $this->quizsettings->get('requiresafeexambrowser');
+        if ($requiredtype == settings_provider::USE_SEB_NO
+                || $requiredtype == settings_provider::USE_SEB_CLIENT_CONFIG) {
+            return true;
+        }
+
         $configkey = $this->quizsettings->get('configkey');
         if (empty($configkey)) {
-            return false;
+            return false; // No config key has been saved.
         }
 
         // If the Config Key header isn't present, prevent access.
@@ -88,8 +134,8 @@ class access_manager {
         if (empty($pageurl)) {
             $pageurl = $this->get_this_page_url();
         }
-        return $this->check_key($configkey, $pageurl,
-                trim($_SERVER[self::CONFIG_KEY_HEADER]));
+
+        return $this->check_key($configkey, $pageurl, trim($_SERVER[self::CONFIG_KEY_HEADER]));
     }
 
     /**
@@ -119,19 +165,23 @@ class access_manager {
      * what we need for verifying the X-SafeExamBrowser-RequestHash header.
      */
     private function get_this_page_url() : string {
-        global $FULLME;
+        global $CFG, $FULLME;
+        // If $FULLME not set fall back to wwwroot.
+        if ($FULLME == null) {
+            return $CFG->wwwroot;
+        }
         return $FULLME;
     }
 
     /**
-     * Check the hash from the request header against the permitted keys.
+     * Check the hash from the request header against the permitted browser exam keys.
      *
-     * @param array $keys allowed keys.
-     * @param string $url the request URL.
-     * @param string $header the value of the X-SafeExamBrowser-RequestHash to check.
-     * @return bool true if the hash matches.
+     * @param array $keys Allowed browser exam keys.
+     * @param string $url The request URL.
+     * @param string $header The value of the X-SafeExamBrowser-RequestHash to check.
+     * @return bool True if the hash matches.
      */
-    private function check_keys(array $keys, string $url, string $header) : bool {
+    private function check_browser_exam_keys(array $keys, string $url, string $header) : bool {
         foreach ($keys as $key) {
             if ($this->check_key($key, $url, $header)) {
                 return true;
@@ -145,7 +195,7 @@ class access_manager {
      *
      * @param string $key an allowed key.
      * @param string $url the request URL.
-     * @param string $header the value of the X-SafeExamBrowser-RequestHash to check.
+     * @param string $header the value of the X-SafeExamBrowser-RequestHash or X-SafeExamBrowser-ConfigKeyHash to check.
      * @return bool true if the hash matches.
      */
     private function check_key($key, $url, $header) : bool {

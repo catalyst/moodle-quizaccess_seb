@@ -29,6 +29,7 @@
         <FIELD NAME="regexallowed" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of allowed URLs"/>
         <FIELD NAME="expressionsblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma or newline separated list of blocked expressions"/>
         <FIELD NAME="regexblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of blocked URLs"/>
+        <FIELD NAME="allowedbrowserexamkeys" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="List of allowed browser exam keys."/>
         <FIELD NAME="suppresssebdownloadlink" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether SEB download link should appear"/>
         <FIELD NAME="configkey" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="SEB Config Key hash to validate browser."/>
         <FIELD NAME="config" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Unencrypted SEB Config string."/>

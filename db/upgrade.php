@@ -73,5 +73,20 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2019122100, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020010700) {
+
+        // Define field allowedbrowserexamkeys to be added to quizaccess_seb_quizsettings.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $field = new xmldb_field('allowedbrowserexamkeys', XMLDB_TYPE_TEXT, null, null, null, null, null, 'regexblocked');
+
+        // Conditionally launch add field allowedbrowserexamkeys.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020010700, 'quizaccess', 'seb');
+    }
+
     return true;
 }

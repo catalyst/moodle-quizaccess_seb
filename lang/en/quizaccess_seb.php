@@ -45,6 +45,8 @@ $string['seb'] = 'Safe Exam Browser';
 $string['seb_help'] = 'Setup quiz to use the Safe Exam Browser.';
 $string['seb_activateurlfiltering'] = 'Enable URL filtering';
 $string['seb_activateurlfiltering_help'] = 'If enabled, URLs will be filtered when loading web pages. The filter set has to be defined below.';
+$string['seb_allowedbrowserexamkeys'] = 'Allowed Browser Exam Keys';
+$string['seb_allowedbrowserexamkeys_help'] = 'In this field you can enter the allowed Browser Exam Keys for versions of Safe Exam Browser that are permitted to access this quiz. If no keys are entered, then Moodle does not check Browser Exam Keys.';
 $string['seb_allowreloadinexam'] = 'Enable reload in exam';
 $string['seb_allowreloadinexam_help'] = 'If enabled, page reload is allowed (reload button in SEB task bar, browser tool bar, iOS side slider menu, keyboard shortcut F5/cmd+R). Offline caching might break when the user tries to reload a page without internet connection.';
 $string['seb_allowspellchecking'] = 'Enable spell checking';
@@ -103,6 +105,8 @@ $string['seb_use_client'] = 'Yes - Use SEB client config';
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
 $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a}';
+$string['allowedbrowserkeysdistinct'] = 'The keys must all be different.';
+$string['allowedbrowserkeyssyntax'] = 'A key should be a 64-character hex string.';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
