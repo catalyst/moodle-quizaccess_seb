@@ -195,7 +195,7 @@ class access_manager {
      *
      * @param string $key an allowed key.
      * @param string $url the request URL.
-     * @param string $header the value of the X-SafeExamBrowser-RequestHash or X_SafeExamBrowser_ConfigKeyHash to check.
+     * @param string $header the value of the X-SafeExamBrowser-RequestHash or X-SafeExamBrowser-ConfigKeyHash to check.
      * @return bool true if the hash matches.
      */
     private function check_key($key, $url, $header) : bool {
