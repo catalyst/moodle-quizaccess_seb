@@ -91,7 +91,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         foreach (settings_provider::get_quiz_element_types() as $name => $type) {
 
             // Check if the user has capability to edit setting, otherwise use hidden setting type.
-            if (!has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
+            if ($type != 'header' && !has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
                 $type = 'hidden'; // A disabled element may be more appropriate but does not currently exist.
             }
 
