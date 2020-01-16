@@ -30,8 +30,10 @@ use CFPropertyList\CFBoolean;
 use CFPropertyList\CFDictionary;
 use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
+use context_user;
 use core\persistent;
 use lang_string;
+use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -275,17 +277,46 @@ class quiz_settings extends persistent {
      * @throws \coding_exception
      */
     private function compute_config() {
-        // Process all settings that are boolean.
-        $this->process_bool_settings();
+        switch ($this->get('requiresafeexambrowser')) {
+            case settings_provider::USE_SEB_NO:
+                break;
+            case settings_provider::USE_SEB_UPLOAD_CONFIG:
+                $this->process_seb_config_file();
+                break;
+            default:
+                // Process all settings that are boolean.
+                $this->process_bool_settings();
 
-        // Process quit settings.
-        $this->process_quit_settings();
+                // Process quit settings.
+                $this->process_quit_settings();
 
-        // Add all the URL filters.
-        $this->process_url_filters();
+                // Add all the URL filters.
+                $this->process_url_filters();
+        }
 
         // Export and save the config, ready for DB.
         $this->set('config', $this->plist->to_xml());
+    }
+
+    /**
+     * If file is uploaded, save the file to the config field
+     *
+     * @throws \CFPropertyList\IOException
+     * @throws \CFPropertyList\PListException
+     * @throws \DOMException
+     * @throws \coding_exception
+     */
+    private function process_seb_config_file() {
+        // If file has been uploaded, overwrite existing config.
+        if ($this->get('sebconfigfile') && $file = $this->get_current_user_draft_file($this->get('sebconfigfile'))) {
+            $this->plist = new property_list($file->get_content());
+        }
+        // Update the quit password if set in Moodle.
+        if (!empty($this->get('quitpassword'))) {
+            // Hash quit password.
+            $hashedpassword = hash('SHA256', $this->get('quitpassword'));
+            $this->plist->add_element_to_root('hashedQuitPassword', new CFString($hashedpassword));
+        }
     }
 
     /**
@@ -398,5 +429,30 @@ class quiz_settings extends persistent {
             $keys[$i] = strtolower($key);
         }
         return $keys;
+    }
+
+    /**
+     * Try and get a file in the user draft filearea by itemid.
+     *
+     * @param string $itemid Item ID of the file.
+     * @return null|stored_file Returns null if no file is found.
+     *
+     * @throws \coding_exception
+     */
+    private function get_current_user_draft_file(string $itemid) {
+        global $USER;
+        $context = context_user::instance($USER->id);
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'user', 'draft', $itemid);
+        foreach ($files as $file) {
+            // Get first non empty file. Should only be one.
+            if ($file->get_filesize() > 0) {
+                $configfile = $file;
+            }
+        }
+        if (!empty($configfile)) {
+            return $configfile;
+        }
+        return null;
     }
 }
