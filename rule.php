@@ -35,11 +35,6 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
 class quizaccess_seb extends quiz_access_rule_base {
 
-    /**
-     * Default URL to download SEB browser.
-     */
-    const DEFAULT_SEB_DOWNLOAD_URL = 'https://safeexambrowser.org/download_en.html';
-
     /** @var access_manager $accessmanager Instance to manage the access to the quiz for this plugin. */
     private $accessmanager;
 
@@ -336,6 +331,13 @@ class quizaccess_seb extends quiz_access_rule_base {
             return $errormessage;
         }
 
+        // If global setting to require a quiz password is set, check that it is set at global level or quiz level.
+        if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired'))
+                && empty(get_config('quiz', 'password'))
+                && empty($this->quiz->password)) {
+            return get_string('passwordnotset', 'quizaccess_seb');
+        }
+
         // Check if the quiz can be validated with the quiz Config Key or Browser Exam Keys.
         if ($this->accessmanager->validate_access_keys()) {
             return false;
@@ -435,8 +437,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return string
      */
     private function get_seb_download_url() {
-        // TODO: Issue #9 - Admin setting or download SEB url.
-        return self::DEFAULT_SEB_DOWNLOAD_URL;
+        return get_config('quizaccess_seb', 'downloadlink');
     }
 
     /**
