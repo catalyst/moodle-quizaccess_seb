@@ -390,19 +390,27 @@ class quizaccess_seb extends quiz_access_rule_base {
      */
     private function get_action_buttons() {
         global $OUTPUT;
-        $buttons = '';
 
-        // Get data for buttons.
-        $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
-        $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, is_https());
+        $buttons = html_writer::start_div();
 
-        $buttons .= html_writer::start_div();
         // If suppresssebdownloadlink setting is enabled, do not show download button.
         if (empty($this->quiz->seb_suppresssebdownloadlink)) {
             $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
         }
-        $buttons .= $OUTPUT->single_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
-        $buttons .= $OUTPUT->single_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+
+        // Get config for displaying links.
+        $linkconfig = explode(',', get_config('quizaccess_seb', 'showseblinks'));
+
+        if (in_array('seb', $linkconfig)) {
+            $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
+            $buttons .= $OUTPUT->single_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
+        }
+
+        if (in_array('http', $linkconfig)) {
+            $httplink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, false, is_https());
+            $buttons .= $OUTPUT->single_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+        }
+
         $buttons .= html_writer::end_div();
 
         return $buttons;
