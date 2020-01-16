@@ -24,6 +24,7 @@
  */
 
 use quizaccess_seb\quiz_settings;
+use quizaccess_seb\settings_provider;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -175,6 +176,83 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertContains($expectederrorstring, $errors);
     }
 
+    public function test_config_file_uploaded_converted_to_config() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+                . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+                . "<key>allowWlan</key><false/></dict></plist>\n";
+        $itemid = $this->create_test_file($xml);
+        $quizsettings = new quiz_settings(0, (object) [
+            'quizid' => 1,
+            'requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
+        ]);
+        $quizsettings->set('sebconfigfile', $itemid);
+        $quizsettings->save();
+        $config = $quizsettings->get('config');
+        $this->assertEquals($xml, $config);
+    }
+
+    public function test_no_config_file_uploaded_doesnt_overwrite_config() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $quizsettings = new quiz_settings(0, (object) [
+            'quizid' => 1,
+            'requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
+        ]);
+        $quizsettings->set('showsebtaskbar', 0);
+        $quizsettings->save();
+        $originalconfig = $quizsettings->get('config');
+        $quizsettings->set('sebconfigfile', 999);
+        $quizsettings->save();
+        $newconfig = $quizsettings->get('config');
+        $this->assertEquals($originalconfig, $newconfig);
+    }
+
+    public function test_password_set_with_upload_overwrites_file_setting() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+            . "<key>allowWlan</key><false/></dict></plist>\n";
+        $itemid = $this->create_test_file($xml);
+        $quizsettings = new quiz_settings(0, (object) [
+            'quizid' => 1,
+            'requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
+        ]);
+        $quizsettings->set('sebconfigfile', $itemid);
+        $newpassword = 'newpassword';
+        $quizsettings->set('quitpassword', $newpassword);
+        $quizsettings->save();
+        $config = $quizsettings->get('config');
+        $this->assertNotEquals($xml, $config);
+        $plist = new \quizaccess_seb\property_list($config);
+        $this->assertEquals(hash('sha256', $newpassword), $plist->get_element_value('hashedQuitPassword'));
+    }
+
+    public function test_no_password_set_with_upload_doesnt_overwrite_file_setting() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+            . "<key>allowWlan</key><false/></dict></plist>\n";
+        $itemid = $this->create_test_file($xml);
+        $quizsettings = new quiz_settings(0, (object) [
+            'quizid' => 1,
+            'requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
+        ]);
+        $quizsettings->set('sebconfigfile', $itemid);
+        $quizsettings->set('quitpassword', '');
+        $quizsettings->save();
+        $config = $quizsettings->get('config');
+        $this->assertEquals($xml, $config);
+        $plist = new \quizaccess_seb\property_list($config);
+        $this->assertEquals('hashedpassword', $plist->get_element_value('hashedQuitPassword'));
+    }
+
     /**
      * Bad browser exam key data provider.
      *
@@ -200,6 +278,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         return [
             'enabled simple expessions' => [
                 (object) [
+                    'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
                     'expressionsallowed' => "test.com\nsecond.hello",
                     'regexallowed' => '',
@@ -219,6 +298,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             ],
             'blocked simple expessions' => [
                 (object) [
+                    'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => '',
@@ -238,6 +318,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             ],
             'enabled regex expessions' => [
                 (object) [
+                    'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => "test.com\nsecond.hello",
@@ -257,6 +338,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             ],
             'blocked regex expessions' => [
                 (object) [
+                    'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => '',
@@ -276,6 +358,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             ],
             'multiple simple expessions' => [
                 (object) [
+                    'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
                     'expressionsallowed' => "*",
                     'regexallowed' => '',
@@ -328,5 +411,30 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             'regexblocked' => '',
             'suppresssebdownloadlink' => '1',
         ];
+    }
+
+    /**
+     * Create a file in the current user's draft file area.
+     *
+     * @param string $xml
+     * @return int Item ID of file.
+     *
+     * @throws file_exception
+     * @throws stored_file_creation_exception
+     */
+    private function create_test_file(string $xml) : int {
+        global $USER;
+        $itemid = 999;
+        $fs = get_file_storage();
+        $filerecord = [
+            'contextid' => \context_user::instance($USER->id)->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => 'test.xml'
+        ];
+        $fs->create_file_from_string($filerecord, $xml);
+        return $itemid;
     }
 }
