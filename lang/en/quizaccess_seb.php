@@ -74,11 +74,12 @@ $string['seb_regexblocked_help'] = 'A text field which contains the filtering ex
 $string['seb_requiresafeexambrowser'] = 'Require the use of Safe Exam Browser';
 $string['seb_requiresafeexambrowser_help'] = "If enabled, students can only attempt the quiz using the Safe Exam Browser.
 The available options are:
-- No – Safe Exam Browser is not required to attempt the quiz
-- Yes, Use existing template – A template for the configuration of Safe Exam Browser can be used. Templates are managed by the Moodle Administrator. Your manual settings overwrite the settings in the template.
-- Yes, Configure manually – No template for the configuration of Safe Exam Browser will be used. You can configure Safe Exam Browser manually.
-- Yes, Upload my own config file – You can upload your own Safe Exam Browser configuration file. All manual settings and the use of templates will be disabled.
-- Yes, Use SEB client config file -  No configurations of Safe Exam Browser are on Moodle side. The quiz can be attempted with any configuration of Safe Exam Browser.";
+
+* No – Safe Exam Browser is not required to attempt the quiz.
+* Yes - Use an existing template – A template for the configuration of Safe Exam Browser can be used. Templates are managed by the Moodle Administrator. Your manual settings overwrite the settings in the template.
+* Yes - Configure manually – No template for the configuration of Safe Exam Browser will be used. You can configure Safe Exam Browser manually.
+* Yes - Upload my own config – You can upload your own Safe Exam Browser configuration file. All manual settings and the use of templates will be disabled.
+* Yes - Use SEB client config – No configurations of Safe Exam Browser are on Moodle side. The quiz can be attempted with any configuration of Safe Exam Browser.";
 $string['seb_sebconfigtemplate'] = 'Safe Exam Browser config template';
 $string['seb_sebconfigtemplate_help'] = 'The settings in the selected config template will be used for the configuration of the Safe Exam Browser while attempting the quiz. You may overwrite the settings in the template with your manual settings.';
 $string['seb_showkeyboardlayout'] = 'Show keyboard layout';
