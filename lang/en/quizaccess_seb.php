@@ -143,3 +143,6 @@ $string['sebrequired'] = "This quiz has been configured so that students may onl
 $string['sebdownloadbutton'] = 'Download Safe Exam Browser';
 $string['seblinkbutton'] = 'Launch Safe Exam Browser';
 $string['httplinkbutton'] = 'Download Configuration';
+
+// Events.
+$string['event:accessprevented'] = "Quiz access was prevented.";
