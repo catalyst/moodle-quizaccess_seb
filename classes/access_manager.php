@@ -150,6 +150,21 @@ class access_manager {
     }
 
     /**
+     * This is the basic check for the Safe Exam Browser previously used in the quizaccess_safebrowser plugin that
+     * managed basic Moodle interactions with SEB.
+     *
+     * @return bool
+     *
+     * @throws \coding_exception
+     */
+    public function validate_basic_header() : bool {
+        if ($this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
+            return strpos($_SERVER['HTTP_USER_AGENT'], 'SEB') !== false;
+        }
+        return true;
+    }
+
+    /**
      * Check if user has any capability to bypass the Safe Exam Browser requirement.
      *
      * @return bool True if user can bypass check.

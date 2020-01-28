@@ -108,6 +108,7 @@ $string['missingrequiredsettings'] = 'Config settings not provided all required 
 $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a}';
 $string['allowedbrowserkeysdistinct'] = 'The keys must all be different.';
 $string['allowedbrowserkeyssyntax'] = 'A key should be a 64-character hex string.';
+$string['clientrequiresseb'] = 'This quiz has been configured to use the Safe Exam Browser with client configuration.';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';

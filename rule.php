@@ -268,27 +268,39 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      reason if access should be prevented.
      *
      * @throws coding_exception
+     * @throws moodle_exception
      */
     public function prevent_access() {
-        $errormessage = '';
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
 
         // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
         if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
             return false;
         }
 
+        // If using client configuration with no browser exam keys, do basic check that user is using Safe Exam Browser.
+        // It is more secure to use Browser Exam Keys than to rely on this check.
+        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG
+                && empty($quizsettings->get('allowedbrowserexamkeys'))
+                && !$this->accessmanager->validate_basic_header()) {
+            // Return error message with download link.
+            $errormessage = get_string('clientrequiresseb', 'quizaccess_seb')
+                    . $this->get_download_button_only();
+            // TODO: Issue #8 - Trigger event if access is prevented.
+            return $errormessage;
+        }
+
         // Check if the quiz can be validated with the quiz Config Key or Browser Exam Keys.
         if ($this->accessmanager->validate_access_keys()) {
             return false;
         } else {
-            // Add error message.
-            $errormessage .= get_string('invalidkeys', 'quizaccess_seb');
+            // Return error message with download link and links to get the seb config.
+            $errormessage = get_string('invalidkeys', 'quizaccess_seb')
+                    . $this->get_action_buttons();
+            // Display action buttons to assist user in gaining access to quiz.
             // TODO: Issue #8 - Trigger event if access is prevented.
+            return $errormessage;
         }
-
-        // Display action buttons to assist user in gaining access to quiz.
-        $errormessage .= $this->get_action_buttons();
-        return $errormessage;
     }
 
     /**
@@ -339,6 +351,27 @@ class quizaccess_seb extends quiz_access_rule_base {
         $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
         $buttons .= $OUTPUT->single_button($seblink, get_string('seblinkbutton', 'quizaccess_seb'));
         $buttons .= $OUTPUT->single_button($httplink, get_string('httplinkbutton', 'quizaccess_seb'));
+        $buttons .= html_writer::end_div();
+
+        return $buttons;
+    }
+
+    /**
+     * Get button that links to Safe Exam Browser download.
+     *
+     * @return string HTML for button.
+     *
+     * @throws coding_exception
+     */
+    private function get_download_button_only() {
+        global $OUTPUT;
+        $buttons = '';
+
+        $buttons .= html_writer::start_div();
+        // If suppresssebdownloadlink setting is enabled, do not show download button.
+        if (empty($this->quiz->seb_suppresssebdownloadlink)) {
+            $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+        }
         $buttons .= html_writer::end_div();
 
         return $buttons;

@@ -90,12 +90,12 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
      * Test SEB usage options.
      */
     public function test_get_requiresafeexambrowser_options() {
-        $this->assertCount(2, settings_provider::get_requiresafeexambrowser_options());
+        $this->assertCount(3, settings_provider::get_requiresafeexambrowser_options());
         $this->assertTrue(array_key_exists(0, settings_provider::get_requiresafeexambrowser_options()));
         $this->assertTrue(array_key_exists(1, settings_provider::get_requiresafeexambrowser_options()));
         $this->assertFalse(array_key_exists(2, settings_provider::get_requiresafeexambrowser_options()));
         $this->assertFalse(array_key_exists(3, settings_provider::get_requiresafeexambrowser_options()));
-        $this->assertFalse(array_key_exists(4, settings_provider::get_requiresafeexambrowser_options()));
+        $this->assertTrue(array_key_exists(4, settings_provider::get_requiresafeexambrowser_options()));
     }
 
     /**
