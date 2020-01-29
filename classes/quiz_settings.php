@@ -299,7 +299,7 @@ class quiz_settings extends persistent {
         $map = $this->get_bool_seb_setting_map();
         foreach ($settings as $setting => $value) {
             if (isset($map[$setting])) {
-                $enabled = $value === 1 ? true : false;
+                $enabled = $value == 1 ? true : false;
                 $this->plist->add_element_to_root($map[$setting], new CFBoolean($enabled));
             }
         }

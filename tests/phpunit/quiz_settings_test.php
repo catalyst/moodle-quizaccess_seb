@@ -49,10 +49,10 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $config = $quizsettings->get('config');
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\"><dict><key>showTaskBar</key><false/><key>allowWlan</key><false/><key>showReloadButton</key><false/>"
-                . "<key>showTime</key><false/><key>showInputLanguage</key><false/><key>allowQuit</key><false/>"
-                . "<key>quitURLConfirm</key><false/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
-                . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><false/><key>URLFilterEnable</key><false/>"
+<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
+                . "<key>showTime</key><false/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
+                . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><true/><key>audioMute</key><false/>"
+                . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><true/>"
                 . "<key>URLFilterEnableContentFilter</key><false/><key>hashedQuitPassword</key>"
                 . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
                 . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
@@ -69,10 +69,10 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $config = $quizsettings->get('config');
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\"><dict><key>showTaskBar</key><false/><key>allowWlan</key><false/><key>showReloadButton</key><false/>"
-            . "<key>showTime</key><false/><key>showInputLanguage</key><false/><key>allowQuit</key><false/>"
-            . "<key>quitURLConfirm</key><false/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
-            . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><false/><key>URLFilterEnable</key><false/>"
+<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
+            . "<key>showTime</key><false/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
+            . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><true/><key>audioMute</key><false/>"
+            . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><true/>"
             . "<key>URLFilterEnableContentFilter</key><false/><key>hashedQuitPassword</key>"
             . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
             . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
@@ -83,10 +83,10 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $config = $quizsettings->get('config');
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\"><dict><key>showTaskBar</key><false/><key>allowWlan</key><false/><key>showReloadButton</key><false/>"
-            . "<key>showTime</key><false/><key>showInputLanguage</key><false/><key>allowQuit</key><false/>"
-            . "<key>quitURLConfirm</key><false/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
-            . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><false/><key>URLFilterEnable</key><false/>"
+<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
+            . "<key>showTime</key><false/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
+            . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><true/><key>audioMute</key><false/>"
+            . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><true/>"
             . "<key>URLFilterEnableContentFilter</key><true/><key>hashedQuitPassword</key>"
             . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
             . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
@@ -104,7 +104,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("f90eb44935b05da0fc4b1bc7399e7f07f97d29df8c7ae2c22a8c98070b33fe88",
+        $this->assertEquals("e186cd8999af80662899a61b869c21c9dc4374d3a0c1e3f1f7c14ee306fbf829",
                 $configkey);
     }
 
@@ -118,12 +118,12 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("f90eb44935b05da0fc4b1bc7399e7f07f97d29df8c7ae2c22a8c98070b33fe88",
+        $this->assertEquals("e186cd8999af80662899a61b869c21c9dc4374d3a0c1e3f1f7c14ee306fbf829",
                 $configkey);
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("e250596b30d2a40d1dc833de8df913c5f121c175674fb942df823cba770c57fa",
+        $this->assertEquals("4b667ccbf38346fc044dbab52e527256e0c217da15c439000a71d7c5fe335efd",
             $configkey);
     }
 
