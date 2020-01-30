@@ -288,7 +288,7 @@ class quiz_settings extends persistent {
         // Recalculate config and config key.
         $this->compute_config();
         $this->compute_config_key();
-        $this->save_filemanager_draftarea();
+        $this->save_filemanager_sebconfigfile_draftarea();
     }
 
     /**
@@ -464,7 +464,13 @@ class quiz_settings extends persistent {
         return null;
     }
 
-    private function save_filemanager_draftarea() : bool {
+    /**
+     * Saves filemanager_sebconfigfile files to the moodle storage backend.
+     *
+     * @return bool
+     * @throws \coding_exception
+     */
+    private function save_filemanager_sebconfigfile_draftarea() : bool {
         $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
 
         if ($draftitemid) {
