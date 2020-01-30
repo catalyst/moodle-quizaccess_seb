@@ -188,6 +188,12 @@ class quizaccess_seb extends quiz_access_rule_base {
             $errors['seb'] = get_string('settingsfrozen', 'quizaccess_seb');
         }
 
+        // Edge case for filemanager_sebconfig.
+        if (!empty($errors['seb_sebconfigfile'])) {
+            $errors['filemanager_sebconfigfile'] = $errors['seb_sebconfigfile'];
+            unset($errors['seb_sebconfigfile']);
+        }
+
         return $errors;
     }
 

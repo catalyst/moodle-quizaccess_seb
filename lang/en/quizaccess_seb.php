@@ -110,6 +110,7 @@ $string['missingrequiredsettings'] = 'Config settings not provided all required 
 $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a}';
 $string['allowedbrowserkeysdistinct'] = 'The keys must all be different.';
 $string['allowedbrowserkeyssyntax'] = 'A key should be a 64-character hex string.';
+$string['filenotpresent'] = 'Please upload a SEB config file.';
 $string['fileparsefailed'] = 'The uploaded file could not be saved as a SEB config file.';
 $string['clientrequiresseb'] = 'This quiz has been configured to use the Safe Exam Browser with client configuration.';
 $string['settingsfrozen'] = 'Due to there being at least one quiz attempt, the Safe Exam Browser settings can no longer be updated.';

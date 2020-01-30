@@ -230,14 +230,22 @@ class quiz_settings extends persistent {
             return true;
         }
         // If there is a config file uploaded, make sure it is a PList XML file.
-        if ($this->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG
-                && $file = $this->get_current_user_draft_file($itemid)) {
+        $file = $this->get_current_user_draft_file($itemid);
+        $requiresetting = $this->get('requiresafeexambrowser');
+
+        // If we require an SEB config uploaded, and the file exists, parse it.
+        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG && $file) {
             $plist = new CFPropertyList();
             try {
                 $plist->parse($file->get_content());
             } catch (Exception $e) {
                 return new lang_string('fileparsefailed', 'quizaccess_seb');
             }
+        }
+
+        // If we require an SEB config uploaded, and the file does not exist, error.
+        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG && !$file) {
+            return new lang_string('filenotpresent', 'quizaccess_seb');
         }
 
         return true;
