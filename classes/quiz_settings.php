@@ -447,7 +447,7 @@ class quiz_settings extends persistent {
      *
      * @throws \coding_exception
      */
-    private function get_current_user_draft_file(string $itemid) : ?stored_file {
+    private function get_current_user_draft_file(string $itemid) : ?stored_file { // @codingStandardsIgnoreLine
         global $USER;
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
