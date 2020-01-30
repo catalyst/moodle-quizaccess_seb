@@ -58,11 +58,6 @@ class settings_provider {
      */
     const USE_SEB_CLIENT_CONFIG = 4;
 
-     /**
-      * The filearea itemid which is used for saving the module template.
-     */
-    const SEB_CONFIG_FILE_ITEMID = 111;
-
     /**
      * Get the type of element for each of the form elements in quiz settings.
      *
