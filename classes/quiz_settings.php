@@ -492,6 +492,11 @@ class quiz_settings extends persistent {
         $fs = new \file_storage();
 
         $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
+
+        if (!$cm) {
+            return false;
+        }
+
         $context = context_module::instance($cm->id);
 
         if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cm->id,
