@@ -288,7 +288,12 @@ class quiz_settings extends persistent {
         // Recalculate config and config key.
         $this->compute_config();
         $this->compute_config_key();
-        $this->save_filemanager_sebconfigfile_draftarea();
+
+        if ($this->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
+            $this->save_filemanager_sebconfigfile_draftarea();
+        } else {
+            $this->cleanup_draftareas_and_saved_config();
+        }
     }
 
     /**
@@ -474,5 +479,26 @@ class quiz_settings extends persistent {
         }
 
         return true;
+    }
+
+    /**
+     * Cleanup function to delete the saved config when it has not been specified.
+     * This will be called when settings_provider::USE_SEB_UPLOAD_CONFIG is not true.
+     *
+     * @return bool Always true or exception if error occurred
+     * @throws \coding_exception
+     */
+    private function cleanup_draftareas_and_saved_config() : bool {
+        $fs = new \file_storage();
+
+        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
+        $context = context_module::instance($cm->id);
+
+        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cm->id,
+            'id DESC', false)) {
+            return false;
+        }
+
+        return reset($files)->delete();
     }
 }
