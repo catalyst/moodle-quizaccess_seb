@@ -451,17 +451,10 @@ class quiz_settings extends persistent {
         global $USER;
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, 'user', 'draft', $itemid);
-        foreach ($files as $file) {
-            // Get first non empty file. Should only be one.
-            if ($file->get_filesize() > 0) {
-                $configfile = $file;
-            }
+        if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $itemid, 'id DESC', false)) {
+            return null;
         }
-        if (!empty($configfile)) {
-            return $configfile;
-        }
-        return null;
+        return reset($files);
     }
 
     /**
