@@ -146,7 +146,7 @@ class settings_provider {
         return [
             'seb_requiresafeexambrowser' => self::USE_SEB_NO,
             'seb_sebconfigtemplate' => 0,
-            'seb_sebconfigfile' => null,
+            'filemanager_sebconfigfile' => null,
             'seb_suppresssebdownloadlink' => 0,
             'seb_linkquitseb' => '',
             'seb_userconfirmquit' => 1,

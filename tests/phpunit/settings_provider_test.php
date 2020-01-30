@@ -48,6 +48,7 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         // Unset expected fields.
         unset($diffelements['seb']);
         unset($diffelements['sebconfigtemplate']);
+        unset($diffelements['filemanager_sebconfigfile']);
 
         $this->assertEmpty($diffelements);
     }
