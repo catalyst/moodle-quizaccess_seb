@@ -34,6 +34,7 @@ use CFPropertyList\CFString;
 use CFPropertyList\IOException;
 use CFPropertyList\PListException;
 use context_user;
+use context_module;
 use core\persistent;
 use Exception;
 use lang_string;
@@ -224,6 +225,10 @@ class quiz_settings extends persistent {
      * @throws IOException
      */
     protected function validate_sebconfigfile($itemid) {
+        // When saving the settings, this value will be null.
+        if (is_null($itemid)) {
+            return true;
+        }
         // If there is a config file uploaded, make sure it is a PList XML file.
         if ($this->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG
                 && $file = $this->get_current_user_draft_file($itemid)) {
@@ -234,6 +239,7 @@ class quiz_settings extends persistent {
                 return new lang_string('fileparsefailed', 'quizaccess_seb');
             }
         }
+
         return true;
     }
 
@@ -282,6 +288,7 @@ class quiz_settings extends persistent {
         // Recalculate config and config key.
         $this->compute_config();
         $this->compute_config_key();
+        $this->save_filemanager_draftarea();
     }
 
     /**
@@ -436,11 +443,11 @@ class quiz_settings extends persistent {
      * Try and get a file in the user draft filearea by itemid.
      *
      * @param string $itemid Item ID of the file.
-     * @return stored_file Returns null if no file is found.
+     * @return stored_file|null Returns null if no file is found.
      *
      * @throws \coding_exception
      */
-    private function get_current_user_draft_file(string $itemid) : stored_file {
+    private function get_current_user_draft_file(string $itemid) : ?stored_file {
         global $USER;
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
@@ -455,5 +462,22 @@ class quiz_settings extends persistent {
             return $configfile;
         }
         return null;
+    }
+
+    private function save_filemanager_draftarea() : bool {
+        global $CFG;
+
+        // During plugin installation file_save_draft_area_files causes an exception that user id=0 is not found.
+        if (!empty($CFG->upgraderunning)) {
+            return false;
+        }
+
+        $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
+
+        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
+        $context = context_module::instance($cm->id);
+        file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', 0, []);
+
+        return true;
     }
 }
