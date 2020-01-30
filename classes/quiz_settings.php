@@ -477,7 +477,8 @@ class quiz_settings extends persistent {
         if ($draftitemid) {
             $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
             $context = context_module::instance($cm->id);
-            file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', 0, []);
+            file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile',
+                settings_provider::SEB_CONFIG_FILE_ITEMID, []);
         }
 
         return true;

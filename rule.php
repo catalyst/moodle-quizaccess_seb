@@ -124,7 +124,7 @@ class quizaccess_seb extends quiz_access_rule_base {
                     $quizform->get_context()->id,
                     'quizaccess_seb',
                     $name,
-                    0
+                    settings_provider::SEB_CONFIG_FILE_ITEMID
                 );
                 $mform->setDefault($name, $draftitemid);
                 $mform->addHelpButton($name, $name, 'quizaccess_seb');
