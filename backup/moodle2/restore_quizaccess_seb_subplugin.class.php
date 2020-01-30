@@ -66,6 +66,10 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         // TODO: Map template ID to new template reference once implemented.
         $quizsettings = new quiz_settings(0, $data);
         $quizsettings->save();
+
+        $this->add_related_files('quizaccess_seb',
+            'filemanager_sebconfigfile',
+            null);
     }
 }
 
