@@ -70,7 +70,7 @@ class settings_provider {
             'seb' => 'header',
             'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options()],
             'seb_sebconfigtemplate' => ['select', self::get_template_options()],
-            'seb_sebconfigfile' => 'filepicker',
+            'filemanager_sebconfigfile' => ['filemanager', self::get_filemanager_options()],
             'seb_suppresssebdownloadlink' => 'selectyesno',
             'seb_linkquitseb' => 'text',
             'seb_userconfirmquit' => 'selectyesno',
@@ -123,6 +123,18 @@ class settings_provider {
     }
 
     /**
+     * Returns a list of options for the file manager element.
+     * @return array
+     */
+    public static function get_filemanager_options() : array {
+        return [
+            'subdirs' => 0,
+            'maxfiles' => 1,
+            'accepted_types' => ['.seb']
+        ];
+    }
+
+    /**
      * Get the default values of the quiz settings.
      *
      * Array key is name of 'form element'/'database column (excluding prefix)'.
@@ -172,8 +184,8 @@ class settings_provider {
             'seb_sebconfigtemplate' => [
                 new hideif_rule('seb_sebconfigtemplate', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_TEMPLATE),
             ],
-            'seb_sebconfigfile' => [
-                new hideif_rule('seb_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),
+            'filemanager_sebconfigfile' => [
+                new hideif_rule('filemanager_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),
             ],
             'seb_showsebtaskbar' => [
                 new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
