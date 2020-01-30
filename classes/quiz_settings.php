@@ -465,13 +465,6 @@ class quiz_settings extends persistent {
     }
 
     private function save_filemanager_draftarea() : bool {
-        global $CFG;
-
-        // During plugin installation file_save_draft_area_files causes an exception that user id=0 is not found.
-        if (!empty($CFG->upgraderunning)) {
-            return false;
-        }
-
         $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
 
         if ($draftitemid) {
