@@ -30,6 +30,7 @@ use CFPropertyList\CFBoolean;
 use CFPropertyList\CFDictionary;
 use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
+use context_module;
 use context_user;
 use core\persistent;
 use lang_string;
@@ -308,7 +309,7 @@ class quiz_settings extends persistent {
      */
     private function process_seb_config_file() {
         // If file has been uploaded, overwrite existing config.
-        if ($this->get('sebconfigfile') && $file = $this->get_current_user_draft_file($this->get('sebconfigfile'))) {
+        if ($this->get('sebconfigfile') && $file = $this->get_module_context_sebconfig_file($this->get('quizid'))) {
             $this->plist = new property_list($file->get_content());
         }
         // Update the quit password if set in Moodle.
@@ -444,6 +445,37 @@ class quiz_settings extends persistent {
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
         $files = $fs->get_area_files($context->id, 'user', 'draft', $itemid);
+        foreach ($files as $file) {
+            // Get first non empty file. Should only be one.
+            if ($file->get_filesize() > 0) {
+                $configfile = $file;
+            }
+        }
+        if (!empty($configfile)) {
+            return $configfile;
+        }
+        return null;
+    }
+
+    /**
+     * Try and get a file in the context filearea by itemid.
+     *
+     * @param string $quizid The Quiz ID for obtaining the context.
+     * @return null|stored_file Returns null if no file is found.
+     *
+     * @throws \coding_exception
+     */
+    private function get_module_context_sebconfig_file(string $quizid) {
+        $cm = get_coursemodule_from_instance('quiz', $quizid);
+        $context = context_module::instance($cm->id);
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(
+            $context->id,
+            'quizaccess_seb',
+            'filemanager_sebconfigfile',
+            settings_provider::SEB_CONFIG_FILE_ITEMID
+        );
+
         foreach ($files as $file) {
             // Get first non empty file. Should only be one.
             if ($file->get_filesize() > 0) {
