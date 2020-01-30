@@ -97,7 +97,9 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
 
             // Create element.
-            if (is_array($type)) {
+            if (is_array($type) && $type[0] == 'filemanager') {
+                $element = $mform->createElement($type[0], $name, get_string($name, 'quizaccess_seb'), null, $type[1]);
+            } else if (is_array($type)) {
                 $element = $mform->createElement($type[0], $name, get_string($name, 'quizaccess_seb'), $type[1]);
             } else {
                 $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
@@ -114,6 +116,19 @@ class quizaccess_seb extends quiz_access_rule_base {
                 $mform->setDefault($name, $defaults[$name]);
             }
 
+            // Second pass to populate the filemanager with any existing saved self config template.
+            if (is_array($type) && $type[0] == 'filemanager') {
+                $draftitemid = 0;
+                file_prepare_draft_area(
+                    $draftitemid,
+                    $quizform->get_context()->id,
+                    'quizaccess_seb',
+                    $name,
+                    0
+                );
+                $mform->setDefault($name, $draftitemid);
+                $mform->addHelpButton($name, $name, 'quizaccess_seb');
+            }
             // Set hideifs.
             if (isset($hideifs[$name])) {
                 foreach ($hideifs[$name] as $hideif) {
