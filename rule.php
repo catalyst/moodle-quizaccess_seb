@@ -170,6 +170,8 @@ class quizaccess_seb extends quiz_access_rule_base {
         $quizsettings = (new quiz_settings())->from_record($settings);
         // Set non-form fields.
         $quizsettings->set('quizid', $data['instance']);
+        // Explicit setting the sebconfigfile value such that the validation will check for a valid plist.
+        $quizsettings->set('sebconfigfile', $data['filemanager_sebconfigfile']);
         $quizsettings->validate();
 
         // Add any errors to list.
