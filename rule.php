@@ -116,7 +116,7 @@ class quizaccess_seb extends quiz_access_rule_base {
                 $mform->setDefault($name, $defaults[$name]);
             }
 
-            // Second pass to populate the filemanager with any existing saved self config template.
+            // Second pass to populate the filemanager with any existing saved self config file.
             if (is_array($type) && $type[0] == 'filemanager') {
                 $draftitemid = 0;
                 file_prepare_draft_area(
