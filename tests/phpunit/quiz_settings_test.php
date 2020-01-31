@@ -211,43 +211,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertEquals($originalconfig, $newconfig);
     }
 
-    public function test_password_set_with_upload_overwrites_file_setting() {
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
-            . "<key>allowWlan</key><false/></dict></plist>\n";
-        $itemid = $this->create_module_test_file($xml);
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $newpassword = 'newpassword';
-        $quizsettings->set('quitpassword', $newpassword);
-        $quizsettings->save();
-        $config = $quizsettings->get('config');
-        $this->assertNotEquals($xml, $config);
-        $plist = new \quizaccess_seb\property_list($config);
-        $this->assertEquals(hash('sha256', $newpassword), $plist->get_element_value('hashedQuitPassword'));
-    }
-
-    public function test_no_password_set_with_upload_doesnt_overwrite_file_setting() {
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
-            . "<key>allowWlan</key><false/></dict></plist>\n";
-        $itemid = $this->create_module_test_file($xml);
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $quizsettings->set('quitpassword', '');
-        $quizsettings->save();
-        $config = $quizsettings->get('config');
-        $this->assertEquals($xml, $config);
-        $plist = new \quizaccess_seb\property_list($config);
-        $this->assertEquals('hashedpassword', $plist->get_element_value('hashedQuitPassword'));
-    }
-
     /**
      * Bad browser exam key data provider.
      *
