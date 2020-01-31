@@ -110,14 +110,14 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     /**
      * Test the validation of a seb config file.
      */
-    public function test_validate_sebconfigfile_success() {
+    public function test_validate_draftarea_configfile_success() {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
             . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
             . "<key>allowWlan</key><false/></dict></plist>\n";
-        $itemid = $this->create_test_file($xml);
+        $itemid = $this->create_test_draftarea_file($xml);
         $errors = settings_provider::validate_draftarea_configfile($itemid);
         $this->assertEmpty($errors);
     }
@@ -125,13 +125,82 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     /**
      * Test the validation of a missing seb config file.
      */
-    public function test_validate_sebconfigfile_failure() {
+    public function test_validate_draftarea_configfile_failure() {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
         $xml = "This is not a config file.";
-        $itemid = $this->create_test_file($xml);
+        $itemid = $this->create_test_draftarea_file($xml);
         $errors = settings_provider::validate_draftarea_configfile($itemid);
         $this->assertEquals($errors, new lang_string('fileparsefailed', 'quizaccess_seb'));
+    }
+
+    /**
+     * Test obtaining the draftarea content.
+     */
+    public function test_get_current_user_draft_file() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $itemid = $this->create_test_draftarea_file($xml);
+        $file = settings_provider::get_current_user_draft_file($itemid);
+        $content = $file->get_content();
+
+        $this->assertEquals($xml, $content);
+    }
+
+    /**
+     * Test saving files from the user draft area into the quiz context area storage.
+     */
+    public function test_save_filemanager_sebconfigfile_draftarea() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $user = $this->getDataGenerator()->create_user();
+        $context = context_module::instance($quiz->cmid);
+        $this->setUser($user);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+
+        $draftitemid = $this->create_test_draftarea_file($xml);
+
+        settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $quiz->cmid);
+
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile');
+
+        $this->assertCount(2, $files);
+    }
+
+    /**
+     * Test deleting the $quiz->cmid itemid from the file area.
+     *
+     * @throws coding_exception
+     * @throws file_exception
+     * @throws stored_file_creation_exception
+     */
+    public function test_delete_uploaded_config_file() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $user = $this->getDataGenerator()->create_user();
+        $context = context_module::instance($quiz->cmid);
+        $this->setUser($user);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+
+        $draftitemid = $this->create_test_draftarea_file($xml);
+
+        settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $quiz->cmid);
+
+        $fs = get_file_storage();
+
+        $files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile');
+        $this->assertCount(2, $files);
+
+        settings_provider::delete_uploaded_config_file($quiz->cmid);
+        $files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile');
+        // The '.' directory.
+        $this->assertCount(1, $files);
+
     }
 
     /**
@@ -150,18 +219,18 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     }
 
     /**
-     * Create a file in the current user's draft file area.
+     * Creates a file in the user draft area.
      *
      * @param string $xml
-     * @return int Item ID of file.
-     *
+     * @return int The user draftarea id
      * @throws file_exception
      * @throws stored_file_creation_exception
      */
-    private function create_test_file(string $xml) : int {
+    private function create_test_draftarea_file(string $xml) : int {
         global $USER;
-        $itemid = 999;
-        $fs = get_file_storage();
+
+        $itemid = 0;
+        $usercontext = context_user::instance($USER->id);
         $filerecord = [
             'contextid' => \context_user::instance($USER->id)->id,
             'component' => 'user',
@@ -170,7 +239,13 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
             'filepath' => '/',
             'filename' => 'test.xml'
         ];
+
+        $fs = get_file_storage();
         $fs->create_file_from_string($filerecord, $xml);
-        return $itemid;
+
+        $draftitemid = 0;
+        file_prepare_draft_area($draftitemid, $usercontext->id, 'user', 'draft', 0);
+
+        return $draftitemid;
     }
 }
