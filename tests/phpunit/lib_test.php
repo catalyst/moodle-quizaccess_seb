@@ -125,15 +125,20 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
 
+        // Set settings to require seb.
+        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $quizsettings->save();
+
         $config = quizaccess_seb_get_config($quiz->cmid);
 
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/>"
-                . "<key>showReloadButton</key><true/><key>showTime</key><true/><key>showInputLanguage</key><true/>"
-                . "<key>allowQuit</key><true/><key>quitURLConfirm</key><true/><key>audioControlEnabled</key><false/>"
-                . "<key>audioMute</key><false/><key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/>"
-                . "<key>URLFilterEnable</key><false/><key>URLFilterEnableContentFilter</key><false/>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key>"
+                . "<false/><key>showReloadButton</key><true/><key>showTime</key><true/><key>showInputLanguage</key>"
+                . "<true/><key>allowQuit</key><true/><key>quitURLConfirm</key><true/><key>audioControlEnabled</key>"
+                . "<false/><key>audioMute</key><false/><key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key>"
+                . "<true/><key>URLFilterEnable</key><false/><key>URLFilterEnableContentFilter</key><false/>"
                 . "<key>URLFilterRules</key><array/></dict></plist>\n", $config);
     }
 

@@ -368,6 +368,26 @@ class settings_provider {
     }
 
     /**
+     * Get the file that is stored in the course module file area.
+     *
+     * @param string $cmid The course module id which is used as an itemid reference.
+     * @return stored_file|null Returns null if no file is found.
+     *
+     * @throws \coding_exception
+     */
+    public static function get_module_context_sebconfig_file(string $cmid) : ?stored_file { // @codingStandardsIgnoreLine
+        $fs = new \file_storage();
+        $context = context_module::instance($cmid);
+
+        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
+            'id DESC', false)) {
+            return null;
+        }
+
+        return reset($files);
+    }
+
+    /**
      * Saves filemanager_sebconfigfile files to the moodle storage backend.
      *
      * @param string $cmid The cmid of for the quiz.
@@ -392,15 +412,13 @@ class settings_provider {
      * @throws \coding_exception
      */
     public static function delete_uploaded_config_file(string $cmid) : bool {
-        $fs = new \file_storage();
-        $context = context_module::instance($cmid);
+        $file = self::get_module_context_sebconfig_file($cmid);
 
-        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
-            'id DESC', false)) {
-            return false;
+        if (!empty($file)) {
+            return $file->delete();
         }
 
-        return reset($files)->delete();
+        return false;
     }
 }
 

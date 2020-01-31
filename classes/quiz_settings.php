@@ -275,17 +275,45 @@ class quiz_settings extends persistent {
      * @throws \coding_exception
      */
     private function compute_config() {
-        // Process all settings that are boolean.
-        $this->process_bool_settings();
+        switch ($this->get('requiresafeexambrowser')) {
+            case settings_provider::USE_SEB_NO:
+                break;
+            case settings_provider::USE_SEB_UPLOAD_CONFIG:
+                $this->process_seb_config_file();
+                break;
+            default:
+                // Process all settings that are boolean.
+                $this->process_bool_settings();
 
-        // Process quit settings.
-        $this->process_quit_settings();
+                // Process quit settings.
+                $this->process_quit_settings();
 
-        // Add all the URL filters.
-        $this->process_url_filters();
+                // Add all the URL filters.
+                $this->process_url_filters();
+        }
 
         // Export and save the config, ready for DB.
         $this->set('config', $this->plist->to_xml());
+    }
+
+    /**
+     * If file is uploaded, save the file to the config field.
+     * This is processed after the validation step, so a SEB file should exist at this point.
+     *
+     * @throws \CFPropertyList\IOException
+     * @throws \CFPropertyList\PListException
+     * @throws \DOMException
+     * @throws \coding_exception
+     */
+    private function process_seb_config_file() {
+        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
+
+        $file = settings_provider::get_module_context_sebconfig_file($cm->id);
+
+        // If file has been uploaded, overwrite existing config.
+        if (!empty($file)) {
+            $this->plist = new property_list($file->get_content());
+        }
     }
 
     /**
