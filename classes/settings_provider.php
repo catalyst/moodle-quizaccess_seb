@@ -279,7 +279,6 @@ class settings_provider {
             ],
             'seb_quitpassword' => [
                 new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
                 new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
                 new hideif_rule('seb_quitpassword', 'seb_allowuserquitseb', 'eq', 0),
             ],
