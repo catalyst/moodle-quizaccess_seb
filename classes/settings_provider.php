@@ -37,6 +37,8 @@ use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/../vendor/autoload.php');
+
 class settings_provider {
 
     /**
@@ -321,7 +323,7 @@ class settings_provider {
      * @return void|lang_string
      *
      * @throws \coding_exception
-     * @throws IOException
+     * @throws \Exception
      */
     public static function validate_draftarea_configfile($itemid) {
         // When saving the settings, this value will be null.
@@ -336,7 +338,7 @@ class settings_provider {
             $plist = new CFPropertyList();
             try {
                 $plist->parse($file->get_content());
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return new lang_string('fileparsefailed', 'quizaccess_seb');
             }
         }
