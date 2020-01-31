@@ -331,7 +331,7 @@ class settings_provider {
             return;
         }
         // If there is a config file uploaded, make sure it is a PList XML file.
-        $file = settings_provider::get_current_user_draft_file($itemid);
+        $file = self::get_current_user_draft_file($itemid);
 
         // If we require an SEB config uploaded, and the file exists, parse it.
         if ($file) {
