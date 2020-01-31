@@ -230,7 +230,7 @@ class quiz_settings extends persistent {
             return true;
         }
         // If there is a config file uploaded, make sure it is a PList XML file.
-        $file = $this->get_current_user_draft_file($itemid);
+        $file = settings_provider::get_current_user_draft_file($itemid);
         $requiresetting = $this->get('requiresafeexambrowser');
 
         // If we require an SEB config uploaded, and the file exists, parse it.
@@ -296,12 +296,6 @@ class quiz_settings extends persistent {
         // Recalculate config and config key.
         $this->compute_config();
         $this->compute_config_key();
-
-        if ($this->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
-            $this->save_filemanager_sebconfigfile_draftarea();
-        } else {
-            $this->cleanup_draftareas_and_saved_config();
-        }
     }
 
     /**
@@ -450,68 +444,5 @@ class quiz_settings extends persistent {
             $keys[$i] = strtolower($key);
         }
         return $keys;
-    }
-
-    /**
-     * Try and get a file in the user draft filearea by itemid.
-     *
-     * @param string $itemid Item ID of the file.
-     * @return stored_file|null Returns null if no file is found.
-     *
-     * @throws \coding_exception
-     */
-    private function get_current_user_draft_file(string $itemid) : ?stored_file { // @codingStandardsIgnoreLine
-        global $USER;
-        $context = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $itemid, 'id DESC', false)) {
-            return null;
-        }
-        return reset($files);
-    }
-
-    /**
-     * Saves filemanager_sebconfigfile files to the moodle storage backend.
-     *
-     * @return bool
-     * @throws \coding_exception
-     */
-    private function save_filemanager_sebconfigfile_draftarea() : bool {
-        $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
-
-        if ($draftitemid) {
-            $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
-            $context = context_module::instance($cm->id);
-            file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile',
-                $cm->id, []);
-        }
-
-        return true;
-    }
-
-    /**
-     * Cleanup function to delete the saved config when it has not been specified.
-     * This will be called when settings_provider::USE_SEB_UPLOAD_CONFIG is not true.
-     *
-     * @return bool Always true or exception if error occurred
-     * @throws \coding_exception
-     */
-    private function cleanup_draftareas_and_saved_config() : bool {
-        $fs = new \file_storage();
-
-        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
-
-        if (!$cm) {
-            return false;
-        }
-
-        $context = context_module::instance($cm->id);
-
-        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cm->id,
-            'id DESC', false)) {
-            return false;
-        }
-
-        return reset($files)->delete();
     }
 }

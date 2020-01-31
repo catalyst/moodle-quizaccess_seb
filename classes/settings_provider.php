@@ -29,6 +29,10 @@
 
 namespace quizaccess_seb;
 
+use context_module;
+use context_user;
+use stored_file;
+
 defined('MOODLE_INTERNAL') || die();
 
 class settings_provider {
@@ -305,6 +309,62 @@ class settings_provider {
                 new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ]
         ];
+    }
+
+    /**
+     * Try and get a file in the user draft filearea by itemid.
+     *
+     * @param string $itemid Item ID of the file.
+     * @return stored_file|null Returns null if no file is found.
+     *
+     * @throws \coding_exception
+     */
+    public static function get_current_user_draft_file(string $itemid) : ?stored_file { // @codingStandardsIgnoreLine
+        global $USER;
+        $context = context_user::instance($USER->id);
+        $fs = get_file_storage();
+        if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $itemid, 'id DESC', false)) {
+            return null;
+        }
+        return reset($files);
+    }
+
+    /**
+     * Saves filemanager_sebconfigfile files to the moodle storage backend.
+     *
+     * @param string $cmid The cmid of for the quiz.
+     * @return bool Always true
+     */
+    public static function save_filemanager_sebconfigfile_draftarea(string $cmid) : bool {
+        $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
+
+        if ($draftitemid) {
+            $context = context_module::instance($cmid);
+            file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile',
+                $cmid, []);
+        }
+
+        return true;
+    }
+
+    /**
+     * Cleanup function to delete the saved config when it has not been specified.
+     * This will be called when settings_provider::USE_SEB_UPLOAD_CONFIG is not true.
+     *
+     * @param string $cmid The cmid of for the quiz.
+     * @return bool Always true or exception if error occurred
+     * @throws \coding_exception
+     */
+    public static function delete_uploaded_config_file(string $cmid) : bool {
+        $fs = new \file_storage();
+        $context = context_module::instance($cmid);
+
+        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
+            'id DESC', false)) {
+            return false;
+        }
+
+        return reset($files)->delete();
     }
 }
 
