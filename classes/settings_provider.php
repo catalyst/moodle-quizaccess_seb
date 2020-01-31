@@ -368,9 +368,9 @@ class settings_provider {
     }
 
     /**
-     * Try and get a file in the user draft filearea by itemid.
+     * Get the file that is stored in the course module file area.
      *
-     * @param string $itemid Item ID of the file.
+     * @param string $cmid The course module id which is used as an itemid reference.
      * @return stored_file|null Returns null if no file is found.
      *
      * @throws \coding_exception
@@ -412,15 +412,13 @@ class settings_provider {
      * @throws \coding_exception
      */
     public static function delete_uploaded_config_file(string $cmid) : bool {
-        $fs = new \file_storage();
-        $context = context_module::instance($cmid);
+        $file = self::get_module_context_sebconfig_file($cmid);
 
-        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
-            'id DESC', false)) {
-            return false;
+        if (!empty($file)) {
+            return $file->delete();
         }
 
-        return reset($files)->delete();
+        return false;
     }
 }
 
