@@ -192,7 +192,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>allowWlan</key><false/></dict></plist>\n";
         $itemid = $this->create_module_test_file($xml);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->set('sebconfigfile', $itemid);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings->save();
         $config = $quizsettings->get('config');
@@ -207,7 +206,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $quizsettings->set('showsebtaskbar', 0);
         $quizsettings->save();
         $originalconfig = $quizsettings->get('config');
-        $quizsettings->set('sebconfigfile', settings_provider::SEB_CONFIG_FILE_ITEMID);
         $quizsettings->save();
         $newconfig = $quizsettings->get('config');
         $this->assertEquals($originalconfig, $newconfig);
@@ -223,7 +221,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $itemid = $this->create_module_test_file($xml);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $quizsettings->set('sebconfigfile', $itemid);
         $newpassword = 'newpassword';
         $quizsettings->set('quitpassword', $newpassword);
         $quizsettings->save();
@@ -243,7 +240,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $itemid = $this->create_module_test_file($xml);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $quizsettings->set('sebconfigfile', $itemid);
         $quizsettings->set('quitpassword', '');
         $quizsettings->save();
         $config = $quizsettings->get('config');
@@ -413,31 +409,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     }
 
     /**
-     * Create a file in the current user's draft file area.
-     *
-     * @param string $xml
-     * @return int Item ID of file.
-     *
-     * @throws file_exception
-     * @throws stored_file_creation_exception
-     */
-    private function create_test_file(string $xml) : int {
-        global $USER;
-        $itemid = 999;
-        $fs = get_file_storage();
-        $filerecord = [
-            'contextid' => \context_user::instance($USER->id)->id,
-            'component' => 'user',
-            'filearea' => 'draft',
-            'itemid' => $itemid,
-            'filepath' => '/',
-            'filename' => 'test.xml'
-        ];
-        $fs->create_file_from_string($filerecord, $xml);
-        return $itemid;
-    }
-
-    /**
      * Create a file in a modules filearea.
      *
      * @param string $xml
@@ -447,7 +418,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * @throws stored_file_creation_exception
      */
     private function create_module_test_file(string $xml) : int {
-        $itemid = settings_provider::SEB_CONFIG_FILE_ITEMID;
+        $itemid = $this->cm->id;
         $fs = get_file_storage();
         $filerecord = [
             'contextid' => \context_module::instance($this->cm->id)->id,

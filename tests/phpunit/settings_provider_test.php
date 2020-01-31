@@ -186,21 +186,43 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         $this->setUser($user);
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
-
         $draftitemid = $this->create_test_draftarea_file($xml);
 
         settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $quiz->cmid);
 
         $fs = get_file_storage();
-
         $files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile');
         $this->assertCount(2, $files);
 
         settings_provider::delete_uploaded_config_file($quiz->cmid);
+
         $files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile');
         // The '.' directory.
         $this->assertCount(1, $files);
+    }
 
+    /**
+     * Test getting the file from the context module id file area.
+     */
+    public function test_get_module_context_sebconfig_file() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $user = $this->getDataGenerator()->create_user();
+        $context = context_module::instance($quiz->cmid);
+        $this->setUser($user);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $draftitemid = $this->create_test_draftarea_file($xml);
+
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile');
+        $this->assertCount(0, $files);
+
+        settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $quiz->cmid);
+
+        $file = settings_provider::get_module_context_sebconfig_file($quiz->cmid);
+
+        $this->assertSame($file->get_content(), $xml);
     }
 
     /**
