@@ -314,13 +314,6 @@ class quiz_settings extends persistent {
         if (!empty($file)) {
             $this->plist = new property_list($file->get_content());
         }
-
-        // Update the quit password if set in Moodle.
-        if (!empty($this->get('quitpassword'))) {
-            // Hash quit password.
-            $hashedpassword = hash('SHA256', $this->get('quitpassword'));
-            $this->plist->add_element_to_root('hashedQuitPassword', new CFString($hashedpassword));
-        }
     }
 
     /**
