@@ -176,39 +176,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertContains($expectederrorstring, $errors);
     }
 
-    public function test_validate_sebconfigfile_success() {
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
-            . "<key>allowWlan</key><false/></dict></plist>\n";
-        $itemid = $this->create_test_file($xml);
-        $quizsettings = new quiz_settings(0, (object) [
-            'quizid' => 1,
-            'requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
-            'sebconfigfile' => $itemid,
-        ]);
-        $quizsettings->save();
-        $errors = $quizsettings->get_errors();
-        $this->assertEmpty($errors);
-    }
-
-    public function test_validate_sebconfigfile_failure() {
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $xml = "This is not a config file.";
-        $itemid = $this->create_test_file($xml);
-        $quizsettings = new quiz_settings(0, (object) [
-            'quizid' => 1,
-            'requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
-            'sebconfigfile' => $itemid,
-        ]);
-        $this->expectException(\core\invalid_persistent_exception::class);
-        $this->expectExceptionMessage("The uploaded file could not be saved as a SEB config file.");
-        $quizsettings->save();
-    }
-
     /**
      * Bad browser exam key data provider.
      *
