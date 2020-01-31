@@ -127,18 +127,18 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
 
         // Set settings to require seb.
         $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', 1);
+        $quizsettings->set('requiresafeexambrowser', \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
         $quizsettings->save();
 
         $config = quizaccess_seb_get_config($quiz->cmid);
 
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><false/><key>allowWlan</key>"
-                . "<false/><key>showReloadButton</key><false/><key>showTime</key><false/><key>showInputLanguage</key>"
-                . "<false/><key>allowQuit</key><false/><key>quitURLConfirm</key><false/><key>audioControlEnabled</key>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key>"
+                . "<false/><key>showReloadButton</key><true/><key>showTime</key><true/><key>showInputLanguage</key>"
+                . "<true/><key>allowQuit</key><true/><key>quitURLConfirm</key><true/><key>audioControlEnabled</key>"
                 . "<false/><key>audioMute</key><false/><key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key>"
-                . "<false/><key>URLFilterEnable</key><false/><key>URLFilterEnableContentFilter</key><false/>"
+                . "<true/><key>URLFilterEnable</key><false/><key>URLFilterEnableContentFilter</key><false/>"
                 . "<key>URLFilterRules</key><array/></dict></plist>\n", $config);
     }
 
