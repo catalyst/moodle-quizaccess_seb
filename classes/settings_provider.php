@@ -29,8 +29,10 @@
 
 namespace quizaccess_seb;
 
+use CFPropertyList\CFPropertyList;
 use context_module;
 use context_user;
+use lang_string;
 use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
@@ -309,6 +311,40 @@ class settings_provider {
                 new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ]
         ];
+    }
+
+    /**
+     * Validate that if a file has been uploaded by current user, that it is a valid PLIST XML file.
+     * This function is only called if requiresafeexambrowser == settings_provider::USE_SEB_UPLOAD_CONFIG.
+     *
+     * @param string $itemid Item ID of file in user draft file area.
+     * @return void|lang_string
+     *
+     * @throws \coding_exception
+     * @throws IOException
+     */
+    public static function validate_draftarea_configfile($itemid) {
+        // When saving the settings, this value will be null.
+        if (is_null($itemid)) {
+            return;
+        }
+        // If there is a config file uploaded, make sure it is a PList XML file.
+        $file = settings_provider::get_current_user_draft_file($itemid);
+
+        // If we require an SEB config uploaded, and the file exists, parse it.
+        if ($file) {
+            $plist = new CFPropertyList();
+            try {
+                $plist->parse($file->get_content());
+            } catch (Exception $e) {
+                return new lang_string('fileparsefailed', 'quizaccess_seb');
+            }
+        }
+
+        // If we require an SEB config uploaded, and the file does not exist, error.
+        if (!$file) {
+            return new lang_string('filenotpresent', 'quizaccess_seb');
+        }
     }
 
     /**

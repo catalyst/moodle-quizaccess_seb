@@ -29,16 +29,9 @@ use CFPropertyList\CFArray;
 use CFPropertyList\CFBoolean;
 use CFPropertyList\CFDictionary;
 use CFPropertyList\CFNumber;
-use CFPropertyList\CFPropertyList;
 use CFPropertyList\CFString;
-use CFPropertyList\IOException;
-use CFPropertyList\PListException;
-use context_user;
-use context_module;
 use core\persistent;
-use Exception;
 use lang_string;
-use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -216,42 +209,6 @@ class quiz_settings extends persistent {
     }
 
     /**
-     * Validate that if a file has been uploaded by current user, that it is a valid PLIST XML file.
-     *
-     * @param string $itemid Item ID of file in user draft file area.
-     * @return bool|lang_string
-     *
-     * @throws \coding_exception
-     * @throws IOException
-     */
-    protected function validate_sebconfigfile($itemid) {
-        // When saving the settings, this value will be null.
-        if (is_null($itemid)) {
-            return true;
-        }
-        // If there is a config file uploaded, make sure it is a PList XML file.
-        $file = settings_provider::get_current_user_draft_file($itemid);
-        $requiresetting = $this->get('requiresafeexambrowser');
-
-        // If we require an SEB config uploaded, and the file exists, parse it.
-        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG && $file) {
-            $plist = new CFPropertyList();
-            try {
-                $plist->parse($file->get_content());
-            } catch (Exception $e) {
-                return new lang_string('fileparsefailed', 'quizaccess_seb');
-            }
-        }
-
-        // If we require an SEB config uploaded, and the file does not exist, error.
-        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG && !$file) {
-            return new lang_string('filenotpresent', 'quizaccess_seb');
-        }
-
-        return true;
-    }
-
-    /**
      * Get the browser exam keys as a pre-split array instead of just as a string.
      *
      * @return array
@@ -315,9 +272,6 @@ class quiz_settings extends persistent {
     /**
      * Create or update the config string based on the current quiz settings.
      *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
      * @throws \coding_exception
      */
     private function compute_config() {

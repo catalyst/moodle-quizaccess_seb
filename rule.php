@@ -189,9 +189,13 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         // Edge case for filemanager_sebconfig.
-        if (!empty($errors['seb_sebconfigfile'])) {
-            $errors['filemanager_sebconfigfile'] = $errors['seb_sebconfigfile'];
-            unset($errors['seb_sebconfigfile']);
+        $requiresetting = $quizsettings->get('requiresafeexambrowser');
+        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG) {
+            $itemid = $data['filemanager_sebconfigfile'];
+            $drafterror = settings_provider::validate_draftarea_configfile($itemid);
+            if (!empty($drafterror)) {
+                $errors['filemanager_sebconfigfile'] = $drafterror;
+            }
         }
 
         return $errors;
