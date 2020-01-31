@@ -24,7 +24,6 @@
  */
 
 use quizaccess_seb\quiz_settings;
-use quizaccess_seb\settings_provider;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -329,30 +328,5 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             'regexblocked' => '',
             'suppresssebdownloadlink' => '1',
         ];
-    }
-
-    /**
-     * Create a file in the current user's draft file area.
-     *
-     * @param string $xml
-     * @return int Item ID of file.
-     *
-     * @throws file_exception
-     * @throws stored_file_creation_exception
-     */
-    private function create_test_file(string $xml) : int {
-        global $USER;
-        $itemid = 999;
-        $fs = get_file_storage();
-        $filerecord = [
-            'contextid' => \context_user::instance($USER->id)->id,
-            'component' => 'user',
-            'filearea' => 'draft',
-            'itemid' => $itemid,
-            'filepath' => '/',
-            'filename' => 'test.xml'
-        ];
-        $fs->create_file_from_string($filerecord, $xml);
-        return $itemid;
     }
 }

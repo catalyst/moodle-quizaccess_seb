@@ -31,6 +31,14 @@ defined('MOODLE_INTERNAL') || die();
 class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
 
     /**
+     * Called before every test.
+     */
+    public function setUp() {
+        parent::setUp();
+        $this->resetAfterTest();
+    }
+
+    /**
      * Test that settings types to be added to quiz settings, are part of quiz_settings persistent class.
      */
     public function test_setting_types_are_part_of_quiz_settings_table() {
@@ -100,6 +108,33 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     }
 
     /**
+     * Test the validation of a seb config file.
+     */
+    public function test_validate_sebconfigfile_success() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+            . "<key>allowWlan</key><false/></dict></plist>\n";
+        $itemid = $this->create_test_file($xml);
+        $errors = settings_provider::validate_draftarea_configfile($itemid);
+        $this->assertEmpty($errors);
+    }
+
+    /**
+     * Test the validation of a missing seb config file.
+     */
+    public function test_validate_sebconfigfile_failure() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $xml = "This is not a config file.";
+        $itemid = $this->create_test_file($xml);
+        $errors = settings_provider::validate_draftarea_configfile($itemid);
+        $this->assertEquals($errors, new lang_string('fileparsefailed', 'quizaccess_seb'));
+    }
+
+    /**
      * Strip the seb_ prefix from each setting key.
      *
      * @param \stdClass $settings Object containing settings.
@@ -112,5 +147,30 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
             $newsettings->$newname = $setting; // Add new key.
         }
         return $newsettings;
+    }
+
+    /**
+     * Create a file in the current user's draft file area.
+     *
+     * @param string $xml
+     * @return int Item ID of file.
+     *
+     * @throws file_exception
+     * @throws stored_file_creation_exception
+     */
+    private function create_test_file(string $xml) : int {
+        global $USER;
+        $itemid = 999;
+        $fs = get_file_storage();
+        $filerecord = [
+            'contextid' => \context_user::instance($USER->id)->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => 'test.xml'
+        ];
+        $fs->create_file_from_string($filerecord, $xml);
+        return $itemid;
     }
 }
