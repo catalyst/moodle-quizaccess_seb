@@ -29,7 +29,15 @@
 
 namespace quizaccess_seb;
 
+use CFPropertyList\CFPropertyList;
+use context_module;
+use context_user;
+use lang_string;
+use stored_file;
+
 defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 class settings_provider {
 
@@ -70,7 +78,7 @@ class settings_provider {
             'seb' => 'header',
             'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options()],
             'seb_sebconfigtemplate' => ['select', self::get_template_options()],
-            'seb_sebconfigfile' => 'filepicker',
+            'filemanager_sebconfigfile' => ['filemanager', self::get_filemanager_options()],
             'seb_suppresssebdownloadlink' => 'selectyesno',
             'seb_linkquitseb' => 'text',
             'seb_userconfirmquit' => 'selectyesno',
@@ -106,7 +114,7 @@ class settings_provider {
         // @codingStandardsIgnoreStart
         // TODO: Implement following features and uncomment options.
         //$options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
-        //$options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
+        $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
         $options[self::USE_SEB_CLIENT_CONFIG] = get_string('seb_use_client', 'quizaccess_seb');
         // @codingStandardsIgnoreEnd
 
@@ -123,6 +131,18 @@ class settings_provider {
     }
 
     /**
+     * Returns a list of options for the file manager element.
+     * @return array
+     */
+    public static function get_filemanager_options() : array {
+        return [
+            'subdirs' => 0,
+            'maxfiles' => 1,
+            'accepted_types' => ['.seb']
+        ];
+    }
+
+    /**
      * Get the default values of the quiz settings.
      *
      * Array key is name of 'form element'/'database column (excluding prefix)'.
@@ -134,7 +154,7 @@ class settings_provider {
         return [
             'seb_requiresafeexambrowser' => self::USE_SEB_NO,
             'seb_sebconfigtemplate' => 0,
-            'seb_sebconfigfile' => null,
+            'filemanager_sebconfigfile' => null,
             'seb_suppresssebdownloadlink' => 0,
             'seb_linkquitseb' => '',
             'seb_userconfirmquit' => 1,
@@ -172,8 +192,8 @@ class settings_provider {
             'seb_sebconfigtemplate' => [
                 new hideif_rule('seb_sebconfigtemplate', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_TEMPLATE),
             ],
-            'seb_sebconfigfile' => [
-                new hideif_rule('seb_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),
+            'filemanager_sebconfigfile' => [
+                new hideif_rule('filemanager_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),
             ],
             'seb_showsebtaskbar' => [
                 new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
@@ -293,6 +313,94 @@ class settings_provider {
                 new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ]
         ];
+    }
+
+    /**
+     * Validate that if a file has been uploaded by current user, that it is a valid PLIST XML file.
+     * This function is only called if requiresafeexambrowser == settings_provider::USE_SEB_UPLOAD_CONFIG.
+     *
+     * @param string $itemid Item ID of file in user draft file area.
+     * @return void|lang_string
+     *
+     * @throws \coding_exception
+     * @throws \Exception
+     */
+    public static function validate_draftarea_configfile($itemid) {
+        // When saving the settings, this value will be null.
+        if (is_null($itemid)) {
+            return;
+        }
+        // If there is a config file uploaded, make sure it is a PList XML file.
+        $file = self::get_current_user_draft_file($itemid);
+
+        // If we require an SEB config uploaded, and the file exists, parse it.
+        if ($file) {
+            $plist = new CFPropertyList();
+            try {
+                $plist->parse($file->get_content());
+            } catch (\Exception $e) {
+                return new lang_string('fileparsefailed', 'quizaccess_seb');
+            }
+        }
+
+        // If we require an SEB config uploaded, and the file does not exist, error.
+        if (!$file) {
+            return new lang_string('filenotpresent', 'quizaccess_seb');
+        }
+    }
+
+    /**
+     * Try and get a file in the user draft filearea by itemid.
+     *
+     * @param string $itemid Item ID of the file.
+     * @return stored_file|null Returns null if no file is found.
+     *
+     * @throws \coding_exception
+     */
+    public static function get_current_user_draft_file(string $itemid) : ?stored_file { // @codingStandardsIgnoreLine
+        global $USER;
+        $context = context_user::instance($USER->id);
+        $fs = get_file_storage();
+        if (!$files = $fs->get_area_files($context->id, 'user', 'draft', $itemid, 'id DESC', false)) {
+            return null;
+        }
+        return reset($files);
+    }
+
+    /**
+     * Saves filemanager_sebconfigfile files to the moodle storage backend.
+     *
+     * @param string $cmid The cmid of for the quiz.
+     * @return bool Always true
+     */
+    public static function save_filemanager_sebconfigfile_draftarea(string $draftitemid, string $cmid) : bool {
+        if ($draftitemid) {
+            $context = context_module::instance($cmid);
+            file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile',
+                $cmid, []);
+        }
+
+        return true;
+    }
+
+    /**
+     * Cleanup function to delete the saved config when it has not been specified.
+     * This will be called when settings_provider::USE_SEB_UPLOAD_CONFIG is not true.
+     *
+     * @param string $cmid The cmid of for the quiz.
+     * @return bool Always true or exception if error occurred
+     * @throws \coding_exception
+     */
+    public static function delete_uploaded_config_file(string $cmid) : bool {
+        $fs = new \file_storage();
+        $context = context_module::instance($cmid);
+
+        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
+            'id DESC', false)) {
+            return false;
+        }
+
+        return reset($files)->delete();
     }
 }
 

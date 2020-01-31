@@ -42,6 +42,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      */
     public function test_config_is_created_from_quiz_settings() {
         $settings = $this->get_test_settings();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('config'));
@@ -62,6 +64,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
 
     public function test_config_is_updated_from_quiz_settings() {
         $settings = $this->get_test_settings();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('config'));
@@ -99,6 +103,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      */
     public function test_config_key_is_created_from_quiz_settings() {
         $settings = $this->get_test_settings();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('configkey'));
@@ -113,6 +119,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      */
     public function test_config_key_is_updated_from_quiz_settings() {
         $settings = $this->get_test_settings();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('configkey'));

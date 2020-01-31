@@ -272,9 +272,6 @@ class quiz_settings extends persistent {
     /**
      * Create or update the config string based on the current quiz settings.
      *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
      * @throws \coding_exception
      */
     private function compute_config() {

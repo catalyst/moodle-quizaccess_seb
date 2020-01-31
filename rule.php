@@ -97,7 +97,9 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
 
             // Create element.
-            if (is_array($type)) {
+            if (is_array($type) && $type[0] == 'filemanager') {
+                $element = $mform->createElement($type[0], $name, get_string($name, 'quizaccess_seb'), null, $type[1]);
+            } else if (is_array($type)) {
                 $element = $mform->createElement($type[0], $name, get_string($name, 'quizaccess_seb'), $type[1]);
             } else {
                 $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
@@ -114,6 +116,19 @@ class quizaccess_seb extends quiz_access_rule_base {
                 $mform->setDefault($name, $defaults[$name]);
             }
 
+            // Second pass to populate the filemanager with any existing saved self config file.
+            if (is_array($type) && $type[0] == 'filemanager') {
+                $draftitemid = 0;
+                file_prepare_draft_area(
+                    $draftitemid,
+                    $quizform->get_context()->id,
+                    'quizaccess_seb',
+                    $name,
+                    $quizform->get_coursemodule()->id
+                );
+                $mform->setDefault($name, $draftitemid);
+                $mform->addHelpButton($name, $name, 'quizaccess_seb');
+            }
             // Set hideifs.
             if (isset($hideifs[$name])) {
                 foreach ($hideifs[$name] as $hideif) {
@@ -169,6 +184,16 @@ class quizaccess_seb extends quiz_access_rule_base {
             $errors['seb'] = get_string('settingsfrozen', 'quizaccess_seb');
         }
 
+        // Edge case for filemanager_sebconfig.
+        $requiresetting = $quizsettings->get('requiresafeexambrowser');
+        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG) {
+            $itemid = $data['filemanager_sebconfigfile'];
+            $drafterror = settings_provider::validate_draftarea_configfile($itemid);
+            if (!empty($drafterror)) {
+                $errors['filemanager_sebconfigfile'] = $drafterror;
+            }
+        }
+
         return $errors;
     }
 
@@ -204,6 +229,15 @@ class quizaccess_seb extends quiz_access_rule_base {
         // the validation method also adds in default fields which is useful here.
         $quizsettings->validate();
         $quizsettings->save();
+
+        // Ensure that a cm exists before deleting any files.
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id);
+        if ($cm && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
+            $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
+            settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $cm->id);
+        } else if ($cm) {
+            settings_provider::delete_uploaded_config_file($cm->id);
+        }
     }
 
     /**
