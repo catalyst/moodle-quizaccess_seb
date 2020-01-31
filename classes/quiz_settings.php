@@ -30,11 +30,8 @@ use CFPropertyList\CFBoolean;
 use CFPropertyList\CFDictionary;
 use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
-use context_module;
-use context_user;
 use core\persistent;
 use lang_string;
-use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -300,7 +297,8 @@ class quiz_settings extends persistent {
     }
 
     /**
-     * If file is uploaded, save the file to the config field
+     * If file is uploaded, save the file to the config field.
+     * This is processed after the validation step, so a SEB file should exist at this point.
      *
      * @throws \CFPropertyList\IOException
      * @throws \CFPropertyList\PListException
@@ -308,10 +306,15 @@ class quiz_settings extends persistent {
      * @throws \coding_exception
      */
     private function process_seb_config_file() {
+        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
+
+        $file = settings_provider::get_module_context_sebconfig_file($cm->id);
+
         // If file has been uploaded, overwrite existing config.
-        if ($this->get('sebconfigfile') && $file = $this->get_module_context_sebconfig_file($this->get('quizid'))) {
+        if (!empty($file)) {
             $this->plist = new property_list($file->get_content());
         }
+
         // Update the quit password if set in Moodle.
         if (!empty($this->get('quitpassword'))) {
             // Hash quit password.
@@ -430,61 +433,5 @@ class quiz_settings extends persistent {
             $keys[$i] = strtolower($key);
         }
         return $keys;
-    }
-
-    /**
-     * Try and get a file in the user draft filearea by itemid.
-     *
-     * @param string $itemid Item ID of the file.
-     * @return null|stored_file Returns null if no file is found.
-     *
-     * @throws \coding_exception
-     */
-    private function get_current_user_draft_file(string $itemid) {
-        global $USER;
-        $context = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        $files = $fs->get_area_files($context->id, 'user', 'draft', $itemid);
-        foreach ($files as $file) {
-            // Get first non empty file. Should only be one.
-            if ($file->get_filesize() > 0) {
-                $configfile = $file;
-            }
-        }
-        if (!empty($configfile)) {
-            return $configfile;
-        }
-        return null;
-    }
-
-    /**
-     * Try and get a file in the context filearea by itemid.
-     *
-     * @param string $quizid The Quiz ID for obtaining the context.
-     * @return null|stored_file Returns null if no file is found.
-     *
-     * @throws \coding_exception
-     */
-    private function get_module_context_sebconfig_file(string $quizid) {
-        $cm = get_coursemodule_from_instance('quiz', $quizid);
-        $context = context_module::instance($cm->id);
-        $fs = get_file_storage();
-        $files = $fs->get_area_files(
-            $context->id,
-            'quizaccess_seb',
-            'filemanager_sebconfigfile',
-            settings_provider::SEB_CONFIG_FILE_ITEMID
-        );
-
-        foreach ($files as $file) {
-            // Get first non empty file. Should only be one.
-            if ($file->get_filesize() > 0) {
-                $configfile = $file;
-            }
-        }
-        if (!empty($configfile)) {
-            return $configfile;
-        }
-        return null;
     }
 }

@@ -368,6 +368,26 @@ class settings_provider {
     }
 
     /**
+     * Try and get a file in the user draft filearea by itemid.
+     *
+     * @param string $itemid Item ID of the file.
+     * @return stored_file|null Returns null if no file is found.
+     *
+     * @throws \coding_exception
+     */
+    public static function get_module_context_sebconfig_file(string $cmid) : ?stored_file { // @codingStandardsIgnoreLine
+        $fs = new \file_storage();
+        $context = context_module::instance($cmid);
+
+        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
+            'id DESC', false)) {
+            return null;
+        }
+
+        return reset($files);
+    }
+
+    /**
      * Saves filemanager_sebconfigfile files to the moodle storage backend.
      *
      * @param string $cmid The cmid of for the quiz.
