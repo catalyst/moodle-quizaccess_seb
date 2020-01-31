@@ -233,7 +233,8 @@ class quizaccess_seb extends quiz_access_rule_base {
         // Ensure that a cm exists before deleting any files.
         $cm = get_coursemodule_from_instance('quiz', $quiz->id);
         if ($cm && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
-            settings_provider::save_filemanager_sebconfigfile_draftarea($cm->id);
+            $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
+            settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $cm->id);
         } else if ($cm) {
             settings_provider::delete_uploaded_config_file($cm->id);
         }

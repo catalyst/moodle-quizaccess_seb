@@ -373,9 +373,7 @@ class settings_provider {
      * @param string $cmid The cmid of for the quiz.
      * @return bool Always true
      */
-    public static function save_filemanager_sebconfigfile_draftarea(string $cmid) : bool {
-        $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
-
+    public static function save_filemanager_sebconfigfile_draftarea(string $draftitemid, string $cmid) : bool {
         if ($draftitemid) {
             $context = context_module::instance($cmid);
             file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile',
