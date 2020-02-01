@@ -25,3 +25,15 @@
 
 defined('MOODLE_INTERNAL') || die;
 
+global $ADMIN;
+if ($ADMIN->fulltree) {
+
+    $links = [
+        'seb' => get_string('setting:showseblink', 'quizaccess_seb'),
+        'http' => get_string('setting:showhttplink', 'quizaccess_seb')
+    ];
+    $settings->add(new admin_setting_configmulticheckbox('quizaccess_seb/showseblinks',
+            get_string('setting:showseblinks', 'quizaccess_seb'),
+            get_string('setting:showseblinks_desc', 'quizaccess_seb'),
+            $links, $links));
+}
