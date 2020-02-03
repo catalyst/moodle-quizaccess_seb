@@ -113,12 +113,28 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
      * Test SEB usage options.
      */
     public function test_get_requiresafeexambrowser_options() {
-        $this->assertCount(4, settings_provider::get_requiresafeexambrowser_options());
-        $this->assertTrue(array_key_exists(0, settings_provider::get_requiresafeexambrowser_options()));
-        $this->assertTrue(array_key_exists(1, settings_provider::get_requiresafeexambrowser_options()));
-        $this->assertFalse(array_key_exists(2, settings_provider::get_requiresafeexambrowser_options()));
-        $this->assertTrue(array_key_exists(3, settings_provider::get_requiresafeexambrowser_options()));
-        $this->assertTrue(array_key_exists(4, settings_provider::get_requiresafeexambrowser_options()));
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = context_module::instance($quiz->cmid);
+        $this->setAdminUser();
+
+        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+
+        $this->assertCount(4, $settings);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $settings));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $settings));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $settings));
+
+        // A new user does not have the capability to use the file manager.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+
+        $this->assertCount(3, $settings);
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
     }
 
     /**
