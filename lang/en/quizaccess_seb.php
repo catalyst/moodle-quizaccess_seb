@@ -27,7 +27,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Safe Exam Browser templates and settings';
+$string['pluginname'] = 'Safe Exam Browser access rule';
 
 // Privacy.
 $string['privacy:metadata:quizaccess_seb_quizsettings'] = 'Safe Exam Browser settings for a quiz. This includes the ID of the last user to create or modify the settings.';
