@@ -30,6 +30,7 @@
 namespace quizaccess_seb;
 
 use CFPropertyList\CFPropertyList;
+use context_course;
 use context_module;
 use context_user;
 use lang_string;
@@ -71,10 +72,10 @@ class settings_provider {
      *
      * Contains all setting elements. Array key is name of 'form element'/'database column (excluding prefix)'.
      *
-     * @param context_module|null $context Optional parameter, context used with capability checking selection options.
+     * @param context_course|context_module $context Optional parameter, context used with capability checking selection options.
      * @return array All quiz form elements to be added and their types.
      */
-    public static function get_quiz_elements(context_module $context = null) : array {
+    public static function get_quiz_elements($context = null) : array {
         return [
             'seb' => 'header',
             'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options($context)],
@@ -140,10 +141,10 @@ class settings_provider {
 
     /**
      * Returns a list of all options of SEB usage.
-     * @param context_module|null $context Optional parameter, context used with capability checking selection options.
+     * @param context_course|context_module $context Optional parameter, context used with capability checking selection options.
      * @return array
      */
-    public static function get_requiresafeexambrowser_options(context_module $context = null) : array {
+    public static function get_requiresafeexambrowser_options($context = null) : array {
         $options[self::USE_SEB_NO] = get_string('no');
         $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
 
