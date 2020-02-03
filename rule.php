@@ -86,9 +86,10 @@ class quizaccess_seb extends quiz_access_rule_base {
         $defaults = settings_provider::get_quiz_defaults();
         $types = settings_provider::get_quiz_element_types();
         $hideifs = settings_provider::get_quiz_hideifs();
+        $cm = context_module::instance($quizform->get_coursemodule()->id);
 
         // Insert all the form elements before the 'security' section as a group.
-        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+        foreach (settings_provider::get_quiz_elements($cm) as $name => $type) {
 
             // Check if the user has capability to edit setting, otherwise use hidden setting type.
             if ($type != 'header' && !has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
@@ -133,6 +134,7 @@ class quizaccess_seb extends quiz_access_rule_base {
                 $mform->setDefault($name, $draftitemid);
                 $mform->addHelpButton($name, $name, 'quizaccess_seb');
             }
+
             // Set hideifs.
             if (isset($hideifs[$name])) {
                 foreach ($hideifs[$name] as $hideif) {

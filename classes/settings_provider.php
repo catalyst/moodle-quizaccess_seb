@@ -71,12 +71,13 @@ class settings_provider {
      *
      * Contains all setting elements. Array key is name of 'form element'/'database column (excluding prefix)'.
      *
+     * @param context_module|null $context Optional parameter, context used with capability checking selection options.
      * @return array All quiz form elements to be added and their types.
      */
-    public static function get_quiz_elements() : array {
+    public static function get_quiz_elements(context_module $context = null) : array {
         return [
             'seb' => 'header',
-            'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options()],
+            'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options($context)],
             'seb_sebconfigtemplate' => ['select', self::get_template_options()],
             'filemanager_sebconfigfile' => ['filemanager', self::get_filemanager_options()],
             'seb_suppresssebdownloadlink' => 'selectyesno',
@@ -139,16 +140,23 @@ class settings_provider {
 
     /**
      * Returns a list of all options of SEB usage.
+     * @param context_module|null $context Optional parameter, context used with capability checking selection options.
      * @return array
      */
-    public static function get_requiresafeexambrowser_options() : array {
+    public static function get_requiresafeexambrowser_options(context_module $context = null) : array {
         $options[self::USE_SEB_NO] = get_string('no');
         $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
 
         // @codingStandardsIgnoreStart
         // TODO: Implement following features and uncomment options.
-        //$options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
-        $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
+        //if ($context && has_capability('quizaccess/seb:manage_seb_sebconfigtemplate', $context)) {
+        //    $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
+        //}
+
+        if ($context && has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context)) {
+            $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
+        }
+
         $options[self::USE_SEB_CLIENT_CONFIG] = get_string('seb_use_client', 'quizaccess_seb');
         // @codingStandardsIgnoreEnd
 
