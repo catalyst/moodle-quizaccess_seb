@@ -193,6 +193,11 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
         }
 
+        // Global settings may be active which require a quiz password to be set.
+        if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired')) && empty($data['quizpassword'])) {
+            $errors['quizpassword'] = get_string('passwordnotset', 'quizaccess_seb');
+        }
+
         return $errors;
     }
 
@@ -329,13 +334,6 @@ class quizaccess_seb extends quiz_access_rule_base {
                     . $this->get_download_button_only();
             // TODO: Issue #8 - Trigger event if access is prevented.
             return $errormessage;
-        }
-
-        // If global setting to require a quiz password is set, check that it is set at global level or quiz level.
-        if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired'))
-                && empty(get_config('quiz', 'password'))
-                && empty($this->quiz->password)) {
-            return get_string('passwordnotset', 'quizaccess_seb');
         }
 
         // Check if the quiz can be validated with the quiz Config Key or Browser Exam Keys.
