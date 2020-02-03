@@ -149,10 +149,12 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         // If there have been any quiz attempts, freeze SEB settings, and explain why in section tooltip.
-        $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
-        if (!empty($attempts)) {
-            $mform->hardFreeze(array_keys(settings_provider::get_quiz_elements()));
-            $mform->addHelpButton('seb', 'disabledsettings', 'quizaccess_seb');
+        if ($quizform->get_instance()) {
+            $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
+            if (!empty($attempts)) {
+                $mform->hardFreeze(array_keys(settings_provider::get_quiz_elements()));
+                $mform->addHelpButton('seb', 'disabledsettings', 'quizaccess_seb');
+            }
         }
     }
 
@@ -183,9 +185,11 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         // If there have been any quiz attempts, prevent settings being saved.
-        $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
-        if (!empty($attempts)) {
-            $errors['seb'] = get_string('settingsfrozen', 'quizaccess_seb');
+        if ($quizform->get_instance()) {
+            $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
+            if (!empty($attempts)) {
+                $errors['seb'] = get_string('settingsfrozen', 'quizaccess_seb');
+            }
         }
 
         // Edge case for filemanager_sebconfig.
