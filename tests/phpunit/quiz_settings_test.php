@@ -376,9 +376,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      *
      * @param string $xml
      * @return int Item ID of file.
-     *
-     * @throws file_exception
-     * @throws stored_file_creation_exception
      */
     private function create_module_test_file(string $xml) : int {
         $itemid = $this->cm->id;

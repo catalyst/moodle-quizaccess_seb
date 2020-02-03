@@ -187,10 +187,6 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
 
     /**
      * Test deleting the $quiz->cmid itemid from the file area.
-     *
-     * @throws coding_exception
-     * @throws file_exception
-     * @throws stored_file_creation_exception
      */
     public function test_delete_uploaded_config_file() {
         $course = $this->getDataGenerator()->create_course();
@@ -259,8 +255,6 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
      *
      * @param string $xml
      * @return int The user draftarea id
-     * @throws file_exception
-     * @throws stored_file_creation_exception
      */
     private function create_test_draftarea_file(string $xml) : int {
         global $USER;

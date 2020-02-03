@@ -32,10 +32,6 @@ require_once($CFG->dirroot  . '/mod/quiz/accessrule/seb/lib.php');
  *
  * @param int $oldversion The version we are upgrading from.
  * @return bool Result.
- *
- * @throws downgrade_exception
- * @throws upgrade_exception
- * @throws ddl_exception
  */
 function xmldb_quizaccess_seb_upgrade($oldversion) {
     global $DB;

@@ -93,9 +93,6 @@ class provider implements
      * Export all user data for the specified user, in the specified contexts.
      *
      * @param approved_contextlist $contextlist The approved contexts to export information for.
-     *
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
@@ -150,8 +147,6 @@ class provider implements
      * Delete all data for all users in the specified context.
      *
      * @param context $context The specific context to delete data for.
-     *
-     * @throws \dml_exception
      */
     public static function delete_data_for_all_users_in_context(\context $context) {
         global $DB;
@@ -170,9 +165,6 @@ class provider implements
      * Delete all user data for the specified user, in the specified contexts.
      *
      * @param approved_contextlist $contextlist The approved contexts and user information to delete information for.
-     *
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
@@ -232,9 +224,6 @@ class provider implements
      * Delete multiple users within a single context.
      *
      * @param approved_userlist $userlist The approved context and user information to delete information for.
-     *
-     * @throws \coding_exception
-     * @throws \dml_exception
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;

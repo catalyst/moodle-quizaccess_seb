@@ -54,8 +54,6 @@ class access_manager {
      * The access_manager constructor.
      *
      * @param quiz $quiz The details of the quiz.
-     *
-     * @throws \moodle_exception
      */
     public function __construct(quiz $quiz) {
         $this->quiz = $quiz;
@@ -71,8 +69,6 @@ class access_manager {
      *
      * @param string $pageurl URL to validate keys on.
      * @return bool true if the user is using a browser with a permitted key, false if not.
-     *
-     * @throws \coding_exception
      */
     public function validate_access_keys(string $pageurl = '') : bool {
         return $this->validate_browser_exam_keys($pageurl) && $this->validate_config_key($pageurl);
@@ -83,8 +79,6 @@ class access_manager {
      *
      * @param string $pageurl URL of page that is attempting to access restricted quiz.
      * @return bool True if header key matches one of the saved keys.
-     *
-     * @throws \coding_exception
      */
     private function validate_browser_exam_keys(string $pageurl = '') : bool {
         // If browser exam keys are entered in settings, check they match the header.
@@ -110,8 +104,6 @@ class access_manager {
      *
      * @param string $pageurl URL of page that is attempting to access restricted quiz.
      * @return bool True if header key matches saved key.
-     *
-     * @throws \coding_exception
      */
     private function validate_config_key(string $pageurl = '') : bool {
         // If using client config, or with no requirement, then no check required.
@@ -142,8 +134,6 @@ class access_manager {
      * Check if Safe Exam Browser is required to access quiz.
      *
      * @return bool If required.
-     *
-     * @throws \coding_exception
      */
     public function seb_required() : bool {
         return $this->quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO;
@@ -154,8 +144,6 @@ class access_manager {
      * managed basic Moodle interactions with SEB.
      *
      * @return bool
-     *
-     * @throws \coding_exception
      */
     public function validate_basic_header() : bool {
         if ($this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
@@ -168,8 +156,6 @@ class access_manager {
      * Check if user has any capability to bypass the Safe Exam Browser requirement.
      *
      * @return bool True if user can bypass check.
-     *
-     * @throws \coding_exception
      */
     public function can_bypass_seb() : bool {
         return has_capability('quizaccess/seb:bypassseb', $this->context);

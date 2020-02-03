@@ -39,8 +39,6 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
      * @param int $contextid Context ID.
      * @param int $roleid Role ID.
      * @return int The role id - mainly returned for creation, so calling function can reuse it.
-     *
-     * @throws \coding_exception
      */
     protected function assign_user_capability($capability, $contextid, $roleid = null) {
         global $USER;

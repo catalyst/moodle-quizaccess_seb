@@ -38,9 +38,6 @@ class link_generator {
      * @param bool $seb Whether to use a seb:// scheme or fall back to http:// scheme.
      * @param bool $secure Whether to use HTTPS or HTTP protocol.
      * @return string A URL.
-     *
-     * @throws \coding_exception
-     * @throws \moodle_exception
      */
     public static function get_link(string $cmid, bool $seb = false, bool $secure = true) : string {
         // Check if course module exists.

@@ -51,8 +51,6 @@ class seb_cipher {
      * @param string $xml File contents to be encrypted.
      * @param string $password Password to encrypt with 'pswd' format, or empty if 'plnd' format required.
      * @return string Encrypted data.
-     *
-     * @throws \Exception
      */
     public static function encrypt(string $xml, string $password) : string {
         $cryptor = new Encryptor;
