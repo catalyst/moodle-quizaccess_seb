@@ -257,70 +257,29 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test that access to quiz is prevented if global setting is set to restrict quiz if no quiz password is set, and no
-     * password is set.
+     * Test that quiz form cannot be saved if the global settings are set to require a password and no password is set.
      */
-    public function test_access_prevented_if_password_required_but_not_set_globally() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
+    public function test_mod_quiz_form_cannot_be_saved_if_global_settings_force_quiz_password_and_none_is_set() {
         // Set global settings to require quiz password but set password to be empty.
         set_config('quizpasswordrequired', '1', 'quizaccess_seb');
-        set_config('password', '', 'quiz');
 
-        // Set quiz setting to require seb.
-        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', 1);
-        $quizsettings->save();
-
-        $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
-        // Check that correct error message is returned.
-        $this->assertContains("A password is required for this quiz but none is set.", $rule->prevent_access());
+        $form = $this->createMock('mod_quiz_mod_form');
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1], [], $form);
+        $this->assertContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 
     /**
      * Test that access to quiz is allowed if global setting is set to restrict quiz if no quiz password is set, and global quiz
      * password is set.
      */
-    public function test_access_allowed_if_password_required_and_set_globally() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
+    public function test_mod_quiz_form_can_be_saved_if_global_settings_force_quiz_password_and_is_set() {
         // Set global settings to require quiz password but set password to be empty.
         set_config('quizpasswordrequired', '1', 'quizaccess_seb');
-        set_config('password', 'test', 'quiz');
 
-        // Set quiz setting to require seb.
-        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', 1);
-        $quizsettings->save();
-
-        $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
-        // Check that correct error message is returned.
-        $this->assertNotContains("A password is required for this quiz but none is set.", $rule->prevent_access());
-    }
-
-    /**
-     * Test that access to quiz is allowed if global setting is set to restrict quiz if no quiz password is set, and local quiz
-     * password is set.
-     */
-    public function test_access_allowed_if_password_required_and_set_for_quiz() {
-        global $DB;
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
-        // Set global settings to require quiz password but set password to be empty.
-        set_config('quizpasswordrequired', '1', 'quizaccess_seb');
-        $quiz->password = 'test';
-        $DB->update_record('quiz', $quiz);
-
-        // Set quiz setting to require seb.
-        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', 1);
-        $quizsettings->save();
-
-        $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
-        // Check that correct error message is returned.
-        $this->assertNotContains("A password is required for this quiz but none is set.", $rule->prevent_access());
+        $form = $this->createMock('mod_quiz_mod_form');
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'quizpassword' => 'set'], [], $form);
+        $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 }

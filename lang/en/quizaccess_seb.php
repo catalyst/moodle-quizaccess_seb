@@ -127,7 +127,7 @@ $string['filenotpresent'] = 'Please upload a SEB config file.';
 $string['fileparsefailed'] = 'The uploaded file could not be saved as a SEB config file.';
 $string['clientrequiresseb'] = 'This quiz has been configured to use the Safe Exam Browser with client configuration.';
 $string['settingsfrozen'] = 'Due to there being at least one quiz attempt, the Safe Exam Browser settings can no longer be updated.';
-$string['passwordnotset'] = 'A password is required for this quiz but none is set.';
+$string['passwordnotset'] = 'A setting has been enabled which requires all quizzes to have a password set.';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
