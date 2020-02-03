@@ -41,13 +41,13 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     /**
      * Test that settings types to be added to quiz settings, are part of quiz_settings persistent class.
      */
-    public function test_setting_types_are_part_of_quiz_settings_table() {
+    public function test_setting_elements_are_part_of_quiz_settings_table() {
         $dbsettings = (array) (new quiz_settings())->to_record();
-        $settingtypes = settings_provider::get_quiz_element_types();
-        $settingtypes = (array) $this->strip_all_prefixes((object) $settingtypes);
+        $settingelements = settings_provider::get_quiz_elements();
+        $settingelements = (array) $this->strip_all_prefixes((object) $settingelements);
 
         // Get all elements to be added to form, that are not in the persistent quiz_settings class.
-        $diffelements = array_diff_key($settingtypes, $dbsettings);
+        $diffelements = array_diff_key($settingelements, $dbsettings);
 
         // Check expected differences.
         $this->assertTrue(array_key_exists('seb', $diffelements)); // Table header.
@@ -65,24 +65,38 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
      * Test that setting defaults only refer to settings defined in setting types.
      */
     public function test_setting_defaults_are_part_of_file_types() {
-        $settingtypes = settings_provider::get_quiz_element_types();
+        $settingelements = settings_provider::get_quiz_elements();
         $settingdefaults = settings_provider::get_quiz_defaults();
 
         // Get all defaults that have no matching element in settings types.
-        $diffelements = array_diff_key($settingdefaults, $settingtypes);
+        $diffelements = array_diff_key($settingdefaults, $settingelements);
 
         $this->assertEmpty($diffelements);
     }
 
     /**
+     * Test that setting types only refer to settings defined in setting types.
+     */
+    public function test_setting_types_are_part_of_file_types() {
+        $settingelements = settings_provider::get_quiz_elements();
+        $settingtypes = settings_provider::get_quiz_element_types();
+
+        // Get all defaults that have no matching element in settings types.
+        $diffelements = array_diff_key($settingtypes, $settingelements);
+
+        $this->assertEmpty($diffelements);
+    }
+
+
+    /**
      * Test that setting hideif rules only refer to settings defined in setting types, including the conditions.
      */
     public function test_setting_hideifs_are_part_of_file_types() {
-        $settingtypes = settings_provider::get_quiz_element_types();
+        $settingelements = settings_provider::get_quiz_elements();
         $settinghideifs = settings_provider::get_quiz_hideifs();
 
         // Get all defaults that have no matching element in settings types.
-        $diffelements = array_diff_key($settinghideifs, $settingtypes);
+        $diffelements = array_diff_key($settinghideifs, $settingelements);
 
         // Check no diff for elements to hide.
         $this->assertEmpty($diffelements);
@@ -90,7 +104,7 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         // Check each element's to hide conditions that each condition refers to element in settings types.
         foreach ($settinghideifs as $conditions) {
             foreach ($conditions as $condition) {
-                $this->assertTrue(array_key_exists($condition->get_element(), $settingtypes));
+                $this->assertTrue(array_key_exists($condition->get_element(), $settingelements));
             }
         }
     }

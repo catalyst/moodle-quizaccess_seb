@@ -73,7 +73,7 @@ class settings_provider {
      *
      * @return array All quiz form elements to be added and their types.
      */
-    public static function get_quiz_element_types() : array {
+    public static function get_quiz_elements() : array {
         return [
             'seb' => 'header',
             'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options()],
@@ -100,6 +100,40 @@ class settings_provider {
             'seb_expressionsblocked' => 'textarea',
             'seb_regexblocked' => 'textarea',
             'seb_allowedbrowserexamkeys' => 'textarea',
+        ];
+    }
+
+
+    /**
+     * Get the types of the quiz settings elements.
+     * @return array List of types for the setting elements.
+     */
+    public static function get_quiz_element_types() : array {
+        return [
+            'seb_requiresafeexambrowser' => PARAM_INT,
+            'seb_sebconfigtemplate' => PARAM_BOOL,
+            'seb_suppresssebdownloadlink' => PARAM_BOOL,
+            'filemanager_sebconfigfile' => PARAM_RAW,
+            'seb_linkquitseb' => PARAM_URL,
+            'seb_userconfirmquit' => PARAM_BOOL,
+            'seb_allowuserquitseb' => PARAM_BOOL,
+            'seb_quitpassword' => PARAM_RAW,
+            'seb_allowreloadinexam' => PARAM_BOOL,
+            'seb_showsebtaskbar' => PARAM_BOOL,
+            'seb_showreloadbutton' => PARAM_BOOL,
+            'seb_showtime' => PARAM_BOOL,
+            'seb_showkeyboardlayout' => PARAM_BOOL,
+            'seb_showwificontrol' => PARAM_BOOL,
+            'seb_enableaudiocontrol' => PARAM_BOOL,
+            'seb_muteonstartup' => PARAM_BOOL,
+            'seb_allowspellchecking' => PARAM_BOOL,
+            'seb_activateurlfiltering' => PARAM_BOOL,
+            'seb_filterembeddedcontent' => PARAM_BOOL,
+            'seb_expressionsallowed' => PARAM_RAW,
+            'seb_regexallowed' => PARAM_RAW,
+            'seb_expressionsblocked' => PARAM_RAW,
+            'seb_regexblocked' => PARAM_RAW,
+            'seb_allowedbrowserexamkeys' => PARAM_RAW,
         ];
     }
 
