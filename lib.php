@@ -30,11 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param string $cmid The course module ID for a quiz with config.
  * @return string SEB config string.
- *
- * @throws coding_exception
- * @throws dml_exception
- * @throws moodle_exception
- * @throws require_login_exception
  */
 function quizaccess_seb_get_config(string $cmid) : string {
     // Try and get the course module.

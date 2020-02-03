@@ -47,8 +47,6 @@ class access_prevented extends base {
      * @param string|null $receivedconfigkey Config key retrieved from page header.
      * @param string|null $receivedbrowserexamkey Browser exam key retrieved from page header.
      * @return base
-     *
-     * @throws \coding_exception
      */
     public static function create_strict(quiz_settings $quizsettings, string $courseid,
                                          context_module $context, string $reason, string $url,
@@ -87,8 +85,6 @@ class access_prevented extends base {
      * Get the name of the event.
      *
      * @return string Name of event.
-     *
-     * @throws \coding_exception
      */
     public static function get_name() {
         return get_string('event:accessprevented', 'quizaccess_seb');

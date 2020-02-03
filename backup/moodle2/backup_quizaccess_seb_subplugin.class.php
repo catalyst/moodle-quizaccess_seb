@@ -34,12 +34,6 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
      * Stores the data related to the Safe Exam Browser quiz settings and management for a particular quiz.
      *
      * @return backup_subplugin_element
-     *
-     * @throws DOMException
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws base_element_struct_exception
-     * @throws coding_exception
      */
     protected function define_quiz_subplugin_structure() {
         parent::define_quiz_subplugin_structure();

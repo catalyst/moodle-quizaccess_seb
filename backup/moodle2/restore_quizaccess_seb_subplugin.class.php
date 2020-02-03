@@ -53,11 +53,6 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
      * Process the restored data for the quizaccess_seb_quizsettings table.
      *
      * @param stdClass $data Data for quizaccess_seb_quizsettings retrieved from backup xml.
-     *
-     * @throws DOMException
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws coding_exception
      */
     public function process_quizaccess_seb_quizsettings($data) {
         // Process quizsettings.

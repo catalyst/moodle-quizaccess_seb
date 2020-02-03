@@ -48,10 +48,6 @@ class config_key {
      *
      * @param string $xml A PList XML string, representing SEB config.
      * @return config_key This config key instance.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
      */
     public static function generate(string $xml) {
         $plist = new property_list($xml);

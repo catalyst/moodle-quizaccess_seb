@@ -321,9 +321,6 @@ class settings_provider {
      *
      * @param string $itemid Item ID of file in user draft file area.
      * @return void|lang_string
-     *
-     * @throws \coding_exception
-     * @throws \Exception
      */
     public static function validate_draftarea_configfile($itemid) {
         // When saving the settings, this value will be null.
@@ -354,8 +351,6 @@ class settings_provider {
      *
      * @param string $itemid Item ID of the file.
      * @return stored_file|null Returns null if no file is found.
-     *
-     * @throws \coding_exception
      */
     public static function get_current_user_draft_file(string $itemid) : ?stored_file { // @codingStandardsIgnoreLine
         global $USER;
@@ -372,8 +367,6 @@ class settings_provider {
      *
      * @param string $cmid The course module id which is used as an itemid reference.
      * @return stored_file|null Returns null if no file is found.
-     *
-     * @throws \coding_exception
      */
     public static function get_module_context_sebconfig_file(string $cmid) : ?stored_file { // @codingStandardsIgnoreLine
         $fs = new \file_storage();
@@ -409,7 +402,6 @@ class settings_provider {
      *
      * @param string $cmid The cmid of for the quiz.
      * @return bool Always true or exception if error occurred
-     * @throws \coding_exception
      */
     public static function delete_uploaded_config_file(string $cmid) : bool {
         $file = self::get_module_context_sebconfig_file($cmid);

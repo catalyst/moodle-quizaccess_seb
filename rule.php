@@ -80,8 +80,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @param mod_quiz_mod_form $quizform the quiz settings form that is being built.
      * @param MoodleQuickForm $mform the wrapped MoodleQuickForm.
-     *
-     * @throws coding_exception
      */
     public static function add_settings_form_fields(mod_quiz_mod_form $quizform, MoodleQuickForm $mform) {
         global $DB;
@@ -158,8 +156,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @param array $files information about any uploaded files.
      * @param mod_quiz_mod_form $quizform the quiz form object.
      * @return array $errors the updated $errors array.
-     *
-     * @throws coding_exception
      */
     public static function validate_settings_form_fields(array $errors,
                                                          array $data, $files, mod_quiz_mod_form $quizform) : array {
@@ -203,8 +199,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @param object $quiz the data from the quiz form, including $quiz->id
      *      which is the id of the quiz being saved.
-     *
-     * @throws coding_exception
      */
     public static function save_settings($quiz) {
 
@@ -246,8 +240,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @param object $quiz the data from the database, including $quiz->id
      *      which is the id of the quiz being deleted.
-     *
-     * @throws coding_exception
      */
     public static function delete_settings($quiz) {
         $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
@@ -315,9 +307,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @return string false if access should be allowed, a message explaining the
      *      reason if access should be prevented.
-     *
-     * @throws coding_exception
-     * @throws moodle_exception
      */
     public function prevent_access() {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
@@ -384,9 +373,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      * Get buttons to prompt user to download SEB or config file.
      *
      * @return string Button html as a block.
-     *
-     * @throws coding_exception
-     * @throws moodle_exception
      */
     private function get_action_buttons() {
         global $OUTPUT;
@@ -420,8 +406,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      * Get button that links to Safe Exam Browser download.
      *
      * @return string HTML for button.
-     *
-     * @throws coding_exception
      */
     private function get_download_button_only() {
         global $OUTPUT;

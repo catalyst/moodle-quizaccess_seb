@@ -52,10 +52,6 @@ class property_list {
      * property_list constructor.
      *
      * @param string $xml A Plist XML string.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
      */
     public function __construct(string $xml = '') {
         $this->cfpropertylist = new CFPropertyList();
@@ -109,8 +105,6 @@ class property_list {
      *
      * @param string $key Key of element to update.
      * @param mixed $value Value to update element with.
-     *
-     * @throws \invalid_parameter_exception
      */
     public function update_element_value(string $key, $value) {
         if (is_array($value)) {
@@ -141,8 +135,6 @@ class property_list {
      *
      * @param string $key Key of element to update.
      * @param array $value Array to update element with.
-     *
-     * @throws \invalid_parameter_exception
      */
     public function update_element_array(string $key, array $value) {
         // Validate new array.
@@ -213,10 +205,6 @@ class property_list {
      * 8. <date> plist XML elements must be converted to ISO 8601 formatted strings.
      *
      * @return string A json encoded string.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
      */
     public function to_json() : string {
         // Create a clone of the PList, so main list isn't mutated.

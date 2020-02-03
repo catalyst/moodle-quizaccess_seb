@@ -48,11 +48,6 @@ class quiz_settings extends persistent {
      *
      * @param int $id If set, this is the id of an existing record, used to load the data.
      * @param \stdClass $record If set will be passed to {@link self::from_record()}.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
-     * @throws \coding_exception
      */
     public function __construct($id = 0, \stdClass $record = null) {
         parent::__construct($id, $record);
@@ -192,8 +187,6 @@ class quiz_settings extends persistent {
      *
      * @param string $keys Newline separated browser exam keys.
      * @return true|lang_string If there is an error, an error string is returned.
-     *
-     * @throws \coding_exception
      */
     protected function validate_allowedbrowserexamkeys($keys) {
         $keys = $this->split_keys($keys);
@@ -212,8 +205,6 @@ class quiz_settings extends persistent {
      * Get the browser exam keys as a pre-split array instead of just as a string.
      *
      * @return array
-     *
-     * @throws \coding_exception
      */
     protected function get_allowedbrowserexamkeys() : array {
         $keysstring = $this->raw_get('allowedbrowserexamkeys');
@@ -243,11 +234,6 @@ class quiz_settings extends persistent {
 
     /**
      * As there is no hook for before both create and update, this function is called by both hooks.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
-     * @throws \coding_exception
      */
     private function before_save() {
         // Recalculate config and config key.
@@ -257,11 +243,6 @@ class quiz_settings extends persistent {
 
     /**
      * Generate the config key from the config string.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
-     * @throws \coding_exception
      */
     private function compute_config_key() {
         $config = $this->get('config');
@@ -271,8 +252,6 @@ class quiz_settings extends persistent {
 
     /**
      * Create or update the config string based on the current quiz settings.
-     *
-     * @throws \coding_exception
      */
     private function compute_config() {
         switch ($this->get('requiresafeexambrowser')) {
@@ -299,11 +278,6 @@ class quiz_settings extends persistent {
     /**
      * If file is uploaded, save the file to the config field.
      * This is processed after the validation step, so a SEB file should exist at this point.
-     *
-     * @throws \CFPropertyList\IOException
-     * @throws \CFPropertyList\PListException
-     * @throws \DOMException
-     * @throws \coding_exception
      */
     private function process_seb_config_file() {
         $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
