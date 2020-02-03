@@ -86,13 +86,15 @@ class quizaccess_seb extends quiz_access_rule_base {
         $defaults = settings_provider::get_quiz_defaults();
         $types = settings_provider::get_quiz_element_types();
         $hideifs = settings_provider::get_quiz_hideifs();
-        $cm = context_module::instance($quizform->get_coursemodule()->id);
+
+        // The course context for new modules, or the module context for existing modules.
+        $context = $quizform->get_context();
 
         // Insert all the form elements before the 'security' section as a group.
-        foreach (settings_provider::get_quiz_elements($cm) as $name => $type) {
+        foreach (settings_provider::get_quiz_elements($context) as $name => $type) {
 
             // Check if the user has capability to edit setting, otherwise use hidden setting type.
-            if ($type != 'header' && !has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
+            if ($type != 'header' && !has_capability('quizaccess/seb:manage_' . $name, $context)) {
                 $type = 'hidden'; // A disabled element may be more appropriate but does not currently exist.
             }
 
@@ -123,13 +125,17 @@ class quizaccess_seb extends quiz_access_rule_base {
 
             // Second pass to populate the filemanager with any existing saved self config file.
             if (is_array($type) && $type[0] == 'filemanager') {
+                $itemid = null;
+                if ($quizform->get_coursemodule()) {
+                    $itemid = $quizform->get_coursemodule()->id;
+                }
                 $draftitemid = 0;
                 file_prepare_draft_area(
                     $draftitemid,
-                    $quizform->get_context()->id,
+                    $context->id,
                     'quizaccess_seb',
                     $name,
-                    $quizform->get_coursemodule()->id
+                    $itemid
                 );
                 $mform->setDefault($name, $draftitemid);
                 $mform->addHelpButton($name, $name, 'quizaccess_seb');
