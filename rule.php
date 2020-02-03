@@ -86,10 +86,11 @@ class quizaccess_seb extends quiz_access_rule_base {
     public static function add_settings_form_fields(mod_quiz_mod_form $quizform, MoodleQuickForm $mform) {
         global $DB;
         $defaults = settings_provider::get_quiz_defaults();
+        $types = settings_provider::get_quiz_element_types();
         $hideifs = settings_provider::get_quiz_hideifs();
 
         // Insert all the form elements before the 'security' section as a group.
-        foreach (settings_provider::get_quiz_element_types() as $name => $type) {
+        foreach (settings_provider::get_quiz_elements() as $name => $type) {
 
             // Check if the user has capability to edit setting, otherwise use hidden setting type.
             if ($type != 'header' && !has_capability('quizaccess/seb:manage_' . $name, $quizform->get_context())) {
@@ -114,6 +115,11 @@ class quizaccess_seb extends quiz_access_rule_base {
             // Set defaults.
             if (isset($defaults[$name])) {
                 $mform->setDefault($name, $defaults[$name]);
+            }
+
+            // Set types.
+            if (isset($types[$name])) {
+                $mform->setType($name, $types[$name]);
             }
 
             // Second pass to populate the filemanager with any existing saved self config file.
@@ -145,7 +151,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         // If there have been any quiz attempts, freeze SEB settings, and explain why in section tooltip.
         $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
         if (!empty($attempts)) {
-            $mform->hardFreeze(array_keys(settings_provider::get_quiz_element_types()));
+            $mform->hardFreeze(array_keys(settings_provider::get_quiz_elements()));
             $mform->addHelpButton('seb', 'disabledsettings', 'quizaccess_seb');
         }
     }

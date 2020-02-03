@@ -40,7 +40,7 @@ $capabilities = array(
 );
 
 // Individual setting capabilities.
-$settings = \quizaccess_seb\settings_provider::get_quiz_element_types();
+$settings = \quizaccess_seb\settings_provider::get_quiz_elements();
 foreach ($settings as $name => $type) {
     // Don't add a capability for the header element.
     if ($type !== 'header') {
