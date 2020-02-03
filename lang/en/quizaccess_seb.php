@@ -127,10 +127,10 @@ $string['settingsfrozen'] = 'Due to there being at least one quiz attempt, the S
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
 $string['seb:managetemplates'] = 'Manage Safe Exam Browser configuration templates.';
+$string['seb:manage_filemanager_sebconfigfile'] = 'Modify Safe Exam Browser quiz setting: Select SEB config file.';
 $string['seb:manage_seb_allowedbrowserexamkeys'] = 'Modify Allowed Browser Exam Keys';
 $string['seb:manage_seb_requiresafeexambrowser'] = 'Modify Safe Exam Browser quiz setting: Require Safe Exam Browser';
 $string['seb:manage_seb_sebconfigtemplate'] = 'Modify Safe Exam Browser quiz setting: Select SEB template.';
-$string['seb:manage_seb_sebconfigfile'] = 'Modify Safe Exam Browser quiz setting: Select SEB config file.';
 $string['seb:manage_seb_suppresssebdownloadlink'] = 'Modify Safe Exam Browser quiz setting: Suppress download link.';
 $string['seb:manage_seb_linkquitseb'] = 'Modify Safe Exam Browser quiz setting: Quit link.';
 $string['seb:manage_seb_userconfirmquit'] = 'Modify Safe Exam Browser quiz setting: Confirm on quit.';
