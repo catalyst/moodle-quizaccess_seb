@@ -39,17 +39,6 @@ class quizaccess_seb extends quiz_access_rule_base {
     private $accessmanager;
 
     /**
-     * Create an instance of this rule for a particular quiz.
-     *
-     * @param quiz $quizobj information about the quiz in question.
-     * @param int $timenow the time that should be considered as 'now'.
-     */
-    public function __construct (quiz $quizobj, int $timenow) {
-        parent::__construct($quizobj, $timenow);
-        $this->accessmanager = new access_manager($quizobj);
-    }
-
-    /**
      * Return an appropriately configured instance of this rule, if it is applicable
      * to the given quiz, otherwise return null.
      *
@@ -65,7 +54,10 @@ class quizaccess_seb extends quiz_access_rule_base {
         if (!$accessmanager->seb_required()) {
             return null;
         }
-        return new self($quizobj, $timenow);
+
+        $rule = new self($quizobj, $timenow);
+        $rule->accessmanager = $accessmanager;
+        return $rule;
     }
 
     /**

@@ -59,9 +59,6 @@ class access_manager {
         $this->quiz = $quiz;
         $this->context = context_module::instance($quiz->get_cmid());
         $this->quizsettings = quiz_settings::get_record(['quizid' => $quiz->get_quizid()]);
-        if ($this->quizsettings == false) {
-            throw new \moodle_exception('noconfigfound', 'quizaccess_seb', '', $quiz->get_cmid());
-        }
     }
 
     /**
@@ -132,11 +129,16 @@ class access_manager {
 
     /**
      * Check if Safe Exam Browser is required to access quiz.
+     * If quizsettings do not exist, then there is no requirement for using SEB.
      *
      * @return bool If required.
      */
     public function seb_required() : bool {
-        return $this->quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO;
+        if (!$this->quizsettings) {
+            return false;
+        } else {
+            return $this->quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO;
+        }
     }
 
     /**
