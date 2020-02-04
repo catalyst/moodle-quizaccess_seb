@@ -389,7 +389,9 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // If suppresssebdownloadlink setting is enabled, do not show download button.
         if (empty($this->quiz->seb_suppresssebdownloadlink)) {
-            $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+            if (!empty($this->get_seb_download_url())) {
+                $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+            }
         }
 
         // Get config for displaying links.
@@ -412,12 +414,17 @@ class quizaccess_seb extends quiz_access_rule_base {
 
     /**
      * Get button that links to Safe Exam Browser download.
+     * This will return an empty string if quizaccess_seb/sebdownloadbutton is not set.
      *
      * @return string HTML for button.
      */
     private function get_download_button_only() {
         global $OUTPUT;
         $buttons = '';
+
+        if (empty($this->get_seb_download_url())) {
+            return $buttons;
+        }
 
         $buttons .= html_writer::start_div();
         // If suppresssebdownloadlink setting is enabled, do not show download button.
