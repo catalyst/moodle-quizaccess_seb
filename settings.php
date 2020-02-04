@@ -44,7 +44,7 @@ if ($ADMIN->fulltree) {
             PARAM_URL));
 
     $settings->add(new admin_setting_configcheckbox('quizaccess_seb/quizpasswordrequired',
-        get_string('setting:quizpasswordrequired', 'quizaccess_seb'),
-        get_string('setting:quizpasswordrequired_desc', 'quizaccess_seb'),
-        '0'));
+            get_string('setting:quizpasswordrequired', 'quizaccess_seb'),
+            get_string('setting:quizpasswordrequired_desc', 'quizaccess_seb'),
+            '0'));
 }
