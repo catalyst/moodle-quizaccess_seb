@@ -288,15 +288,15 @@ class quiz_settings extends persistent {
         $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
         $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $cm->id]);
 
-        $startURL = $this->plist->get_element_value('startURL');
-        if ($startURL) {
+        $starturl = $this->plist->get_element_value('startURL');
+        if ($starturl) {
             $this->plist->update_element_value('startURL', $quizurl->out(true));
         } else {
             $this->plist->add_element_to_root('startURL', new CFString($quizurl->out(true)));
         }
 
-        $sendBrowserExamKey = $this->plist->get_element_value('sendBrowserExamKey');
-        if ($sendBrowserExamKey) {
+        $sendbrowserexamkey = $this->plist->get_element_value('sendBrowserExamKey');
+        if ($sendbrowserexamkey) {
             $this->plist->update_element_value('sendBrowserExamKey', true);
         } else {
             $this->plist->add_element_to_root('sendBrowserExamKey', new CFBoolean(true));
