@@ -153,45 +153,4 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
         $this->expectOutputString('Hello world');
         quizaccess_seb_send_file('Hello world');
     }
-
-    /**
-     * Test we can create missing default settings.
-     */
-    public function test_quizaccess_seb_create_missing_settings() {
-        global $DB;
-
-        $course = $this->getDataGenerator()->create_course();
-        $quiz1 = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $quiz2 = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $quiz3 = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $quiz4 = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
-        $this->assertEquals(4, $DB->count_records('quizaccess_seb_quizsettings'));
-        $this->assertEquals(4, $DB->count_records('quizaccess_seb_quizsettings', ['requiresafeexambrowser' => 0]));
-
-        // Delete created settings.
-        $DB->delete_records('quizaccess_seb_quizsettings');
-
-        $this->assertEmpty($DB->count_records('quizaccess_seb_quizsettings'));
-        $this->assertEquals(0, $DB->count_records('quizaccess_seb_quizsettings', ['requiresafeexambrowser' => 0]));
-
-        // Create an extra quiz.
-        $quiz5 = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $this->assertEquals(1, $DB->count_records('quizaccess_seb_quizsettings'));
-
-        // Create all missing settings.
-        quizaccess_seb_create_missing_settings();
-
-        // Make sure that just new settings are created.
-        $this->assertEquals(5, $DB->count_records('quizaccess_seb_quizsettings'));
-        // Make sure that using SEB is disabled by fefault for all created settings.
-        $this->assertEquals(5, $DB->count_records('quizaccess_seb_quizsettings', ['requiresafeexambrowser' => 0]));
-        // Double check that we can get this data using quiz_settings.
-        $quizzes = $DB->get_records('quiz');
-        foreach ($quizzes as $quiz) {
-            $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-            $this->assertNotFalse($quizsettings);
-            $this->assertEquals(0, $quizsettings->get('requiresafeexambrowser'));
-        }
-    }
 }

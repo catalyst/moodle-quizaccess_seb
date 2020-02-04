@@ -31,6 +31,5 @@ require_once($CFG->dirroot  . '/mod/quiz/accessrule/seb/lib.php');
  * Custom code to be run on installing the plugin.
  */
 function xmldb_quizaccess_seb_install() {
-    quizaccess_seb_create_missing_settings();
     return true;
 }

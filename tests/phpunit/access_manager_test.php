@@ -197,18 +197,4 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
         $this->assertTrue($accessmanager->validate_access_keys());
     }
-
-    /**
-     * Test that access_manager throws an exception if a quiz doesn't have seb settings.
-     */
-    public function test_exception_thrown_if_there_are_no_seb_settings_for_a_quiz() {
-        global $DB;
-        // Delete created settings.
-        $DB->delete_records('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]);
-
-        $this->expectException('moodle_exception');
-        $this->expectExceptionMessage('No SEB config could be found for quiz with cmid: ' . $this->quiz->cmid);
-        new access_manager(new quiz($this->quiz,
-                get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
-    }
 }
