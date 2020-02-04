@@ -32,6 +32,7 @@ use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
 use core\persistent;
 use lang_string;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -271,8 +272,35 @@ class quiz_settings extends persistent {
                 $this->process_url_filters();
         }
 
+        // Add the sensible default options to the configuration and exported SEB files.
+        $this->process_default_settings();
+
         // Export and save the config, ready for DB.
         $this->set('config', $this->plist->to_xml());
+    }
+
+    /**
+     * Sets the default settings when saving a quiz.
+     */
+    private function process_default_settings() {
+        global $CFG;
+
+        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
+        $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $cm->id]);
+
+        $startURL = $this->plist->get_element_value('startURL');
+        if ($startURL) {
+            $this->plist->update_element_value('startURL', $quizurl->out(true));
+        } else {
+            $this->plist->add_element_to_root('startURL', new CFString($quizurl->out(true)));
+        }
+
+        $sendBrowserExamKey = $this->plist->get_element_value('sendBrowserExamKey');
+        if ($sendBrowserExamKey) {
+            $this->plist->update_element_value('sendBrowserExamKey', true);
+        } else {
+            $this->plist->add_element_to_root('sendBrowserExamKey', new CFBoolean(true));
+        }
     }
 
     /**
