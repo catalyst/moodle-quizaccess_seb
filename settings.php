@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Configuration settings for the quizaccess_seb plugin.
+ * Global configuration settings for the quizaccess_seb plugin.
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
@@ -36,4 +36,15 @@ if ($ADMIN->fulltree) {
             get_string('setting:showseblinks', 'quizaccess_seb'),
             get_string('setting:showseblinks_desc', 'quizaccess_seb'),
             $links, $links));
+
+    $settings->add(new admin_setting_configtext('quizaccess_seb/downloadlink',
+            get_string('setting:downloadlink', 'quizaccess_seb'),
+            get_string('setting:downloadlink_desc', 'quizaccess_seb'),
+            'https://safeexambrowser.org/download_en.html',
+            PARAM_URL));
+
+    $settings->add(new admin_setting_configcheckbox('quizaccess_seb/quizpasswordrequired',
+            get_string('setting:quizpasswordrequired', 'quizaccess_seb'),
+            get_string('setting:quizpasswordrequired_desc', 'quizaccess_seb'),
+            '0'));
 }

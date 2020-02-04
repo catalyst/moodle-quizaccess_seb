@@ -253,4 +253,53 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Check that correct error message is returned.
         $this->assertFalse($rule->prevent_access());
     }
+
+    /**
+     * Test that quiz form cannot be saved if the global settings are set to require a password and no password is set.
+     */
+    public function test_mod_quiz_form_cannot_be_saved_if_global_settings_force_quiz_password_and_none_is_set() {
+        // Set global settings to require quiz password but set password to be empty.
+        set_config('quizpasswordrequired', '1', 'quizaccess_seb');
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1], [], $form);
+        $this->assertContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
+    }
+
+    /**
+     * Test that access to quiz is allowed if global setting is set to restrict quiz if no quiz password is set, and global quiz
+     * password is set.
+     */
+    public function test_mod_quiz_form_can_be_saved_if_global_settings_force_quiz_password_and_is_set() {
+        // Set global settings to require quiz password but set password to be empty.
+        set_config('quizpasswordrequired', '1', 'quizaccess_seb');
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'quizpassword' => 'set'], [], $form);
+        $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
+    }
+
+    /**
+     * Test get_download_button_only, checks for empty config setting quizaccess_seb/downloadlink.
+     */
+    public function test_get_download_button_only() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('get_download_button_only');
+        $method->setAccessible(true);
+
+        // The current default contents.
+        $this->assertContains('https://safeexambrowser.org/download_en.html', $method->invoke($rule));
+
+        set_config('downloadlink', '', 'quizaccess_seb');
+
+        // Will not return any button if the URL is empty.
+        $this->assertSame('', $method->invoke($rule));
+    }
+
 }

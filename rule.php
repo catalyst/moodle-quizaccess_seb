@@ -35,11 +35,6 @@ require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
 class quizaccess_seb extends quiz_access_rule_base {
 
-    /**
-     * Default URL to download SEB browser.
-     */
-    const DEFAULT_SEB_DOWNLOAD_URL = 'https://safeexambrowser.org/download_en.html';
-
     /** @var access_manager $accessmanager Instance to manage the access to the quiz for this plugin. */
     private $accessmanager;
 
@@ -206,6 +201,11 @@ class quizaccess_seb extends quiz_access_rule_base {
             if (!empty($drafterror)) {
                 $errors['filemanager_sebconfigfile'] = $drafterror;
             }
+        }
+
+        // Global settings may be active which require a quiz password to be set.
+        if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired')) && empty($data['quizpassword'])) {
+            $errors['quizpassword'] = get_string('passwordnotset', 'quizaccess_seb');
         }
 
         return $errors;
@@ -399,7 +399,9 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // If suppresssebdownloadlink setting is enabled, do not show download button.
         if (empty($this->quiz->seb_suppresssebdownloadlink)) {
-            $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+            if (!empty($this->get_seb_download_url())) {
+                $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+            }
         }
 
         // Get config for displaying links.
@@ -422,12 +424,17 @@ class quizaccess_seb extends quiz_access_rule_base {
 
     /**
      * Get button that links to Safe Exam Browser download.
+     * This will return an empty string if quizaccess_seb/sebdownloadbutton is not set.
      *
      * @return string HTML for button.
      */
     private function get_download_button_only() {
         global $OUTPUT;
         $buttons = '';
+
+        if (empty($this->get_seb_download_url())) {
+            return $buttons;
+        }
 
         $buttons .= html_writer::start_div();
         // If suppresssebdownloadlink setting is enabled, do not show download button.
@@ -445,8 +452,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return string
      */
     private function get_seb_download_url() {
-        // TODO: Issue #9 - Admin setting or download SEB url.
-        return self::DEFAULT_SEB_DOWNLOAD_URL;
+        return get_config('quizaccess_seb', 'downloadlink');
     }
 
     /**

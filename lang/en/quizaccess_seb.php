@@ -39,6 +39,10 @@ $string['quizsettings'] = 'Quiz settings';
 
 // Admin settings.
 $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
+$string['setting:downloadlink'] = 'Safe Exam Browser download link.';
+$string['setting:downloadlink_desc'] = 'URL for downloading the Safe Exam Browser application.';
+$string['setting:quizpasswordrequired'] = 'Quiz password required.';
+$string['setting:quizpasswordrequired_desc'] = 'Check this box if all quizzes that require the Safe Exam Browser must have a quiz password set.';
 $string['setting:showseblink'] = 'Show seb:// link';
 $string['setting:showhttplink'] = 'Show http:// link';
 $string['setting:showseblinks'] = 'Show Safe Exam Browser config links.';
@@ -123,6 +127,7 @@ $string['filenotpresent'] = 'Please upload a SEB config file.';
 $string['fileparsefailed'] = 'The uploaded file could not be saved as a SEB config file.';
 $string['clientrequiresseb'] = 'This quiz has been configured to use the Safe Exam Browser with client configuration.';
 $string['settingsfrozen'] = 'Due to there being at least one quiz attempt, the Safe Exam Browser settings can no longer be updated.';
+$string['passwordnotset'] = 'Using Safe Exam Browser requires to set a quiz password.';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';
