@@ -110,8 +110,6 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        set_config('downloadlink', 'https://safeexambrowser.org/download_en.html', 'quizaccess_seb'); // Set download link config.
-
         // Set quiz setting to require seb.
         $quizsetting = quiz_settings::get_record(['quizid' => $quiz->id]);
         $quizsetting->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
@@ -282,4 +280,26 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'quizpassword' => 'set'], [], $form);
         $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
+
+    /**
+     * Test get_download_button_only, checks for empty config setting quizaccess_seb/downloadlink.
+     */
+    public function test_get_download_button_only() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        $rule = new quizaccess_seb(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0);
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('get_download_button_only');
+        $method->setAccessible(true);
+
+        // The current default contents.
+        $this->assertContains('https://safeexambrowser.org/download_en.html', $method->invoke($rule));
+
+        set_config('downloadlink', '', 'quizaccess_seb');
+
+        // Will not return any button if the URL is empty.
+        $this->assertSame('', $method->invoke($rule));
+    }
+
 }
