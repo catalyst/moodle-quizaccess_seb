@@ -57,7 +57,7 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
     /**
      * Test that SEB is not required.
      */
-    public function test_seb_check_not_required() {
+    public function test_seb_required_false() {
         // Set quiz setting to not require seb.
         $quizsetting = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsetting->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
@@ -71,7 +71,12 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
     /**
      * Test that SEB is required.
      */
-    public function test_seb_check_required() {
+    public function test_seb_required_true() {
+        // Explicitly set the quiz to require SEB with manual config.
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $settings->save();
+
         $accessmanager = new access_manager(new quiz($this->quiz,
                 get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
         $this->assertTrue($accessmanager->seb_required());
