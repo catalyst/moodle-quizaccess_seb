@@ -48,10 +48,28 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
         $this->resetAfterTest();
         $this->course = $this->getDataGenerator()->create_course();
         $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
-        // Set the quiz to require SEB with manual config.
-        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $settings->save();
+    }
+
+    /**
+     * Test access_manager private property quizsettings is null.
+     */
+    public function test_access_manager_quizsettings_null() {
+        global $DB;
+
+        // Using a generator will create the quiz_settings record.
+        // Lets remove it to emulate an existing quiz prior to installing the plugin.
+        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
+
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+
+        $this->assertFalse($accessmanager->seb_required());
+
+        $reflection = new \ReflectionClass('\quizaccess_seb\access_manager');
+        $property = $reflection->getProperty('quizsettings');
+        $property->setAccessible(true);
+
+        $this->assertFalse($property->getValue($accessmanager));
     }
 
     /**
