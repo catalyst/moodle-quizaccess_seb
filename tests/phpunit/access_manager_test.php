@@ -143,6 +143,10 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      * Test that the quiz Config Key does not match the incoming request header.
      */
     public function test_access_keys_fail_to_validate_with_config_key() {
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $settings->save();
+
         $accessmanager = new access_manager(new quiz($this->quiz,
                 get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
 
