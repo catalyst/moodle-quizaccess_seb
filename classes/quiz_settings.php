@@ -68,6 +68,9 @@ class quiz_settings extends persistent {
             'quizid' => [
                 'type' => PARAM_INT,
             ],
+            'cmid' => [
+                'type' => PARAM_INT,
+            ],
             'templateid' => [
                 'type' => PARAM_INT,
                 'default' => 0,
@@ -291,8 +294,7 @@ class quiz_settings extends persistent {
     private function process_default_settings() {
         global $CFG;
 
-        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
-        $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $cm->id]);
+        $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $this->get('cmid')]);
 
         $starturl = $this->plist->get_element_value('startURL');
         if ($starturl) {
@@ -314,9 +316,7 @@ class quiz_settings extends persistent {
      * This is processed after the validation step, so a SEB file should exist at this point.
      */
     private function process_seb_config_file() {
-        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
-
-        $file = settings_provider::get_module_context_sebconfig_file($cm->id);
+        $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
 
         // If file has been uploaded, overwrite existing config.
         if (!empty($file)) {

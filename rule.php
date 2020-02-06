@@ -179,6 +179,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         $quizsettings = (new quiz_settings())->from_record($settings);
         // Set non-form fields.
         $quizsettings->set('quizid', $data['instance']);
+        $quizsettings->set('cmid', $data['coursemodule']);
         $quizsettings->validate();
 
         // Add any errors to list.
@@ -227,6 +228,9 @@ class quizaccess_seb extends quiz_access_rule_base {
         // Associate settings with quiz.
         $settings->quizid = $quiz->id;
 
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
+        $settings->cmid = $cm->id;
+
         // TODO: Process sebconfigtemplate into templateid.
         $settings->templateid = 0;
 
@@ -245,7 +249,6 @@ class quizaccess_seb extends quiz_access_rule_base {
         $quizsettings->save();
 
         // Ensure that a cm exists before deleting any files.
-        $cm = get_coursemodule_from_instance('quiz', $quiz->id);
         if ($cm && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
             $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
             settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $cm->id);

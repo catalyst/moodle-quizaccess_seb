@@ -50,7 +50,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     public function test_validate_settings_with_valid_data() {
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1], [],
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1], [],
             $form);
         $this->assertEmpty($errors);
     }
@@ -62,7 +62,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form and quiz instance.
         $errors = quizaccess_seb::validate_settings_form_fields([],
-                ['instance' => 1, 'seb_requiresafeexambrowser' => 'Uh oh!'], [], $form);
+                ['instance' => 1, 'coursemodule' => 1, 'seb_requiresafeexambrowser' => 'Uh oh!'], [], $form);
         $this->assertEquals(['seb_requiresafeexambrowser' => 'Data submitted is invalid'], $errors);
     }
 
@@ -269,7 +269,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1], [], $form);
         $this->assertContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 
@@ -283,7 +283,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'quizpassword' => 'set'], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1, 'quizpassword' => 'set'], [], $form);
         $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 

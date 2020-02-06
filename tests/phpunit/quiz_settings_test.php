@@ -42,7 +42,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->course = $this->getDataGenerator()->create_course();
         $this->quiz = $this->getDataGenerator()->create_module('quiz', array('course' => $this->course->id));
         $this->context = context_module::instance($this->quiz->cmid);
-        $this->cm = get_coursemodule_from_instance('quiz', $this->quiz->id);
         $this->url = new moodle_url("/mod/quiz/view.php", ['id' => $this->quiz->cmid]);
     }
 
@@ -53,6 +52,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         // Test settings to populate the in the object.
         $settings = $this->get_test_settings();
         $settings->quizid = $this->quiz->id;
+        $settings->cmid = $this->quiz->cmid;
 
         // Obtain the existing record that is created when using a generator.
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
@@ -79,6 +79,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         // Test settings to populate the in the object.
         $settings = $this->get_test_settings();
         $settings->quizid = $this->quiz->id;
+        $settings->cmid = $this->quiz->cmid;
 
         // Obtain the existing record that is created when using a generator.
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
@@ -126,13 +127,12 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
 
         $settings = $this->get_test_settings();
-        $settings->quizid = $this->quiz->id;
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("9830bc3ee647c5e1d2e092282d6f088ca24cd94c5c56c2973c63f95ef2838eb4",
+        $this->assertEquals("47793f5669387c366bb50ad97966e0b0be34644329dc9bdf97b5822897d5ee44",
                 $configkey);
     }
 
@@ -146,18 +146,17 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
 
         $settings = $this->get_test_settings();
-        $settings->quizid = $this->quiz->id;
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("9830bc3ee647c5e1d2e092282d6f088ca24cd94c5c56c2973c63f95ef2838eb4",
+        $this->assertEquals("47793f5669387c366bb50ad97966e0b0be34644329dc9bdf97b5822897d5ee44",
                 $configkey);
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("b7b9f3bd6361b018825e1f3362562930b782245d86c782ba9bb0f207c9ee1e25",
+        $this->assertEquals("b8eb09e36214475a7e872ce588a7bd0ab73bb02c9d6bde3e7807c58031b59922",
             $configkey);
     }
 
@@ -177,6 +176,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
 
         // Dynamically update the quizid from the setUp.
         $settings->quizid = $this->quiz->id;
+        $settings->cmid = $this->quiz->cmid;
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('config'));
@@ -379,6 +379,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     private function get_test_settings() : stdClass {
         return (object) [
             'quizid' => 1,
+            'cmid' => 1,
             'requiresafeexambrowser' => '1',
             'sebconfigfile' => '373552893',
             'showsebtaskbar' => '1',
@@ -411,10 +412,10 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * @return int Item ID of file.
      */
     private function create_module_test_file(string $xml) : int {
-        $itemid = $this->cm->id;
+        $itemid = $this->quiz->cmid;
         $fs = get_file_storage();
         $filerecord = [
-            'contextid' => \context_module::instance($this->cm->id)->id,
+            'contextid' => \context_module::instance($this->quiz->cmid)->id,
             'component' => 'quizaccess_seb',
             'filearea' => 'filemanager_sebconfigfile',
             'itemid' => $itemid,
