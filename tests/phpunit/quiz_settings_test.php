@@ -121,11 +121,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * Test that config key is generated immediately prior to saving quiz settings.
      */
     public function test_config_key_is_created_from_quiz_settings() {
-        global $DB;
-        // Using a generator will create the quiz_settings record.
-        // Lets remove it to emulate an existing quiz prior to installing the plugin.
-        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
-
         $settings = $this->get_test_settings();
 
         $quizsettings = new quiz_settings(0, $settings);
@@ -140,11 +135,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * Test that config key is generated immediately prior to saving quiz settings.
      */
     public function test_config_key_is_updated_from_quiz_settings() {
-        global $DB;
-        // Using a generator will create the quiz_settings record.
-        // Lets remove it to emulate an existing quiz prior to installing the plugin.
-        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
-
         $settings = $this->get_test_settings();
 
         $quizsettings = new quiz_settings(0, $settings);
@@ -169,23 +159,10 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * @dataProvider filter_rules_provider
      */
     public function test_filter_rules_added_to_config(stdClass $settings, string $expectedxml) {
-        global $DB;
-        // Using a generator will create the quiz_settings record.
-        // Lets remove it to emulate an existing quiz prior to installing the plugin.
-        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
-
-        // Dynamically update the quizid from the setUp.
-        $settings->quizid = $this->quiz->id;
-        $settings->cmid = $this->quiz->cmid;
-
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('config'));
         $quizsettings->create();
         $config = $quizsettings->get('config');
-
-        // We have a startURL value which is dynamically generated based on the quiz cmid.
-        $expectedxml = str_replace("{{quizurl}}", $this->url, $expectedxml);
-
         $this->assertEquals($expectedxml, $config);
     }
 
@@ -266,6 +243,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 (object) [
                     'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
+                    'cmid' => 1,
                     'expressionsallowed' => "test.com\nsecond.hello",
                     'regexallowed' => '',
                     'expressionsblocked' => '',
@@ -280,13 +258,14 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><false/></dict><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'blocked simple expessions' => [
                 (object) [
                     'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
+                    'cmid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => '',
                     'expressionsblocked' => "test.com\nsecond.hello",
@@ -301,13 +280,14 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><false/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'enabled regex expessions' => [
                 (object) [
                     'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
+                    'cmid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => "test.com\nsecond.hello",
                     'expressionsblocked' => '',
@@ -322,13 +302,14 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><true/></dict><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'blocked regex expessions' => [
                 (object) [
                     'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
+                    'cmid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => '',
                     'expressionsblocked' => '',
@@ -343,13 +324,14 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'multiple simple expessions' => [
                 (object) [
                     'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
+                    'cmid' => 1,
                     'expressionsallowed' => "*",
                     'regexallowed' => '',
                     'expressionsblocked' => '',
@@ -365,7 +347,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<integer>1</integer><key>active</key><true/><key>expression</key><string>*</string><key>regex</key><false/></dict>"
                 . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
         ];
