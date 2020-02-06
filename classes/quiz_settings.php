@@ -260,8 +260,14 @@ class quiz_settings extends persistent {
                 break;
             case settings_provider::USE_SEB_UPLOAD_CONFIG:
                 $this->process_seb_config_file();
+
+                // Add the sensible default options to the configuration and exported SEB files.
+                $this->process_default_settings();
                 break;
             default:
+                // If at any point a configuration file has been uploaded and parsed, clear the settings.
+                $this->plist = new property_list();
+
                 // Process all settings that are boolean.
                 $this->process_bool_settings();
 
@@ -270,10 +276,10 @@ class quiz_settings extends persistent {
 
                 // Add all the URL filters.
                 $this->process_url_filters();
-        }
 
-        // Add the sensible default options to the configuration and exported SEB files.
-        $this->process_default_settings();
+                // Add the sensible default options to the configuration and exported SEB files.
+                $this->process_default_settings();
+        }
 
         // Export and save the config, ready for DB.
         $this->set('config', $this->plist->to_xml());
