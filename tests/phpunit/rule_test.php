@@ -71,8 +71,13 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_save_settings() {
         global $DB;
-        $quiz = new stdClass();
-        $quiz->id = 1;
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Using a generator will create the quiz_settings record.
+        // Lets remove it to emulate an existing quiz prior to installing the plugin.
+        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $quiz->id]);
+
         $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
         quizaccess_seb::save_settings($quiz);
         $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
@@ -94,10 +99,10 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_delete_settings_with_existing_settings() {
         global $DB;
-        $quiz = new stdClass();
-        $quiz->id = 1;
-        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
-        quizaccess_seb::save_settings($quiz);
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Using a generator will create the quiz_settings record.
         $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
         quizaccess_seb::delete_settings($quiz);
         $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));

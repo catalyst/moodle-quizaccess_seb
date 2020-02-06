@@ -43,19 +43,24 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->quiz = $this->getDataGenerator()->create_module('quiz', array('course' => $this->course->id));
         $this->context = context_module::instance($this->quiz->cmid);
         $this->cm = get_coursemodule_from_instance('quiz', $this->quiz->id);
+        $this->url = new moodle_url("/mod/quiz/view.php", ['id' => $this->quiz->cmid]);
     }
 
     /**
      * Test that config is generated immediately prior to saving quiz settings.
      */
     public function test_config_is_created_from_quiz_settings() {
+        // Test settings to populate the in the object.
         $settings = $this->get_test_settings();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $settings->quizid = $this->quiz->id;
 
-        $quizsettings = new quiz_settings(0, $settings);
-        $this->assertEmpty($quizsettings->get('config'));
-        $quizsettings->create();
+        // Obtain the existing record that is created when using a generator.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+
+        // Update the settings with values from the test function.
+        $quizsettings->from_record($settings);
+        $quizsettings->save();
+
         $config = $quizsettings->get('config');
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
@@ -66,18 +71,22 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>hashedQuitPassword</key>"
                 . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
                 . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>test.com</string><key>regex</key><false/></dict></array></dict></plist>\n",
-                $config);
+                . "<string>test.com</string><key>regex</key><false/></dict></array><key>startURL</key><string>$this->url</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n", $config);
     }
 
     public function test_config_is_updated_from_quiz_settings() {
+        // Test settings to populate the in the object.
         $settings = $this->get_test_settings();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $settings->quizid = $this->quiz->id;
 
-        $quizsettings = new quiz_settings(0, $settings);
-        $this->assertEmpty($quizsettings->get('config'));
-        $quizsettings->create();
+        // Obtain the existing record that is created when using a generator.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+
+        // Update the settings with values from the test function.
+        $quizsettings->from_record($settings);
+        $quizsettings->save();
+
         $config = $quizsettings->get('config');
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
@@ -88,8 +97,9 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             . "<key>URLFilterEnableContentFilter</key><false/><key>hashedQuitPassword</key>"
             . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
             . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-            . "<string>test.com</string><key>regex</key><false/></dict></array></dict></plist>\n",
-            $config);
+            . "<string>test.com</string><key>regex</key><false/></dict></array><key>startURL</key><string>$this->url</string>"
+            . "<key>sendBrowserExamKey</key><true/></dict></plist>\n", $config);
+
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
         $config = $quizsettings->get('config');
@@ -102,23 +112,27 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             . "<key>URLFilterEnableContentFilter</key><true/><key>hashedQuitPassword</key>"
             . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
             . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-            . "<string>test.com</string><key>regex</key><false/></dict></array></dict></plist>\n",
-            $config);
+            . "<string>test.com</string><key>regex</key><false/></dict></array><key>startURL</key><string>$this->url</string>"
+            . "<key>sendBrowserExamKey</key><true/></dict></plist>\n", $config);
     }
 
     /**
      * Test that config key is generated immediately prior to saving quiz settings.
      */
     public function test_config_key_is_created_from_quiz_settings() {
+        global $DB;
+        // Using a generator will create the quiz_settings record.
+        // Lets remove it to emulate an existing quiz prior to installing the plugin.
+        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
+
         $settings = $this->get_test_settings();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $settings->quizid = $this->quiz->id;
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("e186cd8999af80662899a61b869c21c9dc4374d3a0c1e3f1f7c14ee306fbf829",
+        $this->assertEquals("9830bc3ee647c5e1d2e092282d6f088ca24cd94c5c56c2973c63f95ef2838eb4",
                 $configkey);
     }
 
@@ -126,20 +140,24 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * Test that config key is generated immediately prior to saving quiz settings.
      */
     public function test_config_key_is_updated_from_quiz_settings() {
+        global $DB;
+        // Using a generator will create the quiz_settings record.
+        // Lets remove it to emulate an existing quiz prior to installing the plugin.
+        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
+
         $settings = $this->get_test_settings();
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $settings->quizid = $this->quiz->id;
 
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("e186cd8999af80662899a61b869c21c9dc4374d3a0c1e3f1f7c14ee306fbf829",
+        $this->assertEquals("9830bc3ee647c5e1d2e092282d6f088ca24cd94c5c56c2973c63f95ef2838eb4",
                 $configkey);
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
         $configkey = $quizsettings->get('configkey');
-        $this->assertEquals("4b667ccbf38346fc044dbab52e527256e0c217da15c439000a71d7c5fe335efd",
+        $this->assertEquals("b7b9f3bd6361b018825e1f3362562930b782245d86c782ba9bb0f207c9ee1e25",
             $configkey);
     }
 
@@ -152,10 +170,22 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * @dataProvider filter_rules_provider
      */
     public function test_filter_rules_added_to_config(stdClass $settings, string $expectedxml) {
+        global $DB;
+        // Using a generator will create the quiz_settings record.
+        // Lets remove it to emulate an existing quiz prior to installing the plugin.
+        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $this->quiz->id]);
+
+        // Dynamically update the quizid from the setUp.
+        $settings->quizid = $this->quiz->id;
+
         $quizsettings = new quiz_settings(0, $settings);
         $this->assertEmpty($quizsettings->get('config'));
         $quizsettings->create();
         $config = $quizsettings->get('config');
+
+        // We have a startURL value which is dynamically generated based on the quiz cmid.
+        $expectedxml = str_replace("{{quizurl}}", $this->url, $expectedxml);
+
         $this->assertEquals($expectedxml, $config);
     }
 
@@ -184,12 +214,12 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     }
 
     public function test_config_file_uploaded_converted_to_config() {
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $url = new moodle_url("/mod/quiz/view.php", ['id' => $this->quiz->cmid]);
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
                 . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
-                . "<key>allowWlan</key><false/></dict></plist>\n";
+                . "<key>allowWlan</key><false/><key>startURL</key><string>$url</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
         $itemid = $this->create_module_test_file($xml);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
@@ -199,8 +229,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     }
 
     public function test_no_config_file_uploaded_doesnt_overwrite_config() {
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings->set('showsebtaskbar', 0);
@@ -252,7 +280,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><false/></dict><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><false/></dict></array></dict></plist>\n",
+                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'blocked simple expessions' => [
                 (object) [
@@ -272,7 +301,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><false/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><false/></dict></array></dict></plist>\n",
+                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'enabled regex expessions' => [
                 (object) [
@@ -292,7 +322,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><true/></dict><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array></dict></plist>\n",
+                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'blocked regex expessions' => [
                 (object) [
@@ -312,7 +343,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
                 . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array></dict></plist>\n",
+                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
             'multiple simple expessions' => [
                 (object) [
@@ -333,7 +365,8 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<integer>1</integer><key>active</key><true/><key>expression</key><string>*</string><key>regex</key><false/></dict>"
                 . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
                 . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array></dict></plist>\n",
+                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>{{quizurl}}</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n",
             ],
         ];
     }

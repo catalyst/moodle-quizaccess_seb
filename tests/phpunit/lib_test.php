@@ -132,6 +132,8 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
 
         $config = quizaccess_seb_get_config($quiz->cmid);
 
+        $url = new moodle_url("/mod/quiz/view.php", ['id' => $quiz->cmid]);
+
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
                 . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key>"
@@ -139,7 +141,8 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
                 . "<true/><key>allowQuit</key><true/><key>quitURLConfirm</key><true/><key>audioControlEnabled</key>"
                 . "<false/><key>audioMute</key><false/><key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key>"
                 . "<true/><key>URLFilterEnable</key><false/><key>URLFilterEnableContentFilter</key><false/>"
-                . "<key>URLFilterRules</key><array/></dict></plist>\n", $config);
+                . "<key>URLFilterRules</key><array/><key>startURL</key><string>$url</string>"
+                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n", $config);
     }
 
     /**
