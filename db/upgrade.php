@@ -92,5 +92,49 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020020600, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020020700) {
+
+        $table = new xmldb_table('quizaccess_seb_template');
+
+        $field = new xmldb_field('description', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null, 'name');
+        // Conditionally launch add field description.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('enabled', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, null, 'content');
+        // Conditionally launch add field enabled.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('sortorder', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'enabled');
+        // Conditionally launch add field sortorder.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'sortorder');
+        // Conditionally launch add field usermodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'usermodified');
+        // Conditionally launch add field timecreated.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'timecreated');
+        // Conditionally launch add field timemodified.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020020700, 'quizaccess', 'seb');
+    }
+
     return true;
 }
