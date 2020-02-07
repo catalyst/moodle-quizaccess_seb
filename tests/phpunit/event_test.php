@@ -30,7 +30,7 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
     /**
      * Test creating the access_prevented event.
      */
-    public function test_access_prevented() {
+    public function test_event_access_prevented() {
         $this->resetAfterTest();
         // Set up event with data.
         $user = $this->getDataGenerator()->create_user();
@@ -68,5 +68,43 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         $this->assertEquals($quizsettings->get('configkey'), $event->other['savedconfigkey']);
         $this->assertEquals(hash('sha256', 'configkey'), $event->other['receivedconfigkey']);
         $this->assertEquals(hash('sha256', 'browserexamkey'), $event->other['receivedbrowserexamkey']);
+    }
+
+    /**
+     * Test creating the template_created event.
+     */
+    public function test_event_create_template() {
+        $this->resetAfterTest();
+        // Set up event with data.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
+        $template = new \quizaccess_seb\template();
+
+        $event = \quizaccess_seb\event\template_created::create_strict(
+            $template,
+            $quizsettings,
+            $course->id,
+            context_module::instance($quiz->cmid),
+            'www.example.com/moodle');
+
+        // Create an event sink, trigger event and retrieve event.
+        $sink = $this->redirectEvents();
+        $event->trigger();
+        $events = $sink->get_events();
+        $this->assertEquals(1, count($events));
+        $event = reset($events);
+
+        // Test that the event data is as expected.
+        $this->assertInstanceOf('\quizaccess_seb\event\template_created', $event);
+        $this->assertEquals('SEB Template was created.', $event->get_name());
+        $this->assertEquals("The user with id '$user->id' has created a template with id '0' in the Quiz id '$quiz->id'.", $event->get_description());
+        $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
+        $this->assertEquals($user->id, $event->userid);
+        $this->assertEquals($template->get('id'), $event->objectid);
+        $this->assertEquals($course->id, $event->courseid);
+        $this->assertEquals('www.example.com/moodle', $event->other['url']);
     }
 }

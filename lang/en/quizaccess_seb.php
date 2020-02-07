@@ -170,6 +170,7 @@ $string['httplinkbutton'] = 'Download Configuration';
 
 // Events.
 $string['event:accessprevented'] = "Quiz access was prevented.";
+$string['event:templatecreated'] = "SEB Template was created.";
 
 // Templates.
 $string['managetemplates'] = 'Manage templates';
