@@ -26,6 +26,8 @@
 namespace quizaccess_seb;
 
 
+use core\persistent;
+
 defined('MOODLE_INTERNAL') || die();
 
 class template extends persistent {
