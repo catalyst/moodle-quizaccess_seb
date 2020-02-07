@@ -69,13 +69,13 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     /**
      * Test settings are saved to DB.
      */
-    public function test_save_settings() {
+    public function test_create_settings_with_existing_quiz() {
         global $DB;
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
         // Using a generator will create the quiz_settings record.
-        // Lets remove it to emulate an existing quiz prior to installing the plugin.
+        // Lets remove the settings it to emulate an existing quiz prior to installing the plugin.
         $DB->delete_records(quiz_settings::TABLE, ['quizid' => $quiz->id]);
 
         $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
