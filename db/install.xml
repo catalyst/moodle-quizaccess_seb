@@ -6,7 +6,8 @@
     <TABLE NAME="quizaccess_seb_quizsettings" COMMENT="Stores the quiz level Safe Exam Browser configuration.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz.id."/>
+        <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz id."/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to course module id."/>
         <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quizaccess_seb_template.id."/>
         <FIELD NAME="requiresafeexambrowser" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether to require SEB."/>
         <FIELD NAME="sebconfigfile" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Item ID for config file on storage."/>

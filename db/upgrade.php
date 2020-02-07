@@ -62,13 +62,6 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2019122000, 'quizaccess', 'seb');
     }
 
-    if ($oldversion < 2019122100) {
-        // Create missing settings for all existing quizzes.
-        quizaccess_seb_create_missing_settings();
-        // Seb savepoint reached.
-        upgrade_plugin_savepoint(true, 2019122100, 'quizaccess', 'seb');
-    }
-
     if ($oldversion < 2020010700) {
 
         // Define field allowedbrowserexamkeys to be added to quizaccess_seb_quizsettings.
@@ -82,6 +75,21 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
 
         // Seb savepoint reached.
         upgrade_plugin_savepoint(true, 2020010700, 'quizaccess', 'seb');
+    }
+
+    if ($oldversion < 2020020600) {
+
+        // Define field cmid to be added to quizaccess_seb_quizsettings.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $field = new xmldb_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'quizid');
+
+        // Conditionally launch add field cmid.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020020600, 'quizaccess', 'seb');
     }
 
     return true;

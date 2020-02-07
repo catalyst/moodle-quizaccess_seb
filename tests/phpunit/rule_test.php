@@ -50,7 +50,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     public function test_validate_settings_with_valid_data() {
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1], [],
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1], [],
             $form);
         $this->assertEmpty($errors);
     }
@@ -62,17 +62,22 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form and quiz instance.
         $errors = quizaccess_seb::validate_settings_form_fields([],
-                ['instance' => 1, 'seb_requiresafeexambrowser' => 'Uh oh!'], [], $form);
+                ['instance' => 1, 'coursemodule' => 1, 'seb_requiresafeexambrowser' => 'Uh oh!'], [], $form);
         $this->assertEquals(['seb_requiresafeexambrowser' => 'Data submitted is invalid'], $errors);
     }
 
     /**
      * Test settings are saved to DB.
      */
-    public function test_save_settings() {
+    public function test_create_settings_with_existing_quiz() {
         global $DB;
-        $quiz = new stdClass();
-        $quiz->id = 1;
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Using a generator will create the quiz_settings record.
+        // Lets remove the settings it to emulate an existing quiz prior to installing the plugin.
+        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $quiz->id]);
+
         $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
         quizaccess_seb::save_settings($quiz);
         $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
@@ -94,10 +99,10 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_delete_settings_with_existing_settings() {
         global $DB;
-        $quiz = new stdClass();
-        $quiz->id = 1;
-        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
-        quizaccess_seb::save_settings($quiz);
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Using a generator will create the quiz_settings record.
         $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
         quizaccess_seb::delete_settings($quiz);
         $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
@@ -264,7 +269,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1], [], $form);
         $this->assertContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 
@@ -278,7 +283,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         $form = $this->createMock('mod_quiz_mod_form');
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'quizpassword' => 'set'], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1, 'quizpassword' => 'set'], [], $form);
         $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 

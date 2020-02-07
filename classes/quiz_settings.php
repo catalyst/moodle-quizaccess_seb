@@ -32,6 +32,7 @@ use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
 use core\persistent;
 use lang_string;
+use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -65,6 +66,9 @@ class quiz_settings extends persistent {
     protected static function define_properties() {
         return [
             'quizid' => [
+                'type' => PARAM_INT,
+            ],
+            'cmid' => [
                 'type' => PARAM_INT,
             ],
             'templateid' => [
@@ -259,8 +263,14 @@ class quiz_settings extends persistent {
                 break;
             case settings_provider::USE_SEB_UPLOAD_CONFIG:
                 $this->process_seb_config_file();
+
+                // Add the sensible default options to the configuration and exported SEB files.
+                $this->process_default_settings();
                 break;
             default:
+                // If at any point a configuration file has been uploaded and parsed, clear the settings.
+                $this->plist = new property_list();
+
                 // Process all settings that are boolean.
                 $this->process_bool_settings();
 
@@ -269,6 +279,9 @@ class quiz_settings extends persistent {
 
                 // Add all the URL filters.
                 $this->process_url_filters();
+
+                // Add the sensible default options to the configuration and exported SEB files.
+                $this->process_default_settings();
         }
 
         // Export and save the config, ready for DB.
@@ -276,13 +289,34 @@ class quiz_settings extends persistent {
     }
 
     /**
+     * Sets the default settings when saving a quiz.
+     */
+    private function process_default_settings() {
+        global $CFG;
+
+        $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $this->get('cmid')]);
+
+        $starturl = $this->plist->get_element_value('startURL');
+        if ($starturl) {
+            $this->plist->update_element_value('startURL', $quizurl->out(true));
+        } else {
+            $this->plist->add_element_to_root('startURL', new CFString($quizurl->out(true)));
+        }
+
+        $sendbrowserexamkey = $this->plist->get_element_value('sendBrowserExamKey');
+        if ($sendbrowserexamkey) {
+            $this->plist->update_element_value('sendBrowserExamKey', true);
+        } else {
+            $this->plist->add_element_to_root('sendBrowserExamKey', new CFBoolean(true));
+        }
+    }
+
+    /**
      * If file is uploaded, save the file to the config field.
      * This is processed after the validation step, so a SEB file should exist at this point.
      */
     private function process_seb_config_file() {
-        $cm = get_coursemodule_from_instance('quiz', $this->get('quizid'));
-
-        $file = settings_provider::get_module_context_sebconfig_file($cm->id);
+        $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
 
         // If file has been uploaded, overwrite existing config.
         if (!empty($file)) {
