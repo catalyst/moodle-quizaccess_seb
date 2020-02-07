@@ -58,6 +58,7 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         // Process quizsettings.
         $data = (object) $data;
         $data->quizid = $this->get_new_parentid('quiz'); // Update quizid with new reference.
+        $data->cmid = $this->task->get_moduleid();
         // TODO: Map template ID to new template reference once implemented.
         $quizsettings = new quiz_settings(0, $data);
         $quizsettings->save();
