@@ -28,20 +28,10 @@ namespace quizaccess_seb;
 
 defined('MOODLE_INTERNAL') || die();
 
-class template_settings extends persistent {
+class template extends persistent {
 
     /** Table name for the persistent. */
     const TABLE = 'quizaccess_seb_template';
-
-    /**
-     * Create an instance of this class.
-     *
-     * @param int $id If set, this is the id of an existing record, used to load the data.
-     * @param \stdClass $record If set will be passed to {@link self::from_record()}.
-     */
-    public function __construct($id = 0, \stdClass $record = null) {
-        parent::__construct($id, $record);
-    }
 
     /**
      * Return the definition of the properties of this model.
