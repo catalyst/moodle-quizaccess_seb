@@ -19,6 +19,7 @@
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,25 +27,37 @@
 defined('MOODLE_INTERNAL') || die;
 
 global $ADMIN;
-if ($ADMIN->fulltree) {
+
+if ($hassiteconfig) {
 
     $links = [
         'seb' => get_string('setting:showseblink', 'quizaccess_seb'),
         'http' => get_string('setting:showhttplink', 'quizaccess_seb')
     ];
     $settings->add(new admin_setting_configmulticheckbox('quizaccess_seb/showseblinks',
-            get_string('setting:showseblinks', 'quizaccess_seb'),
-            get_string('setting:showseblinks_desc', 'quizaccess_seb'),
-            $links, $links));
+        get_string('setting:showseblinks', 'quizaccess_seb'),
+        get_string('setting:showseblinks_desc', 'quizaccess_seb'),
+        $links, $links));
 
     $settings->add(new admin_setting_configtext('quizaccess_seb/downloadlink',
-            get_string('setting:downloadlink', 'quizaccess_seb'),
-            get_string('setting:downloadlink_desc', 'quizaccess_seb'),
-            'https://safeexambrowser.org/download_en.html',
-            PARAM_URL));
+        get_string('setting:downloadlink', 'quizaccess_seb'),
+        get_string('setting:downloadlink_desc', 'quizaccess_seb'),
+        'https://safeexambrowser.org/download_en.html',
+        PARAM_URL));
 
     $settings->add(new admin_setting_configcheckbox('quizaccess_seb/quizpasswordrequired',
-            get_string('setting:quizpasswordrequired', 'quizaccess_seb'),
-            get_string('setting:quizpasswordrequired_desc', 'quizaccess_seb'),
-            '0'));
+        get_string('setting:quizpasswordrequired', 'quizaccess_seb'),
+        get_string('setting:quizpasswordrequired_desc', 'quizaccess_seb'),
+        '0'));
+}
+
+if (has_capability('quizaccess/seb:managetemplates', context_system::instance())) {
+    $ADMIN->add('modsettingsquizcat',
+        new admin_externalpage(
+            'quizaccess_seb/template',
+            'Safe Exam Browser templates',
+            new moodle_url('/mod/quiz/accessrule/seb/template.php'),
+            'quizaccess/seb:managetemplates'
+        )
+    );
 }
