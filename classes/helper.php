@@ -98,7 +98,7 @@ class helper {
      * @param string $alt The alt text for the icon.
      * @param string $iconcomponent The icon component.
      * @param array $options Display options.
-     * @return  string
+     * @return string
      */
     public static function format_icon_link($url, $icon, $alt, $iconcomponent = 'moodle', $options = array()) {
         global $OUTPUT;
