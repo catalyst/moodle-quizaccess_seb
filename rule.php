@@ -243,17 +243,21 @@ class quizaccess_seb extends quiz_access_rule_base {
             $quizsettings->from_record($settings);
         }
 
-        // Validate and save settings. Settings should already be validated by validate_settings_form_fields but
-        // the validation method also adds in default fields which is useful here.
-        $quizsettings->validate();
-        $quizsettings->save();
-
         // Ensure that a cm exists before deleting any files.
         if ($cm && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
             $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
             settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $cm->id);
         } else if ($cm) {
             settings_provider::delete_uploaded_config_file($cm->id);
+        }
+
+        if ($quizsettings->get('id') && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_NO) {
+            $quizsettings->delete();
+        } else {
+            // Validate and save settings. Settings should already be validated by validate_settings_form_fields but
+            // the validation method also adds in default fields which is useful here.
+            $quizsettings->validate();
+            $quizsettings->save();
         }
     }
 
