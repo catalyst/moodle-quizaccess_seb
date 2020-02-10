@@ -100,13 +100,8 @@ class template extends \core\form\persistent {
         }
 
         // Check submitted template as a text.
-        if (!empty($this->get_persistent()->get('id'))) {
-            $plist = new CFPropertyList();
-            try {
-                $plist->parse($data->content);
-            } catch (\Exception $e) {
-                $newerrors['content'] = get_string('invalidtemplate', 'quizaccess_seb');
-            }
+        if (!empty($this->get_persistent()->get('id')) && empty($data->content)) {
+            $newerrors['content'] = get_string('invalidtemplate', 'quizaccess_seb');
         }
 
         return $newerrors;

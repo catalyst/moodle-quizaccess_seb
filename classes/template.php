@@ -105,14 +105,22 @@ class template extends \core\persistent {
      * @return bool|\lang_string
      */
     protected function validate_content(string $content) {
+        $result = true;
+
+        set_error_handler(function($errno, $errstr, $errfile, $errline ){
+            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+        });
+
         $plist = new CFPropertyList();
         try {
             $plist->parse($content);
-        } catch (\Exception $e) {
-            return new \lang_string('invalidtemplate', 'quizaccess_seb');
+        } catch (\ErrorException $e) {
+            $result = new \lang_string('invalidtemplate', 'quizaccess_seb');
         }
 
-        return true;
+        restore_error_handler();
+
+        return $result;
     }
 
     /**
