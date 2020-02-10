@@ -248,19 +248,29 @@ class template_controller {
     protected function delete($id) {
         require_sesskey();
         $instance = $this->get_instance($id);
-        $instance->delete();
 
-        \core\notification::success(get_string('deleted'));
-        redirect(new \moodle_url(static::get_base_url()));
+        if ($instance->can_delete()) {
+            $instance->delete();
+            \core\notification::success(get_string('deleted'));
+            redirect(new \moodle_url(static::get_base_url()));
+        } else {
+            \core\notification::warning(get_string('cantdelete', 'quizaccess_seb'));
+            redirect(new \moodle_url(static::get_base_url()));
+        }
     }
 
     /**
      * Execute view action.
      */
     protected function view() {
+        global $PAGE;
+
         $this->header($this->get_view_heading());
         $this->print_add_button();
         $this->display_all_records();
+
+        // JS for Template management.
+        $PAGE->requires->js_call_amd('quizaccess_seb/managetemplates', 'setup');
 
         $this->footer();
     }

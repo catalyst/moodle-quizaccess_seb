@@ -126,6 +126,7 @@ class template_list extends \flexible_table {
             new \moodle_url(template_controller::get_base_url(), [
                 'id'        => $data->get('id'),
                 'action'    => template_controller::ACTION_DELETE,
+                'sesskey'   => sesskey(),
             ]),
             't/delete',
             get_string('delete'),

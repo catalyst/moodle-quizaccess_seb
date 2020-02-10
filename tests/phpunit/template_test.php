@@ -84,4 +84,60 @@ class quizaccess_seb_template_testcase extends advanced_testcase {
         $template->save();
     }
 
+    public function test_can_delete() {
+        global $DB;
+
+        $data = new stdClass();
+        $data->name = 'Test name';
+        $data->description = 'Test description';
+        $data->enabled = 1;
+        $data->content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
+            . "<key>showTime</key><false/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
+            . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><true/><key>audioMute</key><false/>"
+            . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><true/>"
+            . "<key>URLFilterEnableContentFilter</key><false/><key>hashedQuitPassword</key>"
+            . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
+            . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
+            . "<string>test.com</string><key>regex</key><false/></dict></array>"
+            . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
+        $template = new template(0, $data);
+        $this->assertFalse($template->can_delete());
+
+        $template->save();
+        $this->assertTrue($template->can_delete());
+
+        $DB->insert_record(\quizaccess_seb\quiz_settings::TABLE, (object) [
+            'quizid' => 1,
+            'cmid' => 1,
+            'templateid' => $template->get('id'),
+            'requiresafeexambrowser' => '1',
+            'sebconfigfile' => '373552893',
+            'showsebtaskbar' => '1',
+            'showwificontrol' => '0',
+            'showreloadbutton' => '1',
+            'showtime' => '0',
+            'showkeyboardlayout' => '1',
+            'allowuserquitseb' => '1',
+            'quitpassword' => 'test',
+            'linkquitseb' => '',
+            'userconfirmquit' => '1',
+            'enableaudiocontrol' => '1',
+            'muteonstartup' => '0',
+            'allowspellchecking' => '0',
+            'allowreloadinexam' => '1',
+            'activateurlfiltering' => '1',
+            'filterembeddedcontent' => '0',
+            'expressionsallowed' => 'test.com',
+            'regexallowed' => '',
+            'expressionsblocked' => '',
+            'regexblocked' => '',
+            'suppresssebdownloadlink' => '1',
+            'config' => '',
+        ]);
+
+        $this->assertFalse($template->can_delete());
+    }
+
 }

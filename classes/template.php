@@ -116,4 +116,20 @@ class template extends persistent {
         return true;
     }
 
+    /**
+     * CHeck if we can delete the template.
+     *
+     * @return bool
+     */
+    public function can_delete() : bool {
+        $result = false;
+
+        if ($this->get('id')) {
+            $settings = quiz_settings::get_records(['templateid' => $this->get('id')]);
+            $result = empty($settings);
+        }
+
+        return $result;
+    }
+
 }
