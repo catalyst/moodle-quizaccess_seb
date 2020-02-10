@@ -27,13 +27,12 @@
 namespace quizaccess_seb;
 
 use CFPropertyList\CFPropertyList;
-use core\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-class template extends persistent {
+class template extends \core\persistent {
 
     /** Table name for the persistent. */
     const TABLE = 'quizaccess_seb_template';
