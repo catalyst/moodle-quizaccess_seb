@@ -166,3 +166,19 @@ $string['httplinkbutton'] = 'Download Configuration';
 
 // Events.
 $string['event:accessprevented'] = "Quiz access was prevented.";
+
+// Templates.
+$string['managetemplates'] = 'Manage templates';
+$string['addtemplate'] = 'Add new template';
+$string['newtemplate'] = 'New template';
+$string['edittemplate'] = 'Edit template';
+$string['content'] = 'Template';
+$string['name'] = 'Name';
+$string['description'] = 'Description';
+$string['enabled'] = 'Enabled';
+$string['name'] = 'Name';
+$string['duplicatetemplate'] = "Template with the same name already exists";
+$string['invalidtemplate'] = "Invalid SEB config template";
+$string['cantdelete'] = 'Template can\'t be deleted as it has been used for one or more quizzes';
+$string['confirmtemplateremovaltitle'] = 'Confirm template removal?';
+$string['confirmtemplateremovalquestion'] = 'Are you sure that you wish to remove this template?';

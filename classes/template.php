@@ -19,21 +19,28 @@
  *
  * @package    quizaccess_seb
  * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
- * @copyright  2019 Catalyst IT
+ * @author     Dmitrii Metelkin <dmitriim@catalyst-au.net>
+ * @copyright  2020 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace quizaccess_seb;
 
+use CFPropertyList\CFPropertyList;
 
 use core\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
-class template extends persistent {
+require_once(__DIR__ . '/../vendor/autoload.php');
+
+class template extends \core\persistent {
 
     /** Table name for the persistent. */
     const TABLE = 'quizaccess_seb_template';
+
+    /** @var property_list $plist The SEB config represented as a Property List object. */
+    private $plist;
 
     /**
      * Return the definition of the properties of this model.
@@ -51,8 +58,7 @@ class template extends persistent {
                 'default' => '',
             ],
             'content' => [
-                'type' => PARAM_TEXT,
-                'default' => '',
+                'type' => PARAM_RAW,
             ],
             'enabled' => [
                 'type' => PARAM_INT,
@@ -64,4 +70,75 @@ class template extends persistent {
             ],
         ];
     }
+
+    /**
+     * Hook to execute before an update.
+     *
+     * Please note that at this stage the data has already been validated and therefore
+     * any new data being set will not be validated before it is sent to the database.
+     */
+    protected function before_update() {
+        $this->before_save();
+    }
+
+    /**
+     * Hook to execute before a create.
+     *
+     * Please note that at this stage the data has already been validated and therefore
+     * any new data being set will not be validated before it is sent to the database.
+     */
+    protected function before_create() {
+        $this->before_save();
+    }
+
+    /**
+     * As there is no hook for before both create and update, this function is called by both hooks.
+     */
+    private function before_save() {
+        $this->plist = new property_list($this->get('content'));
+        $this->set('content', $this->plist->to_xml());
+    }
+
+    /**
+     * Validate template content.
+     *
+     * @param string $content Content string to validate.
+     *
+     * @return bool|\lang_string
+     */
+    protected function validate_content(string $content) {
+        $result = true;
+
+        set_error_handler(function($errno, $errstr, $errfile, $errline ){
+            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+        });
+
+        $plist = new CFPropertyList();
+        try {
+            $plist->parse($content);
+        } catch (\ErrorException $e) {
+            $result = new \lang_string('invalidtemplate', 'quizaccess_seb');
+        }
+
+        restore_error_handler();
+
+        return $result;
+    }
+
+    /**
+     * CHeck if we can delete the template.
+     *
+     * @return bool
+     */
+    public function can_delete() : bool {
+        $result = false;
+
+        if ($this->get('id')) {
+            $settings = quiz_settings::get_records(['templateid' => $this->get('id')]);
+            $result = empty($settings);
+        }
+
+        return $result;
+    }
+
 }
