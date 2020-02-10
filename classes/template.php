@@ -26,8 +26,8 @@
 
 namespace quizaccess_seb;
 
-use core\persistent;
 use CFPropertyList\CFPropertyList;
+use core\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
