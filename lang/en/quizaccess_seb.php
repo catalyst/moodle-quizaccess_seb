@@ -180,5 +180,6 @@ $string['name'] = 'Name';
 $string['duplicatetemplate'] = "Template with the same name already exists";
 $string['invalidtemplate'] = "Invalid SEB config template";
 $string['cantdelete'] = 'Template can\'t be deleted as it has been used for one or more quizzes';
+$string['cantedit'] = 'Template can\'t be edited as it has been used for one or more quizzes';
 $string['confirmtemplateremovaltitle'] = 'Confirm template removal?';
 $string['confirmtemplateremovalquestion'] = 'Are you sure that you wish to remove this template?';

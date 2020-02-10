@@ -64,35 +64,3 @@ function quizaccess_seb_send_file(string $contents) {
 
     echo($contents);
 }
-
-/**
- * Manage inplace editable saves.
- *
- * @param string $itemtype The type of item.
- * @param int $itemid The ID of the item.
- * @param mixed $newvalue The new value
- * @return string
- */
-function quizaccess_seb_inplace_editable($itemtype, $itemid, $newvalue) {
-    $context = \context_system::instance();
-    external_api::validate_context($context);
-    require_capability('quizaccess/seb:managetemplates', $context);
-
-    switch ($itemtype) {
-        case 'templname':
-            $template = \quizaccess_seb\template::get_record(['id' => $itemid]);
-            $template->set('name', ($newvalue));
-            $template->save();
-            return \quizaccess_seb\helper::render_templ_name_inplace_editable($template);
-
-        case 'templenabled':
-            $template = \quizaccess_seb\template::get_record(['id' => $itemid]);
-            $template->set('enabled', (int)!!$newvalue);
-            $template->save();
-            return \quizaccess_seb\helper::render_templ_enabled_inplace_editable($template);
-
-        default:
-            return false;
-    }
-
-}
