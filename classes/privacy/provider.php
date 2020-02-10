@@ -59,6 +59,16 @@ class provider implements
             'privacy:metadata:quizaccess_seb_quizsettings'
         );
 
+        $collection->add_database_table(
+            'quizaccess_seb_template',
+            [
+                'usermodified' => 'privacy:metadata:quizaccess_seb_template:usermodified',
+                'timecreated' => 'privacy:metadata:quizaccess_seb_template:timecreated',
+                'timemodified' => 'privacy:metadata:quizaccess_seb_template:timemodified',
+            ],
+            'privacy:metadata:quizaccess_seb_template'
+        );
+
         return $collection;
     }
 
@@ -83,6 +93,16 @@ class provider implements
             'context' => CONTEXT_MODULE,
             'userid' => $userid
         ];
+
+        $contextlist->add_from_sql($sql, $params);
+
+        $sql = "SELECT c.id
+                  FROM {quizaccess_seb_template} tem
+                  JOIN {quizaccess_seb_quizsettings} qs ON qs.templateid = tem.id
+                  JOIN {course_modules} cm ON cm.instance = qs.quizid
+                  JOIN {context} c ON c.instanceid = cm.id AND c.contextlevel = :context
+                 WHERE qs.usermodified = :userid
+              GROUP BY c.id";
 
         $contextlist->add_from_sql($sql, $params);
 
@@ -112,6 +132,7 @@ class provider implements
 
         list($insql, $params) = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
 
+        // SEB quiz settings.
         $sql = "SELECT qs.id as id,
                        qs.quizid as quizid,
                        qs.usermodified as usermodified,
@@ -137,6 +158,39 @@ class provider implements
                 'usermodified' => $quizsettings->usermodified,
                 'timecreated' => transform::datetime($quizsettings->timecreated),
                 'timemodified' => transform::datetime($quizsettings->timemodified)
+            ];
+
+            writer::with_context($context)->export_data($subcontext, $data);
+        }
+
+        // SEB template settings.
+        $sql = "SELECT tem.id as id,
+                       qs.quizid as quizid,
+                       tem.usermodified as usermodified,
+                       tem.timecreated as timecreated,
+                       tem.timemodified as timemodified
+                  FROM {quizaccess_seb_template} tem
+                  JOIN {quizaccess_seb_quizsettings} qs ON qs.templateid = tem.id
+                  JOIN {course_modules} cm ON cm.instance = qs.quizid
+                 WHERE cm.id {$insql}";
+
+        $templatesettingslist = $DB->get_records_sql($sql, $params);
+        $index = 0;
+        foreach ($templatesettingslist as $templatesetting) {
+            // Data export is organised in: {Context}/{Plugin Name}/{Table name}/{index}/data.json.
+            $index++;
+            $subcontext = [
+                get_string('pluginname', 'quizaccess_seb'),
+                get_string('quizsettings', 'quizaccess_seb'),
+                $index
+            ];
+
+            $data = (object) [
+                'templateid' => $templatesetting->id,
+                'quizid' => $templatesetting->quizid,
+                'usermodified' => $templatesetting->usermodified,
+                'timecreated' => transform::datetime($templatesetting->timecreated),
+                'timemodified' => transform::datetime($templatesetting->timemodified)
             ];
 
             writer::with_context($context)->export_data($subcontext, $data);
