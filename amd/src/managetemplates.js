@@ -1,5 +1,5 @@
 /**
- * Tour management code.
+ * Template management code.
  *
  * @module quizaccess_seb/managetemplates
  * @class managetemplates
