@@ -11,7 +11,7 @@ define(
     function($, ajax, str, notification) {
         var manager = {
             /**
-             * Confirm removal of the specified tour.
+             * Confirm removal of the specified template.
              *
              * @method removeTemplate
              * @param {EventFacade} e The EventFacade
@@ -48,7 +48,7 @@ define(
             },
 
             /**
-             * Setup the tour management UI.
+             * Setup the template management UI.
              *
              * @method setup
              */
@@ -59,7 +59,7 @@ define(
 
         return /** @alias module:quizaccess_seb/managetemplates */ {
             /**
-             * Setup the tour management UI.
+             * Setup the template management UI.
              *
              * @method setup
              */
