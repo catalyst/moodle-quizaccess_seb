@@ -251,7 +251,7 @@ class quizaccess_seb extends quiz_access_rule_base {
             settings_provider::delete_uploaded_config_file($cm->id);
         }
 
-        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_NO) {
+        if ($quizsettings->get('id') && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_NO) {
             $quizsettings->delete();
         } else {
             // Validate and save settings. Settings should already be validated by validate_settings_form_fields but
