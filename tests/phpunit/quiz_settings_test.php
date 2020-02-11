@@ -239,8 +239,6 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertContains("<key>allowQuit</key><false/>", $quizsettings->get('config'));
     }
 
-
-
     /**
      * Bad browser exam key data provider.
      *
