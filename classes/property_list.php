@@ -358,9 +358,10 @@ class property_list {
      * @return bool False if not associative.
      */
     private function is_associative_array(array $array) {
-        if (array() === $array) {
+        if (empty($array)) {
             return false;
         }
+        // Check that all keys are not sequential integers starting from 0 (Which is what PHP arrays have behind the scenes.)
         return array_keys($array) !== range(0, count($array) - 1);
     }
 }
