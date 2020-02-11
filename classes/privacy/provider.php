@@ -214,7 +214,7 @@ class provider implements
         $quizid = $DB->get_field('course_modules', 'instance', ['id' => $cmid]);
 
         $params['quizid'] = $quizid;
-        $select = "id IN (SELECT templateid FROM {quizaccess_seb_quizsettings} qs WHERE qs.id = :quizid";
+        $select = "id IN (SELECT templateid FROM {quizaccess_seb_quizsettings} qs WHERE qs.id = :quizid)";
         $DB->set_field_select('quizaccess_seb_quizsettings', 'usermodified', 0, "quizid = :quizid", $params);
         $DB->set_field_select('quizaccess_seb_template', 'usermodified', 0, $select, $params);
     }
