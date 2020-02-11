@@ -24,6 +24,7 @@
  */
 
 use quizaccess_seb\quiz_settings;
+use quizaccess_seb\template;
 use quizaccess_seb\settings_provider;
 
 defined('MOODLE_INTERNAL') || die();
@@ -215,6 +216,30 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $newconfig = $quizsettings->get('config');
         $this->assertEquals($originalconfig, $newconfig);
     }
+
+    /**
+     * Test using USE_SEB_TEMPLATE and have it override defaults.
+     */
+    public function test_using_seb_template_override_settings() {
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+
+        $template = new template();
+        $template->set('content', $xml);
+        $template->set('name', 'test');
+        $template->save();
+        $this->assertContains("<key>startURL</key><string>https://safeexambrowser.org/start</string>", $template->get('content'));
+        $this->assertContains("<key>allowQuit</key><true/>", $template->get('content'));
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $template->get('id'));
+        $quizsettings->set('allowuserquitseb', 0);
+        $quizsettings->save();
+        $this->assertContains("<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id={$this->quiz->cmid}</string>", $quizsettings->get('config'));
+        $this->assertContains("<key>allowQuit</key><false/>", $quizsettings->get('config'));
+    }
+
+
 
     /**
      * Bad browser exam key data provider.
