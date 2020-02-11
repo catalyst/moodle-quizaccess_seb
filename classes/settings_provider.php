@@ -79,7 +79,7 @@ class settings_provider {
         return [
             'seb' => 'header',
             'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options($context)],
-            'seb_sebconfigtemplate' => ['select', self::get_template_options()],
+            'seb_templateid' => ['select', self::get_template_options()],
             'filemanager_sebconfigfile' => ['filemanager', self::get_filemanager_options()],
             'seb_suppresssebdownloadlink' => 'selectyesno',
             'seb_linkquitseb' => 'text',
@@ -113,7 +113,7 @@ class settings_provider {
     public static function get_quiz_element_types() : array {
         return [
             'seb_requiresafeexambrowser' => PARAM_INT,
-            'seb_sebconfigtemplate' => PARAM_BOOL,
+            'seb_templateid' => PARAM_INT,
             'seb_suppresssebdownloadlink' => PARAM_BOOL,
             'filemanager_sebconfigfile' => PARAM_RAW,
             'seb_linkquitseb' => PARAM_URL,
@@ -148,18 +148,17 @@ class settings_provider {
         $options[self::USE_SEB_NO] = get_string('no');
         $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
 
-        // @codingStandardsIgnoreStart
-        // TODO: Implement following features and uncomment options.
-        //if ($context && has_capability('quizaccess/seb:manage_seb_sebconfigtemplate', $context)) {
-        //    $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
-        //}
+        if ($context && has_capability('quizaccess/seb:manage_seb_templateid', $context)) {
+            if (!empty(self::get_template_options())) {
+                $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
+            }
+        }
 
         if ($context && has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context)) {
             $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
         }
 
         $options[self::USE_SEB_CLIENT_CONFIG] = get_string('seb_use_client', 'quizaccess_seb');
-        // @codingStandardsIgnoreEnd
 
         return $options;
     }
@@ -168,9 +167,16 @@ class settings_provider {
      * Returns a list of templates.
      * @return array
      */
-    public static function get_template_options() : array {
-        // TODO: implement as part of Issue #19.
-        return [];
+    protected static function get_template_options() : array {
+        $templates = [];
+        $records = template::get_records(['enabled' => 1], 'sortorder');
+        if ($records) {
+            foreach ($records as $record) {
+                $templates[$record->get('id')] = $record->get('name');
+            }
+        }
+
+        return $templates;
     }
 
     /**
@@ -189,14 +195,13 @@ class settings_provider {
      * Get the default values of the quiz settings.
      *
      * Array key is name of 'form element'/'database column (excluding prefix)'.
-     * TODO: Update sebconfigtemplate default after templates are implemented.
      *
      * @return array List of settings and their defaults.
      */
     public static function get_quiz_defaults() : array {
         return [
             'seb_requiresafeexambrowser' => self::USE_SEB_NO,
-            'seb_sebconfigtemplate' => 0,
+            'seb_templateid' => 0,
             'filemanager_sebconfigfile' => null,
             'seb_suppresssebdownloadlink' => 0,
             'seb_linkquitseb' => '',
@@ -232,8 +237,8 @@ class settings_provider {
      */
     public static function get_quiz_hideifs() : array {
         return [
-            'seb_sebconfigtemplate' => [
-                new hideif_rule('seb_sebconfigtemplate', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_TEMPLATE),
+            'seb_templateid' => [
+                new hideif_rule('seb_templateid', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_TEMPLATE),
             ],
             'filemanager_sebconfigfile' => [
                 new hideif_rule('filemanager_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),

@@ -93,8 +93,8 @@ The available options are:
 <br/>You can upload your own Safe Exam Browser configuration file. All manual settings and the use of templates will be disabled.
 * Yes – Use SEB client config
 <br/>No configurations of Safe Exam Browser are on Moodle side. The quiz can be attempted with any configuration of Safe Exam Browser.";
-$string['seb_sebconfigtemplate'] = 'Safe Exam Browser config template';
-$string['seb_sebconfigtemplate_help'] = 'The settings in the selected config template will be used for the configuration of the Safe Exam Browser while attempting the quiz. You may overwrite the settings in the template with your manual settings.';
+$string['seb_templateid'] = 'Safe Exam Browser config template';
+$string['seb_templateid_help'] = 'The settings in the selected config template will be used for the configuration of the Safe Exam Browser while attempting the quiz. You may overwrite the settings in the template with your manual settings.';
 $string['seb_showkeyboardlayout'] = 'Show keyboard layout';
 $string['seb_showkeyboardlayout_help'] = 'If enabled, the current keyboard layout is shown in the SEB task bar. It allows you to switch to other keyboard layouts, which have been enabled in the operating system.';
 $string['seb_showreloadbutton'] = 'Show reload button';
@@ -135,7 +135,7 @@ $string['seb:managetemplates'] = 'Manage Safe Exam Browser configuration templat
 $string['seb:manage_filemanager_sebconfigfile'] = 'Modify Safe Exam Browser quiz setting: Select SEB config file.';
 $string['seb:manage_seb_allowedbrowserexamkeys'] = 'Modify Allowed Browser Exam Keys';
 $string['seb:manage_seb_requiresafeexambrowser'] = 'Modify Safe Exam Browser quiz setting: Require Safe Exam Browser';
-$string['seb:manage_seb_sebconfigtemplate'] = 'Modify Safe Exam Browser quiz setting: Select SEB template.';
+$string['seb:manage_seb_templateid'] = 'Modify Safe Exam Browser quiz setting: Select SEB template.';
 $string['seb:manage_seb_suppresssebdownloadlink'] = 'Modify Safe Exam Browser quiz setting: Suppress download link.';
 $string['seb:manage_seb_linkquitseb'] = 'Modify Safe Exam Browser quiz setting: Quit link.';
 $string['seb:manage_seb_userconfirmquit'] = 'Modify Safe Exam Browser quiz setting: Confirm on quit.';
@@ -183,3 +183,4 @@ $string['cantdelete'] = 'Template can\'t be deleted as it has been used for one 
 $string['cantedit'] = 'Template can\'t be edited as it has been used for one or more quizzes';
 $string['confirmtemplateremovaltitle'] = 'Confirm template removal?';
 $string['confirmtemplateremovalquestion'] = 'Are you sure that you wish to remove this template?';
+$string['notemplate'] = 'No template';
