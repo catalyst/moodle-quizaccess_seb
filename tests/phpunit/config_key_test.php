@@ -54,11 +54,8 @@ class quizaccess_seb_config_key_testcase extends advanced_testcase {
      * Test that trying to generate the hash key with bad xml will result in an error.
      */
     public function test_config_key_not_generated_with_bad_xml() {
-        set_error_handler(function($errno, $errstr, $errfile, $errline ){
-            throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
-        });
-        $this->expectException(ErrorException::class);
-        $this->expectExceptionMessageRegExp("/.*DOMDocument::loadXML().*/");
+        $this->expectException(invalid_parameter_exception::class);
+        $this->expectExceptionMessage("Invalid a PList XML string, representing SEB config");
         config_key::generate("<?xml This is some bad xml for sure.");
     }
 
