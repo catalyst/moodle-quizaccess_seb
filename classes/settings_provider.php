@@ -169,7 +169,7 @@ class settings_provider {
      */
     protected static function get_template_options() : array {
         $templates = [];
-        $records = template::get_records(['enabled' => 1], 'sortorder');
+        $records = template::get_records(['enabled' => 1], 'name');
         if ($records) {
             foreach ($records as $record) {
                 $templates[$record->get('id')] = $record->get('name');
