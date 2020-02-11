@@ -309,8 +309,11 @@ class property_list {
                 $array[$key] = $this->array_sort($array[$key]);
             }
         }
-        // Sort array. From SEB docs - "Use non-localized (culture invariant), non-ASCII value based case insensitive ordering."
-        ksort($array, SORT_STRING | SORT_FLAG_CASE);
+        // Sort assoc array. From SEB docs - "Use non-localized (culture invariant), non-ASCII value based case
+        // insensitive ordering."
+        if ($this->is_associative_array($array)) {
+            ksort($array, SORT_STRING | SORT_FLAG_CASE);
+        }
 
         return $array;
     }
@@ -346,5 +349,18 @@ class property_list {
     private function array_serialize_cftypes(array $array) : array {
         $array = new CFDictionary($array); // Convert back to CFDictionary so serialization is recursive.
         return $array->toArray(); // Serialize.
+    }
+
+    /**
+     * Check if an array is associative or sequential.
+     *
+     * @param array $array Array to check.
+     * @return bool False if not associative.
+     */
+    private function is_associative_array(array $array) {
+        if (array() === $array) {
+            return false;
+        }
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 }

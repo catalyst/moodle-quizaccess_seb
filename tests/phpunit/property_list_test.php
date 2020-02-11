@@ -380,7 +380,13 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
                     . "<key>allowWlan</key>"
                     . "<string>testValue3</string>"
                     , "{\"allowWlan\":\"testValue3\",\"allowWLAN\":\"testValue2\",\"testKey\":\"testValue\"}"],
-            'url' => ["<key>url</key><string>http://test.com</string>", "{\"url\":\"http://test.com\"}"]
+            'url' => ["<key>url</key><string>http://test.com</string>", "{\"url\":\"http://test.com\"}"],
+            'assoc dict' => ["<key>dict</key><dict><key>banana</key><false/><key>apple</key><true/></dict>",
+                    "{\"dict\":{\"apple\":true,\"banana\":false}}"],
+            'seq array' => ["<key>array</key><array><key>1</key><false/><key>2</key><true/>
+<key>3</key><true/><key>4</key><true/><key>5</key><true/><key>6</key><true/>
+<key>7</key><true/><key>8</key><true/><key>9</key><true/><key>10</key><true/></array>",
+                    "{\"array\":[false,true,true,true,true,true,true,true,true,true]}"],
         ];
     }
 }
