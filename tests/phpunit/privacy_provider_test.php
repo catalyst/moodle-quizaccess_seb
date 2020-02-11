@@ -149,7 +149,8 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
 
         // Test data is deleted.
         provider::delete_data_for_users($approveduserlist);
-        $this->assertEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEmpty($record->get('usermodified'));
     }
 
     /**
@@ -167,7 +168,8 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
 
         // Test data is deleted.
         provider::delete_data_for_user($approvedcontextlist);
-        $this->assertEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEmpty($record->get('usermodified'));
     }
 
     /**

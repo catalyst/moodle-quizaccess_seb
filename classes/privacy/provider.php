@@ -209,10 +209,14 @@ class provider implements
         if ($context->contextlevel !== CONTEXT_MODULE) {
             return;
         }
+
         $cmid = $context->instanceid;
         $quizid = $DB->get_field('course_modules', 'instance', ['id' => $cmid]);
 
-        $DB->delete_records('quizaccess_seb_quizsettings', ['quizid' => $quizid]);
+        $params['quizid'] = $quizid;
+        $select = "id IN (SELECT templateid FROM {quizaccess_seb_quizsettings} qs WHERE qs.id = :quizid";
+        $DB->set_field_select('quizaccess_seb_quizsettings', 'usermodified', 0, "quizid = :quizid", $params);
+        $DB->set_field_select('quizaccess_seb_template', 'usermodified', 0, $select, $params);
     }
 
     /**
@@ -229,28 +233,9 @@ class provider implements
             return;
         }
 
-        // Get all quizids that correspond to the contexts for a user.
-        $cmids = [];
-        foreach ($contexts as $context) {
-            if ($context->contextlevel === CONTEXT_MODULE) {
-                $cmids[] = $context->instanceid;
-            }
-        }
-
-        // Do nothing if no matching quiz settings are found for the user.
-        if (empty($cmids)) {
-            return;
-        }
-
-        // Get the quizids that correspond to the cmids.
-        list($insql, $params) = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
-        $quizids = $DB->get_records_select('course_modules', "id $insql", $params, '', 'instance');
-        $quizids = array_keys($quizids);
-
-        if (!empty($quizids)) {
-            list($insql, $params) = $DB->get_in_or_equal($quizids, SQL_PARAMS_NAMED);
-            $DB->delete_records_select('quizaccess_seb_quizsettings', "quizid $insql", $params);
-        }
+        $params['usermodified'] = $contextlist->get_user()->id;
+        $DB->set_field_select('quizaccess_seb_quizsettings', 'usermodified', 0, "usermodified = :usermodified", $params);
+        $DB->set_field_select('quizaccess_seb_template', 'usermodified', 0, "usermodified = :usermodified", $params);
     }
 
     /**
@@ -290,24 +275,8 @@ class provider implements
 
         $userids = $userlist->get_userids();
         list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-        $params = [
-            'contextid' => $context->id,
-            'contextlevel' => CONTEXT_MODULE,
-        ];
-        $params = array_merge($params, $inparams);
 
-        // Fetch the quizaccess_seb_quizsettings IDs in the context for approved users.
-        $sql = "SELECT qs.id
-                  FROM {quizaccess_seb_quizsettings} qs
-                  JOIN {course_modules} cm ON cm.instance = qs.quizid
-                  JOIN {context} c ON c.instanceid = cm.id
-                   AND c.contextlevel = :contextlevel
-                   AND c.id = :contextid
-                 WHERE qs.usermodified {$insql}";
-        $settingsids = $DB->get_fieldset_sql($sql, $params);
-
-        // Delete the relevant repository_onedrive_access data.
-        list($insql, $params) = $DB->get_in_or_equal($settingsids, SQL_PARAMS_NAMED);
-        $DB->delete_records_select('quizaccess_seb_quizsettings', "id {$insql}", $params);
+        $DB->set_field_select('quizaccess_seb_quizsettings', 'usermodified', 0, "usermodified {$insql}", $inparams);
+        $DB->set_field_select('quizaccess_seb_template', 'usermodified', 0, "usermodified {$insql}", $inparams);
     }
 }
