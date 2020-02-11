@@ -26,7 +26,11 @@
 namespace quizaccess_seb;
 
 
+use CFPropertyList\CFPropertyList;
+
 defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 class helper {
     /**
@@ -50,6 +54,31 @@ class helper {
             null,
             $options
         );
+    }
+
+    /**
+     * Validate seb config string.
+     *
+     * @param string $sebconfig
+     * @return bool
+     */
+    public static function is_valid_seb_config(string $sebconfig) : bool {
+        $result = true;
+
+        set_error_handler(function($errno, $errstr, $errfile, $errline ){
+            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+        });
+
+        $plist = new CFPropertyList();
+        try {
+            $plist->parse($sebconfig);
+        } catch (\ErrorException $e) {
+            $result = false;
+        }
+
+        restore_error_handler();
+
+        return $result;
     }
 
 }
