@@ -51,11 +51,9 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
 
         // Check expected differences.
         $this->assertTrue(array_key_exists('seb', $diffelements)); // Table header.
-        $this->assertTrue(array_key_exists('sebconfigtemplate', $diffelements)); // Used to compute templateid.
 
         // Unset expected fields.
         unset($diffelements['seb']);
-        unset($diffelements['sebconfigtemplate']);
         unset($diffelements['filemanager_sebconfigfile']);
 
         $this->assertEmpty($diffelements);
@@ -120,10 +118,10 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
 
         $settings = settings_provider::get_requiresafeexambrowser_options($context);
 
-        $this->assertCount(4, $settings);
+        $this->assertCount(5, $settings);
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $settings));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $settings));
-        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $settings));
 

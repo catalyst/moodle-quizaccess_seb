@@ -261,27 +261,18 @@ class quiz_settings extends persistent {
         switch ($this->get('requiresafeexambrowser')) {
             case settings_provider::USE_SEB_NO:
                 break;
+
+            case settings_provider::USE_SEB_TEMPLATE:
+                $this->process_template_settings();
+                break;
+
             case settings_provider::USE_SEB_UPLOAD_CONFIG:
                 $this->process_seb_config_file();
-
-                // Add the sensible default options to the configuration and exported SEB files.
-                $this->process_default_settings();
                 break;
+
             default:
-                // If at any point a configuration file has been uploaded and parsed, clear the settings.
-                $this->plist = new property_list();
-
-                // Process all settings that are boolean.
-                $this->process_bool_settings();
-
-                // Process quit settings.
-                $this->process_quit_settings();
-
-                // Add all the URL filters.
-                $this->process_url_filters();
-
-                // Add the sensible default options to the configuration and exported SEB files.
-                $this->process_default_settings();
+                // Remaining case settings_provider::USE_SEB_CONFIG_MANUALLY
+                $this->process_default_case();
         }
 
         // Export and save the config, ready for DB.
@@ -289,9 +280,46 @@ class quiz_settings extends persistent {
     }
 
     /**
-     * Sets the default settings when saving a quiz.
+     * Creates an initial plist, then applies all settings associated with the quiz.
      */
-    private function process_default_settings() {
+    private function process_default_case() {
+        // If at any point a configuration file has been uploaded and parsed, clear the settings.
+        $this->plist = new property_list();
+        $this->progress_default_standard_settings();
+    }
+
+    /**
+     * Creates an initial plist from the template uploaded, then applies all settings associated with the quiz.
+     */
+    private function process_template_settings() {
+        $template = template::get_record(['id' => $this->get('templateid')]);
+        $this->plist = new property_list($template->get('content'));
+        $this->progress_default_standard_settings();
+    }
+
+    /**
+     * This function processes the elements that have been set via the modform fields.
+     *
+     * It's called during case USE_SEB_TEMPLATE and USE_SEB_CONFIG_MANUALLY.
+     */
+    private function progress_default_standard_settings() {
+        // Process all settings that are boolean.
+        $this->process_bool_settings();
+
+        // Process quit settings.
+        $this->process_quit_settings();
+
+        // Add all the URL filters.
+        $this->process_url_filters();
+
+        // Add the sensible default options to the configuration and exported SEB files.
+        $this->process_required_enforced_settings();
+    }
+
+    /**
+     * Sets or updates some sensible default settings, these are the items 'startURL' and 'sendBrowserExamKey'.
+     */
+    private function process_required_enforced_settings() {
         global $CFG;
 
         $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $this->get('cmid')]);
@@ -322,6 +350,9 @@ class quiz_settings extends persistent {
         if (!empty($file)) {
             $this->plist = new property_list($file->get_content());
         }
+
+        // Add the sensible default options to the configuration and exported SEB files.
+        $this->process_required_enforced_settings();
     }
 
     /**

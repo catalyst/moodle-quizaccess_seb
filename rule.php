@@ -231,9 +231,6 @@ class quizaccess_seb extends quiz_access_rule_base {
         $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
         $settings->cmid = $cm->id;
 
-        // TODO: Process sebconfigtemplate into templateid.
-        $settings->templateid = 0;
-
         // Get existing settings or create new settings if none exist.
         $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
         if (!$quizsettings) {
@@ -241,6 +238,11 @@ class quizaccess_seb extends quiz_access_rule_base {
         } else {
             $settings->id = $quizsettings->get('id');
             $quizsettings->from_record($settings);
+        }
+
+        // If specified to not use a template, reset this back to default.
+        if ($quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_TEMPLATE) {
+            $quizsettings->set('templateid', 0);
         }
 
         // Ensure that a cm exists before deleting any files.
@@ -321,7 +323,7 @@ class quizaccess_seb extends quiz_access_rule_base {
                 . 'seb.regexblocked AS seb_regexblocked, '
                 . 'seb.allowedbrowserexamkeys AS seb_allowedbrowserexamkeys, '
                 . 'seb.suppresssebdownloadlink AS seb_suppresssebdownloadlink, '
-                . 'sebtemplate.name AS seb_templatename '
+                . 'sebtemplate.id AS seb_templateid '
                 , 'LEFT JOIN {quizaccess_seb_quizsettings} seb ON seb.quizid = quiz.id '
                 . 'LEFT JOIN {quizaccess_seb_template} sebtemplate ON seb.templateid = sebtemplate.id '
                 , []

@@ -126,7 +126,7 @@ class template extends \core\persistent {
     }
 
     /**
-     * CHeck if we can delete the template.
+     * Check if we can delete the template.
      *
      * @return bool
      */
