@@ -43,11 +43,20 @@ class quizaccess_seb_config_key_testcase extends advanced_testcase {
      *
      * To extract the JSON used to create the CK, verbose level logging needs to enabled in the 'Security' tab. On mac
      * you can find the logs in the 'console' app. Search logs for "JSON for Config Key:".
+     *
+     * @param string $filename Name of sample file.
+     * @param string $expectedhash Expected config key hash.
+     * @param string $password Password to decrypt file if encrypted.
+     *
+     * @dataProvider real_ck_hash_provider
      */
-    public function test_config_key_hash_generated() {
-        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted_mac_001.seb');
+    public function test_config_key_hash_generated(string $filename, string $expectedhash, string $password) {
+        $xml = file_get_contents(__DIR__ . "/sample_data/$filename");
+        if (!empty($password)) {
+            $xml = \quizaccess_seb\seb_cipher::decrypt($xml, $password);
+        }
         $hash = config_key::generate($xml)->get_hash();
-        $this->assertEquals('4fa9af8ec8759eb7c680752ef4ee5eaf1a860628608fccae2715d519849f9292', $hash);
+        $this->assertEquals($expectedhash, $hash);
     }
 
     /**
@@ -79,5 +88,19 @@ class quizaccess_seb_config_key_testcase extends advanced_testcase {
         $hashwithorigver = config_key::generate($xmlwithoriginatorversion)->get_hash();
         $hashwithoutorigver = config_key::generate($xmlwithoutoriginatorversion)->get_hash();
         $this->assertEquals($hashwithorigver, $hashwithoutorigver);
+    }
+
+    /**
+     * Provide a seb file, the expected Config Key and a password if encrypted.
+     *
+     * @return array
+     */
+    public function real_ck_hash_provider() : array {
+        return [
+            'unencrypted_mac2.1.4' => ['unencrypted_mac_001.seb',
+                    '4fa9af8ec8759eb7c680752ef4ee5eaf1a860628608fccae2715d519849f9292', ''],
+            'unencrypted_win2.2.3' => ['unencrypted_win_223.seb',
+                    'fc6f4ea5922717760f4d6d536c23b8d19bf20b52aa97940f5427a76e20f49026', ''],
+        ];
     }
 }
