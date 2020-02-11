@@ -175,7 +175,7 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
     /**
      * Test that data is deleted for a single context.
      */
-    public function delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context() {
         $this->setup_test_data();
 
         $context = context_module::instance($this->quiz->cmid);
@@ -185,6 +185,7 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
 
         // Test data is deleted.
         provider::delete_data_for_all_users_in_context($context);
-        $this->assertEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEmpty($record->get('usermodified'));
     }
 }
