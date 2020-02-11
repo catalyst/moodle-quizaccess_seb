@@ -25,6 +25,7 @@
 
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\settings_provider;
+use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -118,12 +119,25 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
 
         $settings = settings_provider::get_requiresafeexambrowser_options($context);
 
-        $this->assertCount(5, $settings);
+        $this->assertCount(4, $settings);
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $settings));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $settings));
-        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $settings));
+
+        // Create a template.
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $template = new template();
+        $template->set('content', $xml);
+        $template->set('name', 'test');
+        $template->set('enabled', 1);
+        $template->save();
+
+        // The template options should be visible now.
+        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(5, $settings);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
 
         // A new user does not have the capability to use the file manager.
         $user = $this->getDataGenerator()->create_user();

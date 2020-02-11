@@ -206,6 +206,14 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
         }
 
+        // Edge case to force user to select a template.
+        if ($requiresetting == settings_provider::USE_SEB_TEMPLATE) {
+            $templateid = $data['seb_templateid'];
+            if (empty($templateid)) {
+                $errors['seb_templateid'] = get_string('invalidtemplate', 'quizaccess_seb');
+            }
+        }
+
         // Global settings may be active which require a quiz password to be set.
         if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired')) && empty($data['quizpassword'])) {
             $errors['quizpassword'] = get_string('passwordnotset', 'quizaccess_seb');

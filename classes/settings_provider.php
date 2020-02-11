@@ -149,7 +149,9 @@ class settings_provider {
         $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
 
         if ($context && has_capability('quizaccess/seb:manage_seb_templateid', $context)) {
-            $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
+            if (template::get_records(['enabled' => 1])) {
+                $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
+            }
         }
 
         if ($context && has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context)) {
@@ -166,6 +168,7 @@ class settings_provider {
      * @return array
      */
     public static function get_template_options() : array {
+        // Default list option for no template existing.
         $templates[] = get_string('notemplate', 'quizaccess_seb');
 
         $records = template::get_records(['enabled' => 1], 'sortorder');
