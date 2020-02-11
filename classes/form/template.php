@@ -26,6 +26,7 @@
 namespace quizaccess_seb\form;
 
 use CFPropertyList\CFPropertyList;
+use core\notification;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -62,6 +63,11 @@ class template extends \core\form\persistent {
         $mform->setType('enabled', PARAM_INT);
 
         $this->add_action_buttons();
+
+        if (!empty($this->get_persistent()) && !$this->get_persistent()->can_delete()) {
+            $mform->hardFreezeAllVisibleExcept([]);
+            $mform->addElement('cancel');
+        }
     }
 
     /**

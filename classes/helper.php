@@ -29,67 +29,6 @@ namespace quizaccess_seb;
 defined('MOODLE_INTERNAL') || die();
 
 class helper {
-
-    /**
-     * Render the inplace editable used to edit the template enable state.
-     *
-     * @param \quizaccess_seb\template $template The template to edit.
-     *
-     * @return string
-     */
-    public static function render_templ_enabled_inplace_editable(template $template) {
-        global $OUTPUT;
-
-        if ($template->get('enabled')) {
-            $icon = 't/hide';
-            $alt = get_string('disable');
-            $value = 1;
-        } else {
-            $icon = 't/show';
-            $alt = get_string('enable');
-            $value = 0;
-        }
-
-        $editable = new \core\output\inplace_editable(
-            'quizaccess_seb',
-            'templenabled',
-            $template->get('id'),
-            true,
-            $OUTPUT->pix_icon($icon, $alt, 'moodle', [
-                'title' => $alt,
-            ]),
-            $value
-        );
-
-        $editable->set_type_toggle();
-
-        return $editable;
-    }
-
-    /**
-     * Render the inplace editable used to edit the template name.
-     *
-     * @param \quizaccess_seb\template $template The template to edit.
-     *
-     * @return string
-     */
-    public static function render_templ_name_inplace_editable(template $template) {
-        return new \core\output\inplace_editable(
-            'quizaccess_seb',
-            'templname',
-            $template->get('id'),
-            true,
-            \html_writer::link(
-                new \moodle_url(template_controller::get_base_url(), [
-                    'id' => $template->get('id'),
-                    'action' => template_controller::ACTION_EDIT,
-                ]),
-                $template->get('name')
-            ),
-            $template->get('name')
-        );
-    }
-
     /**
      * Get a filler icon for display in the actions column of a table.
      *

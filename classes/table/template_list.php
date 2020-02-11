@@ -79,8 +79,13 @@ class template_list extends \flexible_table {
      * @return string
      */
     protected function col_name(template $data) : string {
-        global $OUTPUT;
-        return $OUTPUT->render(helper::render_templ_name_inplace_editable($data));
+        return \html_writer::link(
+            new \moodle_url(template_controller::get_base_url(), [
+                'id' => $data->get('id'),
+                'action' => template_controller::ACTION_EDIT,
+            ]),
+            $data->get('name')
+        );
     }
 
     /**
@@ -100,8 +105,7 @@ class template_list extends \flexible_table {
      * @return string
      */
     protected function col_enabled(template $data): string {
-        global $OUTPUT;
-        return $OUTPUT->render(helper::render_templ_enabled_inplace_editable($data));
+        return empty($data->get('enabled')) ? get_string('no') : get_string('yes');
     }
 
     /**

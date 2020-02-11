@@ -25,6 +25,7 @@
 
 namespace quizaccess_seb;
 
+use core\notification;
 use quizaccess_seb\table\template_list;
 
 defined('MOODLE_INTERNAL') || die();
@@ -223,15 +224,18 @@ class template_controller {
                     $instance->from_record($data);
                     $instance->update();
                 }
-                \core\notification::success(get_string('changessaved'));
+                notification::success(get_string('changessaved'));
             } catch (\Exception $e) {
-                \core\notification::error($e->getMessage());
+                notification::error($e->getMessage());
             }
             redirect(new \moodle_url(static::get_base_url()));
         } else {
             if (empty($instance)) {
                 $this->header($this->get_new_heading());
             } else {
+                if (!$instance->can_delete()) {
+                    notification::warning(get_string('cantedit', 'quizaccess_seb'));
+                }
                 $this->header($this->get_edit_heading());
             }
         }
@@ -251,10 +255,10 @@ class template_controller {
 
         if ($instance->can_delete()) {
             $instance->delete();
-            \core\notification::success(get_string('deleted'));
+            notification::success(get_string('deleted'));
             redirect(new \moodle_url(static::get_base_url()));
         } else {
-            \core\notification::warning(get_string('cantdelete', 'quizaccess_seb'));
+            notification::warning(get_string('cantdelete', 'quizaccess_seb'));
             redirect(new \moodle_url(static::get_base_url()));
         }
     }
