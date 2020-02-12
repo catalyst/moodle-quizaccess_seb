@@ -56,7 +56,7 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
 
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
-        $this->assertEquals('Quiz access was prevented.', $event->get_name());
+        $this->assertEquals('Quiz access was prevented', $event->get_name());
         $this->assertEquals("The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
             . "Safe Exam Browser access plugin. The reason was 'Because I said so.'.", $event->get_description());
         $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
@@ -101,7 +101,7 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
 
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\template_created', $event);
-        $this->assertEquals('SEB Template was created.', $event->get_name());
+        $this->assertEquals('SEB Template was created', $event->get_name());
         $this->assertEquals("The user with id '$user->id' has created a template with id '{$template->get('id')}'.", $event->get_description());
         $this->assertEquals(context_system::instance(), $event->get_context());
         $this->assertEquals($user->id, $event->userid);
