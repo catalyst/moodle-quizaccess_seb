@@ -169,8 +169,12 @@ $string['seblinkbutton'] = 'Launch Safe Exam Browser';
 $string['httplinkbutton'] = 'Download Configuration';
 
 // Events.
-$string['event:accessprevented'] = "Quiz access was prevented.";
-$string['event:templatecreated'] = "SEB Template was created.";
+$string['event:accessprevented'] = "Quiz access was prevented";
+$string['event:templatecreated'] = "SEB Template was created";
+$string['event:templatedeleted'] = "SEB Template was deleted";
+$string['event:templatedisabled'] = "SEB Template was disabled";
+$string['event:templateenabled'] = "SEB Template was enabled";
+$string['event:templateupdated'] = "SEB Template was updated";
 
 // Templates.
 $string['managetemplates'] = 'Manage templates';

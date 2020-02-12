@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Event for when a template is created.
+ * Event for when a template is updated.
  *
  * @package    quizaccess_seb
  * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
@@ -31,7 +31,7 @@ use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
-class template_created extends base {
+class template_updated extends base {
 
     /**
      * Create event with strict parameters.
@@ -59,7 +59,7 @@ class template_created extends base {
      */
     protected function init() {
         $this->data['objecttable'] = 'quizaccess_seb_template';
-        $this->data['crud'] = 'c';
+        $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
 
@@ -69,7 +69,7 @@ class template_created extends base {
      * @return string Name of event.
      */
     public static function get_name() {
-        return get_string('event:templatecreated', 'quizaccess_seb');
+        return get_string('event:templateupdated', 'quizaccess_seb');
     }
 
     /**
@@ -90,7 +90,7 @@ class template_created extends base {
      * @return string Description.
      */
     public function get_description() {
-        return "The user with id '$this->userid' has created a template with id '$this->objectid'.";
+        return "The user with id '$this->userid' has updated a template with id '$this->objectid'.";
     }
 
     /**

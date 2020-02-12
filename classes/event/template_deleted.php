@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Event for when a template is created.
+ * Event for when a template is deleted.
  *
  * @package    quizaccess_seb
  * @author     Nicholas Hoobin <nicholashoobin@catalyst-au.net>
@@ -31,7 +31,7 @@ use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
-class template_created extends base {
+class template_deleted extends base {
 
     /**
      * Create event with strict parameters.
@@ -39,17 +39,16 @@ class template_created extends base {
      * Define strict parameters to create event with instead of relying on internal validation of array. Better code practice.
      * Easier for consumers of this class to know what data must be supplied and observers can have more trust in event data.
      *
-     * @param template $template SEB template.
+     * @param string $id The id of the template
      * @param context_system $context Context system.
      * @return base
      */
-    public static function create_strict(template $template, context_system $context) : base {
+    public static function create_strict(string $id, context_system $context) : base {
         global $USER;
-        $tid = $template->get('id');
 
         return self::create([
             'userid' => $USER->id,
-            'objectid' => $tid,
+            'objectid' => $id,
             'context' => $context,
         ]);
     }
@@ -59,7 +58,7 @@ class template_created extends base {
      */
     protected function init() {
         $this->data['objecttable'] = 'quizaccess_seb_template';
-        $this->data['crud'] = 'c';
+        $this->data['crud'] = 'd';
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
     }
 
@@ -69,7 +68,7 @@ class template_created extends base {
      * @return string Name of event.
      */
     public static function get_name() {
-        return get_string('event:templatecreated', 'quizaccess_seb');
+        return get_string('event:templatedeleted', 'quizaccess_seb');
     }
 
     /**
@@ -77,11 +76,7 @@ class template_created extends base {
      * @return \moodle_url
      */
     public function get_url() {
-        $params = [
-            'id' => $this->objectid,
-            'action' => 'edit',
-        ];
-        return new \moodle_url('/mod/quiz/accessrule/seb/template.php', $params);
+        return new \moodle_url('/mod/quiz/accessrule/seb/template.php');
     }
 
     /**
@@ -90,7 +85,7 @@ class template_created extends base {
      * @return string Description.
      */
     public function get_description() {
-        return "The user with id '$this->userid' has created a template with id '$this->objectid'.";
+        return "The user with id '$this->userid' has deleted a template with id '$this->objectid'.";
     }
 
     /**

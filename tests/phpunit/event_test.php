@@ -81,14 +81,16 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
         $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $template = new \quizaccess_seb\template();
+        $template->set('content', $xml);
+        $template->set('name', 'test');
+        $template->save();
 
         $event = \quizaccess_seb\event\template_created::create_strict(
             $template,
-            $quizsettings,
-            $course->id,
-            context_module::instance($quiz->cmid),
-            'www.example.com/moodle');
+            context_system::instance());
 
         // Create an event sink, trigger event and retrieve event.
         $sink = $this->redirectEvents();
@@ -100,11 +102,9 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\template_created', $event);
         $this->assertEquals('SEB Template was created.', $event->get_name());
-        $this->assertEquals("The user with id '$user->id' has created a template with id '0' in the Quiz id '$quiz->id'.", $event->get_description());
-        $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
+        $this->assertEquals("The user with id '$user->id' has created a template with id '{$template->get('id')}'.", $event->get_description());
+        $this->assertEquals(context_system::instance(), $event->get_context());
         $this->assertEquals($user->id, $event->userid);
         $this->assertEquals($template->get('id'), $event->objectid);
-        $this->assertEquals($course->id, $event->courseid);
-        $this->assertEquals('www.example.com/moodle', $event->other['url']);
     }
 }
