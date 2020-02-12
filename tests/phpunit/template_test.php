@@ -86,8 +86,8 @@ class quizaccess_seb_template_testcase extends advanced_testcase {
     }
 
     /**
-    *  Test that a template cannot be deleted when assigned to a quiz.
-    */
+     * Test that a template cannot be deleted when assigned to a quiz.
+     */
     public function test_cannot_delete_template_when_assigned_to_quiz() {
         global $DB;
 
