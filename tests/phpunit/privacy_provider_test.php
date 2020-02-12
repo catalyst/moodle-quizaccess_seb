@@ -56,11 +56,20 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
         $this->setUser($this->user);
         $course = $this->getDataGenerator()->create_course();
         $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $template = new \quizaccess_seb\template();
+        $template->set('name', 'test');
+        $template->set('content', $xml);
+        $template->save();
+
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
 
         // Modify settings so usermodified is updated. This is the user data we are testing for.
         $quizsettings->set('requiresafeexambrowser', 1);
+        $quizsettings->set('templateid', $template->get('id'));
         $quizsettings->save();
+
     }
 
     /**
@@ -107,7 +116,15 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
         $index = '1'; // Get first data returned from the quizsettings table metadata.
         $data = $writer->get_data([
             get_string('pluginname', 'quizaccess_seb'),
-            get_string('quizsettings', 'quizaccess_seb'),
+            quiz_settings::TABLE,
+            $index,
+        ]);
+        $this->assertNotEmpty($data);
+
+        $index = '1'; // Get first data returned from the template table metadata.
+        $data = $writer->get_data([
+            get_string('pluginname', 'quizaccess_seb'),
+            \quizaccess_seb\template::TABLE,
             $index,
         ]);
         $this->assertNotEmpty($data);
@@ -115,7 +132,15 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
         $index = '2'; // There should not be more than one instance with data.
         $data = $writer->get_data([
             get_string('pluginname', 'quizaccess_seb'),
-            get_string('quizsettings', 'quizaccess_seb'),
+            quiz_settings::TABLE,
+            $index,
+        ]);
+        $this->assertEmpty($data);
+
+        $index = '2'; // There should not be more than one instance with data.
+        $data = $writer->get_data([
+            get_string('pluginname', 'quizaccess_seb'),
+            \quizaccess_seb\template::TABLE,
             $index,
         ]);
         $this->assertEmpty($data);
@@ -149,7 +174,11 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
 
         // Test data is deleted.
         provider::delete_data_for_users($approveduserlist);
-        $this->assertEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEmpty($record->get('usermodified'));
+
+        $template = \quizaccess_seb\template::get_record(['id' => $record->get('templateid')]);
+        $this->assertEmpty($template->get('usermodified'));
     }
 
     /**
@@ -167,22 +196,33 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
 
         // Test data is deleted.
         provider::delete_data_for_user($approvedcontextlist);
-        $this->assertEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEmpty($record->get('usermodified'));
+
+        $template = \quizaccess_seb\template::get_record(['id' => $record->get('templateid')]);
+        $this->assertEmpty($template->get('usermodified'));
     }
 
     /**
      * Test that data is deleted for a single context.
      */
-    public function delete_data_for_all_users_in_context() {
+    public function test_delete_data_for_all_users_in_context() {
         $this->setup_test_data();
 
         $context = context_module::instance($this->quiz->cmid);
 
         // Test data exists.
-        $this->assertNotEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $template = \quizaccess_seb\template::get_record(['id' => $record->get('templateid')]);
+        $this->assertNotEmpty($record->get('usermodified'));
+        $this->assertNotEmpty($template->get('usermodified'));
 
         // Test data is deleted.
         provider::delete_data_for_all_users_in_context($context);
-        $this->assertEmpty(quiz_settings::get_record(['quizid' => $this->quiz->id]));
+
+        $record = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $template = \quizaccess_seb\template::get_record(['id' => $record->get('templateid')]);
+        $this->assertEmpty($record->get('usermodified'));
+        $this->assertEmpty($template->get('usermodified'));
     }
 }
