@@ -30,7 +30,7 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
     /**
      * Test creating the access_prevented event.
      */
-    public function test_access_prevented() {
+    public function test_event_access_prevented() {
         $this->resetAfterTest();
         // Set up event with data.
         $user = $this->getDataGenerator()->create_user();
@@ -56,7 +56,7 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
 
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
-        $this->assertEquals('Quiz access was prevented.', $event->get_name());
+        $this->assertEquals('Quiz access was prevented', $event->get_name());
         $this->assertEquals("The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
             . "Safe Exam Browser access plugin. The reason was 'Because I said so.'.", $event->get_description());
         $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
@@ -68,5 +68,43 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         $this->assertEquals($quizsettings->get('configkey'), $event->other['savedconfigkey']);
         $this->assertEquals(hash('sha256', 'configkey'), $event->other['receivedconfigkey']);
         $this->assertEquals(hash('sha256', 'browserexamkey'), $event->other['receivedbrowserexamkey']);
+    }
+
+    /**
+     * Test creating the template_created event.
+     */
+    public function test_event_create_template() {
+        $this->resetAfterTest();
+        // Set up event with data.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
+
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $template = new \quizaccess_seb\template();
+        $template->set('content', $xml);
+        $template->set('name', 'test');
+        $template->save();
+
+        $event = \quizaccess_seb\event\template_created::create_strict(
+            $template,
+            context_system::instance());
+
+        // Create an event sink, trigger event and retrieve event.
+        $sink = $this->redirectEvents();
+        $event->trigger();
+        $events = $sink->get_events();
+        $this->assertEquals(1, count($events));
+        $event = reset($events);
+
+        // Test that the event data is as expected.
+        $this->assertInstanceOf('\quizaccess_seb\event\template_created', $event);
+        $this->assertEquals('SEB Template was created', $event->get_name());
+        $this->assertEquals("The user with id '$user->id' has created a template with id '{$template->get('id')}'.", $event->get_description());
+        $this->assertEquals(context_system::instance(), $event->get_context());
+        $this->assertEquals($user->id, $event->userid);
+        $this->assertEquals($template->get('id'), $event->objectid);
     }
 }

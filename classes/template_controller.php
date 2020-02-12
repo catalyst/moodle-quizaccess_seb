@@ -220,9 +220,21 @@ class template_controller {
                     $data->content = $form->get_file_content('content');
                     $persistent = $this->get_instance(0, $data);
                     $persistent->create();
+
+                    \quizaccess_seb\event\template_created::create_strict(
+                        $persistent,
+                        \context_system::instance()
+                    )->trigger();
+                    $this->trigger_enabled_event($persistent);
                 } else {
                     $instance->from_record($data);
                     $instance->update();
+
+                    \quizaccess_seb\event\template_updated::create_strict(
+                        $instance,
+                        \context_system::instance()
+                    )->trigger();
+                    $this->trigger_enabled_event($instance);
                 }
                 notification::success(get_string('changessaved'));
             } catch (\Exception $e) {
@@ -256,6 +268,12 @@ class template_controller {
         if ($instance->can_delete()) {
             $instance->delete();
             notification::success(get_string('deleted'));
+
+            \quizaccess_seb\event\template_deleted::create_strict(
+                $id,
+                \context_system::instance()
+            )->trigger();
+
             redirect(new \moodle_url(static::get_base_url()));
         } else {
             notification::warning(get_string('cantdelete', 'quizaccess_seb'));
@@ -309,6 +327,8 @@ class template_controller {
         $template->set('enabled', $visibility);
         $template->save();
 
+        $this->trigger_enabled_event($template);
+
         redirect(new \moodle_url(self::get_base_url()));
     }
 
@@ -338,6 +358,21 @@ class template_controller {
      */
     protected function footer() {
         echo $this->output->footer();
+    }
+
+    /**
+     * Helper function to fire off an event that informs of if a template is enabled or not.
+     *
+     * @param template $template The template persistent object.
+     */
+    private function trigger_enabled_event(template $template) {
+        $eventstring = ($template->get('enabled') == 0 ? 'disabled' : 'enabled');
+
+        $func = '\quizaccess_seb\event\template_' . $eventstring;
+        $func::create_strict(
+            $template,
+            \context_system::instance()
+        )->trigger();
     }
 
 }
