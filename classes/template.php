@@ -26,15 +26,12 @@
 
 namespace quizaccess_seb;
 
-use CFPropertyList\CFPropertyList;
-
 use core\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../vendor/autoload.php');
 
-class template extends \core\persistent {
+class template extends persistent {
 
     /** Table name for the persistent. */
     const TABLE = 'quizaccess_seb_template';
@@ -107,22 +104,11 @@ class template extends \core\persistent {
      * @return bool|\lang_string
      */
     protected function validate_content(string $content) {
-        $result = true;
-
-        set_error_handler(function($errno, $errstr, $errfile, $errline ){
-            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
-        });
-
-        $plist = new CFPropertyList();
-        try {
-            $plist->parse($content);
-        } catch (\ErrorException $e) {
-            $result = new \lang_string('invalidtemplate', 'quizaccess_seb');
+        if (helper::is_valid_seb_config($content)) {
+            return true;
+        } else {
+            return new \lang_string('invalidtemplate', 'quizaccess_seb');
         }
-
-        restore_error_handler();
-
-        return $result;
     }
 
     /**

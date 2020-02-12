@@ -50,6 +50,10 @@ class config_key {
      * @return config_key This config key instance.
      */
     public static function generate(string $xml) {
+        if (!empty($xml) && !helper::is_valid_seb_config($xml)) {
+            throw new \invalid_parameter_exception('Invalid a PList XML string, representing SEB config');
+        }
+
         $plist = new property_list($xml);
         // Remove the key "originatorVersion" first. This key is exempted from the SEB-JSON hash (it's a special key
         // which doesn't have any functionality, it's just meta data indicating which SEB version saved the config file).

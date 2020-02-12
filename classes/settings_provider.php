@@ -378,10 +378,7 @@ class settings_provider {
 
         // If we require an SEB config uploaded, and the file exists, parse it.
         if ($file) {
-            $plist = new CFPropertyList();
-            try {
-                $plist->parse($file->get_content());
-            } catch (\Exception $e) {
+            if (!helper::is_valid_seb_config($file->get_content())) {
                 return new lang_string('fileparsefailed', 'quizaccess_seb');
             }
         }
