@@ -240,6 +240,28 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     }
 
     /**
+     * Test using USE_SEB_UPLOAD_CONFIG and overriding the password.
+     */
+    public function test_using_own_config_and_overriding_password() {
+        $url = new moodle_url("/mod/quiz/view.php", ['id' => $this->quiz->cmid]);
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+            . "<key>allowWlan</key><false/><key>startURL</key><string>$url</string>"
+            . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
+        $itemid = $this->create_module_test_file($xml);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $quizsettings->set('quitpassword', '123');
+        $quizsettings->save();
+        $config = $quizsettings->get('config');
+
+        $hashedpassword = hash('SHA256', '123');
+        $this->assertNotContains("<key>hashedQuitPassword</key><string>hashedpassword</string>", $config);
+        $this->assertContains("<key>hashedQuitPassword</key><string>{$hashedpassword}</string>", $config);
+    }
+
+    /**
      * Bad browser exam key data provider.
      *
      * @return array

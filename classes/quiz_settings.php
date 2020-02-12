@@ -351,6 +351,9 @@ class quiz_settings extends persistent {
             $this->plist = new property_list($file->get_content());
         }
 
+        // Process quit settings.
+        $this->process_quit_settings();
+
         // Add the sensible default options to the configuration and exported SEB files.
         $this->process_required_enforced_settings();
     }
