@@ -66,6 +66,7 @@ class quizaccess_seb_template_testcase extends advanced_testcase {
         $this->assertEquals($data->description, $actual->description);
         $this->assertEquals($data->enabled, $actual->enabled);
         $this->assertEquals($data->content, $actual->content);
+        $this->assertTrue($template->can_delete());
     }
 
     /**
@@ -84,7 +85,10 @@ class quizaccess_seb_template_testcase extends advanced_testcase {
         $template->save();
     }
 
-    public function test_can_delete() {
+    /**
+     * Test that a template cannot be deleted when assigned to a quiz.
+     */
+    public function test_cannot_delete_template_when_assigned_to_quiz() {
         global $DB;
 
         $data = new stdClass();
@@ -103,7 +107,6 @@ class quizaccess_seb_template_testcase extends advanced_testcase {
             . "<string>test.com</string><key>regex</key><false/></dict></array>"
             . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
         $template = new template(0, $data);
-        $this->assertFalse($template->can_delete());
 
         $template->save();
         $this->assertTrue($template->can_delete());
