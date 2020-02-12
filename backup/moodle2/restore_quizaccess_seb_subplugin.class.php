@@ -40,11 +40,13 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
     protected function define_quiz_subplugin_structure() {
         $paths = [];
 
-        // TODO: Templates.
-
         // Quiz settings.
         $path = $this->get_pathfor('/quizaccess_seb_quizsettings'); // Subplugin root path.
         $paths[] = new restore_path_element('quizaccess_seb_quizsettings', $path);
+
+        // Template settings.
+        $path = $this->get_pathfor('/quizaccess_seb_quizsettings/quizaccess_seb_template');
+        $paths[] = new restore_path_element('quizaccess_seb_template', $path);
 
         return $paths;
     }
@@ -59,13 +61,42 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         $data = (object) $data;
         $data->quizid = $this->get_new_parentid('quiz'); // Update quizid with new reference.
         $data->cmid = $this->task->get_moduleid();
-        // TODO: Map template ID to new template reference once implemented.
+
         $quizsettings = new quiz_settings(0, $data);
         $quizsettings->save();
 
         $this->add_related_files('quizaccess_seb',
             'filemanager_sebconfigfile',
             null);
+    }
+
+    /**
+     * Process the restored data for the quizaccess_seb_template table.
+     *
+     * @param stdClass $data Data for quizaccess_seb_template retrieved from backup xml.
+     */
+    public function process_quizaccess_seb_template($data) {
+        global $DB;
+
+        // Process template.
+        $data = (object) $data;
+
+        // If we're on the same site, then the template will already exist.
+        if (!$this->task->is_samesite()) {
+            // Get or create the record.
+            $template = \quizaccess_seb\template::get_record($data);
+            $template->save();
+
+            $parent = $this->get_new_parentid('quiz');
+
+            $params = [
+                'quizid' => $parent
+            ];
+
+            // Update the restored quiz to use this template.
+            $DB->set_field_select(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'),
+                'quizid = :quizid', $params);
+        }
     }
 }
 
