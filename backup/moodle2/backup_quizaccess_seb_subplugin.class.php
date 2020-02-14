@@ -42,7 +42,6 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
         $subplugin = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
 
-        // TODO: Define the templates table structure once implemented.
         $template = new \quizaccess_seb\template();
         $blanktemplatearray = (array) $template->to_record();
         unset($blanktemplatearray['id']);

@@ -78,25 +78,21 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
     public function process_quizaccess_seb_template($data) {
         global $DB;
 
-        // Process template.
         $data = (object) $data;
 
-        // If we're on the same site, then the template will already exist.
-        if (!$this->task->is_samesite()) {
-            // Get or create the record.
-            $template = \quizaccess_seb\template::get_record($data);
-            $template->save();
+        $parent = $this->get_new_parentid('quiz');
 
-            $parent = $this->get_new_parentid('quiz');
+        // We don't wan't to fetch the existing record, but make a new one.
+        $template = new \quizaccess_seb\template(0, $data);
+        $name = $template->get('name');
+        $newname = get_string('restoredfrom', 'quizaccess_seb', ['name' => $name, 'cmid' => $parent]);
+        $template->set('name', $newname);
+        $template->save();
 
-            $params = [
-                'quizid' => $parent
-            ];
-
-            // Update the restored quiz to use this template.
-            $DB->set_field_select(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'),
-                'quizid = :quizid', $params);
-        }
+        // Update the restored quiz to use this template.
+        $DB->set_field_select(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'),
+            'quizid = :quizid', ['quizid' => $parent]);
     }
+
 }
 
