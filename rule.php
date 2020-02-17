@@ -388,7 +388,7 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         $output = $PAGE->get_renderer('mod_quiz');
         $quizsettings = $this->accessmanager->get_quiz_settings();
-        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, 'finished', true);
+        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, 'finished', false);
         $quitbutton = '';
 
         if (empty($attempts)) {
@@ -414,6 +414,8 @@ class quizaccess_seb extends quiz_access_rule_base {
      */
     public function description() {
         $messages = [get_string('sebrequired', 'quizaccess_seb')];
+
+        // Those with higher level access will be able to see the button if they've made an attempt.
         if (!$this->prevent_access()) {
             $messages[] = $this->display_quit_button();
         }
