@@ -177,6 +177,15 @@ class access_manager {
     }
 
     /**
+     * Getter for the quiz_settings object.
+     *
+     * @return quiz_settings
+     */
+    public function get_quiz_settings() : quiz_settings {
+        return $this->quizsettings;
+    }
+
+    /**
      * Check the hash from the request header against the permitted browser exam keys.
      *
      * @param array $keys Allowed browser exam keys.
