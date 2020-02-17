@@ -44,7 +44,6 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
 
         $template = new \quizaccess_seb\template();
         $blanktemplatearray = (array) $template->to_record();
-        unset($blanktemplatearray['id']);
         unset($blanktemplatearray['usermodified']);
         unset($blanktemplatearray['timemodified']);
 
