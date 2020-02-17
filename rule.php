@@ -281,6 +281,9 @@ class quizaccess_seb extends quiz_access_rule_base {
             return false;
         }
 
+        // If the rule is active, enforce a secure view whilst taking the quiz.
+        $PAGE->set_pagelayout('secure');
+
         // If using client configuration with no browser exam keys, do basic check that user is using Safe Exam Browser.
         // It is more secure to use Browser Exam Keys than to rely on this check.
         if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG
