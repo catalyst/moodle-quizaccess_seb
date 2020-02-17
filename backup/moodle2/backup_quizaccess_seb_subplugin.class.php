@@ -82,7 +82,7 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
         );
 
         $params = ['id' => '../templateid'];
-        $subplugintemplatesettings->set_source_table('quizaccess_seb_template', $params);
+        $subplugintemplatesettings->set_source_table(\quizaccess_seb\template::TABLE, $params);
 
         return $subplugin;
     }
