@@ -193,3 +193,4 @@ $string['cantedit'] = 'Template can\'t be edited as it has been used for one or 
 $string['confirmtemplateremovaltitle'] = 'Confirm template removal?';
 $string['confirmtemplateremovalquestion'] = 'Are you sure that you wish to remove this template?';
 $string['notemplate'] = 'No template';
+$string['restoredfrom'] = '{$a->name} (restored via cmid {$a->cmid})';

@@ -42,7 +42,14 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
         $subplugin = $this->get_subplugin_element();
         $subpluginwrapper = new backup_nested_element($this->get_recommended_name());
 
-        // TODO: Define the templates table structure once implemented.
+        $template = new \quizaccess_seb\template();
+        $blanktemplatearray = (array) $template->to_record();
+        unset($blanktemplatearray['usermodified']);
+        unset($blanktemplatearray['timemodified']);
+
+        $templatekeys = array_keys($blanktemplatearray);
+
+        $subplugintemplatesettings = new backup_nested_element('quizaccess_seb_template', null, $templatekeys);
 
         // Get quiz settings keys to save.
         $settings = new \quizaccess_seb\quiz_settings();
@@ -56,16 +63,15 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
         $settingskeys = array_keys($blanksettingsarray);
 
         // Save the settings.
-        $subpluginquizsettings = new backup_nested_element('quizaccess_seb_quizsettings', null,
-                $settingskeys);
+        $subpluginquizsettings = new backup_nested_element('quizaccess_seb_quizsettings', null, $settingskeys);
 
         // Connect XML elements into the tree.
         $subplugin->add_child($subpluginwrapper);
         $subpluginwrapper->add_child($subpluginquizsettings);
+        $subpluginquizsettings->add_child($subplugintemplatesettings);
 
         // Set source to populate the settings data by referencing the ID of quiz being backed up.
-        $subpluginquizsettings->set_source_table('quizaccess_seb_quizsettings',
-            ['quizid' => $quizid]);
+        $subpluginquizsettings->set_source_table(quizaccess_seb\quiz_settings::TABLE, ['quizid' => $quizid]);
 
         $contextid = $this->get_setting_value(backup::VAR_CONTEXTID);
         $subpluginquizsettings->annotate_files(
@@ -74,6 +80,9 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
             null,
             $contextid
         );
+
+        $params = ['id' => '../templateid'];
+        $subplugintemplatesettings->set_source_table(\quizaccess_seb\template::TABLE, $params);
 
         return $subplugin;
     }
