@@ -274,7 +274,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      reason if access should be prevented.
      */
     public function prevent_access() {
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings = $this->accessmanager->get_quiz_settings();
 
         // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
         if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
@@ -307,6 +307,31 @@ class quizaccess_seb extends quiz_access_rule_base {
     }
 
     /**
+     * Hepler function to display an Exit Safe Exam Browser button if configured to do so and attempts are > 0.
+     *
+     * @return string empty or a button which has the configured seb quit link.
+     */
+    private function display_quit_button() : string {
+        global $OUTPUT, $USER;
+
+        $quizsettings = $this->accessmanager->get_quiz_settings();
+        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, 'finished', false);
+        $quitbutton = '';
+
+        if (empty($attempts)) {
+            return $quitbutton;
+        }
+
+        // Only display if the link has been configured and attempts are greater than 0.
+        if ($quizsettings->get('linkquitseb')) {
+            $url = new moodle_url($quizsettings->get('linkquitseb'));
+            $quitbutton = $OUTPUT->single_button($url, get_string('exitsebbutton', 'quizaccess_seb'), 'get');
+        }
+
+        return $quitbutton;
+    }
+
+    /**
      * Information, such as might be shown on the quiz view page, relating to this restriction.
      * There is no obligation to return anything. If it is not appropriate to tell students
      * about this rule, then just return ''.
@@ -315,9 +340,14 @@ class quizaccess_seb extends quiz_access_rule_base {
      *         (may be '' if no message is appropriate).
      */
     public function description() {
-        return [
-            get_string('sebrequired', 'quizaccess_seb'),
-        ];
+        $messages = [get_string('sebrequired', 'quizaccess_seb')];
+
+        // Those with higher level access will be able to see the button if they've made an attempt.
+        if (!$this->prevent_access()) {
+            $messages[] = $this->display_quit_button();
+        }
+
+        return $messages;
     }
 
     /**

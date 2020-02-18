@@ -417,4 +417,95 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertSame('', $method->invoke($rule));
     }
 
+    /**
+     * Test display_quit_button. If attempt count is greater than 0
+     */
+    public function test_display_quit_button() {
+        global $DB;
+
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Set quiz setting to require seb.
+        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $quizsettings->set('linkquitseb', "http://test.quit.link");
+        $quizsettings->save();
+
+        // Set the user as display_quit_button() uses global $USER.
+        $this->setUser($user);
+
+        $quizparams = (object) [
+            'quiz' => $quiz->id,
+            'userid' => $user->id,
+            'state' => 'finished',
+            'timestart' => 100,
+            'timecheckstate' => 0,
+            'layout' => '',
+            'uniqueid' => 0
+        ];
+        // Insert a finished attempt into the database.
+        $attemptid = $DB->insert_record('quiz_attempts', $quizparams);
+
+        // Create the rule.
+        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+
+        // Set-up the button to be called.
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('display_quit_button');
+        $method->setAccessible(true);
+
+        $button = $method->invoke($rule);
+        $this->assertContains("http://test.quit.link", $button);
+    }
+
+    /**
+     * Test description, checks for a valid SEB session and attempt count .
+     */
+    public function test_description() {
+        global $DB;
+
+        $user = $this->getDataGenerator()->create_user();
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+
+        // Set quiz setting to require seb.
+        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $quizsettings->set('linkquitseb', "http://test.quit.link");
+        $quizsettings->save();
+
+        // Set up basic dummy request.
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB_TEST_SITE';
+
+        $quizparams = (object) [
+            'quiz' => $quiz->id,
+            'userid' => $user->id,
+            'state' => 'finished',
+            'timestart' => 100,
+            'timecheckstate' => 0,
+            'layout' => '',
+            'uniqueid' => 0
+        ];
+        // Insert a finished attempt into the database.
+        $attemptid = $DB->insert_record('quiz_attempts', $quizparams);
+
+        // Create the rule.
+        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+
+        $description = $rule->description();
+        $this->assertCount(2, $description);
+        $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
+        $this->assertEquals($description[1], '');
+
+        // Set the user as display_quit_button() uses the global $USER.
+        $this->setUser($user);
+        $description = $rule->description();
+        $this->assertCount(2, $description);
+        $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
+
+        // The button is contained in the description when a quiz attempt is finished.
+        $this->assertContains("http://test.quit.link", $description[1]);
+    }
 }
