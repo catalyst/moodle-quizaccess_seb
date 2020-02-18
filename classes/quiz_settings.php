@@ -271,7 +271,7 @@ class quiz_settings extends persistent {
                 break;
 
             default:
-                // Remaining case settings_provider::USE_SEB_CONFIG_MANUALLY
+                // Remaining case settings_provider::USE_SEB_CONFIG_MANUALLY.
                 $this->process_default_case();
         }
 
@@ -294,7 +294,12 @@ class quiz_settings extends persistent {
     private function process_template_settings() {
         $template = template::get_record(['id' => $this->get('templateid')]);
         $this->plist = new property_list($template->get('content'));
-        $this->progress_default_standard_settings();
+
+        // Process quit settings.
+        $this->process_quit_settings();
+
+        // Add the sensible default options to the configuration and exported SEB files.
+        $this->process_required_enforced_settings();
     }
 
     /**

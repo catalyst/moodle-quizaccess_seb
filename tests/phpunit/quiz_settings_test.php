@@ -238,9 +238,13 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
         $quizsettings->set('templateid', $template->get('id'));
         $quizsettings->set('allowuserquitseb', 0);
+        $quizsettings->set('quitpassword', '123');
         $quizsettings->save();
         $this->assertContains("<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id={$this->quiz->cmid}</string>", $quizsettings->get('config'));
-        $this->assertContains("<key>allowQuit</key><false/>", $quizsettings->get('config'));
+        $this->assertContains("<key>allowQuit</key><true/>", $quizsettings->get('config'));
+        $hashedpassword = hash('SHA256', '123');
+        $this->assertNotContains("<key>hashedQuitPassword</key><string>123</string>", $quizsettings->get('config'));
+        $this->assertContains("<key>hashedQuitPassword</key><string>{$hashedpassword}</string>", $quizsettings->get('config'));
     }
 
     /**
