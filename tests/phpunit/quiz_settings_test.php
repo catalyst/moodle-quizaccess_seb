@@ -40,8 +40,12 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->resetAfterTest();
 
         // Setup test data.
+        $this->setAdminUser();
         $this->course = $this->getDataGenerator()->create_course();
-        $this->quiz = $this->getDataGenerator()->create_module('quiz', array('course' => $this->course->id));
+        $this->quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $this->course->id,
+            'seb_requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
+        ]);
         $this->context = context_module::instance($this->quiz->cmid);
         $this->url = new moodle_url("/mod/quiz/view.php", ['id' => $this->quiz->cmid]);
     }

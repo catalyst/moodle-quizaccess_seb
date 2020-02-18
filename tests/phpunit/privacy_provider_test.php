@@ -55,7 +55,10 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
         $this->user = $this->getDataGenerator()->create_user();
         $this->setUser($this->user);
         $course = $this->getDataGenerator()->create_course();
-        $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
+        ]);
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $template = new \quizaccess_seb\template();

@@ -36,7 +36,10 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
+        ]);
         $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
         $event = \quizaccess_seb\event\access_prevented::create_strict(
                 $quizsettings,
@@ -78,9 +81,6 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         // Set up event with data.
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $template = new \quizaccess_seb\template();

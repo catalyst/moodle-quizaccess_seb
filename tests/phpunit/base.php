@@ -61,4 +61,116 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
 
         return $roleid;
     }
+
+    /**
+     * Strip the seb_ prefix from each setting key.
+     *
+     * @param \stdClass $settings Object containing settings.
+     * @return \stdClass The modified settings object.
+     */
+    protected function strip_all_prefixes(\stdClass $settings) : \stdClass {
+        $newsettings = new \stdClass();
+        foreach ($settings as $name => $setting) {
+            $newname = preg_replace("/^seb_/", "", $name);
+            $newsettings->$newname = $setting; // Add new key.
+        }
+        return $newsettings;
+    }
+
+    /**
+     * Creates a file in the user draft area.
+     *
+     * @param string $xml
+     * @return int The user draftarea id
+     */
+    protected function create_test_draftarea_file(string $xml) : int {
+        global $USER;
+
+        $itemid = 0;
+        $usercontext = \context_user::instance($USER->id);
+        $filerecord = [
+            'contextid' => \context_user::instance($USER->id)->id,
+            'component' => 'user',
+            'filearea' => 'draft',
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => 'test.xml'
+        ];
+
+        $fs = get_file_storage();
+        $fs->create_file_from_string($filerecord, $xml);
+
+        $draftitemid = 0;
+        file_prepare_draft_area($draftitemid, $usercontext->id, 'user', 'draft', 0);
+
+        return $draftitemid;
+    }
+
+    /**
+     * Create a test quiz for the specified course.
+     *
+     * @param   \stdClass $course
+     * @return  array
+     */
+    protected function create_test_quiz($course) {
+        $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
+
+        $quiz = $quizgenerator->create_instance([
+            'course' => $course->id,
+            'questionsperpage' => 0,
+            'grade' => 100.0,
+            'sumgrades' => 2,
+        ]);
+
+        // Create a couple of questions.
+        $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
+        $cat = $questiongenerator->create_question_category();
+
+        $saq = $questiongenerator->create_question('shortanswer', null, array('category' => $cat->id));
+        quiz_add_quiz_question($saq->id, $quiz);
+        $numq = $questiongenerator->create_question('numerical', null, array('category' => $cat->id));
+        quiz_add_quiz_question($numq->id, $quiz);
+
+        return $quiz;
+    }
+
+    /**
+     * Answer questions for a quiz + user.
+     *
+     * @param \stdClass $quiz Quiz to attempt.
+     * @param \stdClass $user A user to attempt the quiz.
+     * @return  array
+     */
+    protected function attempt_quiz($quiz, $user) {
+        $this->setUser($user);
+
+        $starttime = time();
+        $quizobj = \quiz::create($quiz->id, $user->id);
+
+        $quba = \question_engine::make_questions_usage_by_activity('mod_quiz', $quizobj->get_context());
+        $quba->set_preferred_behaviour($quizobj->get_quiz()->preferredbehaviour);
+
+        // Start the attempt.
+        $attempt = quiz_create_attempt($quizobj, 1, false, $starttime, false, $user->id);
+        quiz_start_new_attempt($quizobj, $quba, $attempt, 1, $starttime);
+        quiz_attempt_save_started($quizobj, $quba, $attempt);
+
+        // Answer the questions.
+        $attemptobj = \quiz_attempt::create($attempt->id);
+
+        $tosubmit = [
+            1 => ['answer' => 'frog'],
+            2 => ['answer' => '3.14'],
+        ];
+
+        $attemptobj->process_submitted_actions($starttime, false, $tosubmit);
+
+        // Finish the attempt.
+        $attemptobj = \quiz_attempt::create($attempt->id);
+        $attemptobj->process_finish($starttime, false);
+
+        $this->setUser();
+
+        return [$quizobj, $quba, $attemptobj];
+    }
 }

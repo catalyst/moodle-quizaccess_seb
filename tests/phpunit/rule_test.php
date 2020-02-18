@@ -36,22 +36,61 @@ require_once(__DIR__ . '/base.php');
 
 class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
+    /** @var stdClass $course Test course to contain quiz. */
+    private $course;
+
+    /** @var stdClass $quiz A test quiz. */
+    private $quiz;
+
     /**
-     * Ran before every test.
+     * Called before every test.
      */
     public function setUp() {
         parent::setUp();
         $this->resetAfterTest();
+        $this->course = $this->getDataGenerator()->create_course();
+    }
+
+    /**
+     * Helper function to create quiz with the required SEB settings.
+     *
+     * @param int $requiresafeexambrowser How to use SEB for this quiz?
+     */
+    private function create_quiz($requiresafeexambrowser = settings_provider::USE_SEB_NO) {
+        $this->quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $this->course->id,
+            'seb_requiresafeexambrowser' => $requiresafeexambrowser,
+        ]);
+    }
+
+    /**
+     * A helper method to make the rule form the currently created quiz and  course.
+     *
+     * @return \quiz_access_rule_base|null
+     */
+    private function make_rule() {
+        return quizaccess_seb::make(
+            new quiz($this->quiz, get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course),
+            0,
+            true
+        );
     }
 
     /**
      * Test no errors are found with valid data.
      */
     public function test_validate_settings_with_valid_data() {
+        $this->setAdminUser();
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
+
         $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1], [],
-            $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid
+        ], [], $form);
         $this->assertEmpty($errors);
     }
 
@@ -59,11 +98,59 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      * Test errors are found with invalid data.
      */
     public function test_validate_settings_with_invalid_data() {
+        $this->setAdminUser();
+
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
         $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
         // Validate settings with a dummy form and quiz instance.
-        $errors = quizaccess_seb::validate_settings_form_fields([],
-                ['instance' => 1, 'coursemodule' => 1, 'seb_requiresafeexambrowser' => 'Uh oh!'], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid, 'seb_requiresafeexambrowser' => 'Uh oh!'
+        ], [], $form);
         $this->assertEquals(['seb_requiresafeexambrowser' => 'Data submitted is invalid'], $errors);
+    }
+
+    /**
+     * Test settings validation is not run if settings are locked.
+     */
+    public function test_settings_validation_is_not_run_if_settings_are_locked() {
+        $user = $this->getDataGenerator()->create_user();
+        $this->quiz = $this->create_test_quiz($this->course);
+        $this->attempt_quiz($this->quiz, $user);
+
+        $this->setAdminUser();
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
+        // Validate settings with a dummy form and quiz instance.
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid, 'seb_requiresafeexambrowser' => 'Uh oh!'
+        ], [], $form);
+        $this->assertEmpty($errors);
+    }
+
+    /**
+     * Test bypassing validation if user don't have permissions to manage seb settings.
+     */
+    public function test_validate_settings_is_not_run_if_a_user_do_not_have_permissions_to_manage_seb_settings() {
+        // Set the user who can't change seb settings. So validation should be bypassed.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
+        // Validate settings with a dummy form and quiz instance.
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid, 'seb_requiresafeexambrowser' => 'Uh oh!'
+        ], [], $form);
+        $this->assertEmpty($errors);
     }
 
     /**
@@ -71,16 +158,32 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_create_settings_with_existing_quiz() {
         global $DB;
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
-        // Using a generator will create the quiz_settings record.
-        // Lets remove the settings it to emulate an existing quiz prior to installing the plugin.
-        $DB->delete_records(quiz_settings::TABLE, ['quizid' => $quiz->id]);
+        $this->setAdminUser();
+        $this->create_quiz(settings_provider::USE_SEB_NO);
 
-        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
-        quizaccess_seb::save_settings($quiz);
-        $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
+        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]));
+        $this->quiz->seb_requiresafeexambrowser = settings_provider::USE_SEB_CONFIG_MANUALLY;
+        quizaccess_seb::save_settings($this->quiz);
+        $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]));
+    }
+
+    /**
+     * Test settings are not saved to DB if settings are locked.
+     */
+    public function test_settings_are_not_saved_if_settings_are_locked() {
+        global $DB;
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course);
+        $this->attempt_quiz($this->quiz, $user);
+
+        $this->setAdminUser();
+        $this->quiz->seb_requiresafeexambrowser = settings_provider::USE_SEB_CONFIG_MANUALLY;
+        quizaccess_seb::save_settings($this->quiz);
+        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]));
     }
 
     /**
@@ -88,6 +191,8 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_delete_settings_without_existing_settings() {
         global $DB;
+        $this->setAdminUser();
+
         $quiz = new stdClass();
         $quiz->id = 1;
         quizaccess_seb::delete_settings($quiz);
@@ -99,28 +204,22 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_delete_settings_with_existing_settings() {
         global $DB;
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->setAdminUser();
+
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Using a generator will create the quiz_settings record.
-        $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
-        quizaccess_seb::delete_settings($quiz);
-        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $quiz->id]));
+        $this->assertNotFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]));
+        quizaccess_seb::delete_settings($this->quiz);
+        $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]));
     }
 
     /**
      * Test access prevented if access keys are invalid.
      */
     public function test_access_prevented_if_access_keys_invalid() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
-
-        // Set quiz setting to require seb.
-        $quizsetting = quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsetting->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $quizsetting->save();
-
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $rule = $this->make_rule();
         // Check that correct error message is returned.
         $errormsg = $rule->prevent_access();
         $this->assertNotEmpty($errormsg);
@@ -136,14 +235,10 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_access_allowed_if_config_key_valid() {
         global $FULLME;
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
 
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
         // Set quiz setting to require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $quizsettings->save();
-
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $configkey = $quizsettings->get('configkey');
 
         // Set up dummy request.
@@ -151,7 +246,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $expectedhash = hash('sha256', $FULLME . $configkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
         // Check that correct error message is returned.
         $this->assertFalse($rule->prevent_access());
     }
@@ -161,12 +256,11 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      */
     public function test_access_allowed_if_browser_exam_keys_valid() {
         global $FULLME;
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Set quiz setting to require seb and save BEK.
         $browserexamkey = hash('sha256', 'testkey');
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG); // Doesn't check config key.
         $quizsettings->set('allowedbrowserexamkeys', $browserexamkey);
         $quizsettings->save();
@@ -176,7 +270,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $expectedhash = hash('sha256', $FULLME . $browserexamkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
 
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
         // Check that correct error message is returned.
         $this->assertFalse($rule->prevent_access());
     }
@@ -185,18 +279,17 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      * Test access allowed if using client configuration and SEB user agent header is valid.
      */
     public function test_access_allowed_if_using_client_config_basic_header_is_valid() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Set quiz setting to require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG); // Doesn't check config key.
         $quizsettings->save();
 
         // Set up basic dummy request.
         $_SERVER['HTTP_USER_AGENT'] = 'SEB_TEST_SITE';
 
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
         // Check that correct error message is returned.
         $this->assertFalse($rule->prevent_access());
     }
@@ -205,36 +298,36 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      * Test access prevented if using client configuration and SEB user agent header is invalid.
      */
     public function test_access_prevented_if_using_client_configuration_and_basic_head_is_invalid() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Set quiz setting to require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG); // Doesn't check config key.
         $quizsettings->save();
 
         // Set up basic dummy request.
         $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
 
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
         // Check that correct error message is returned.
-        $this->assertContains('This quiz has been configured to use the Safe Exam Browser with client configuration.',
-            $rule->prevent_access());
+        $this->assertContains(
+            'This quiz has been configured to use the Safe Exam Browser with client configuration.',
+            $rule->prevent_access()
+        );
     }
 
     /**
      * Test access not prevented if SEB not required.
      */
     public function test_access_allowed_if_seb_not_required() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Set quiz setting to not require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
         $quizsettings->save();
 
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
 
         // The rule will not exist as the settings are not configured for SEB usage.
         $this->assertNull($rule);
@@ -244,18 +337,18 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      * Test access not prevented if USER has bypass capability.
      */
     public function test_access_allowed_if_user_has_bypass_capability() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         // Set quiz setting to require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
         $quizsettings->save();
 
         // Set the bypass SEB check capability to $USER.
-        $this->assign_user_capability('quizaccess/seb:bypassseb', context_module::instance($quiz->cmid)->id);
+        $this->assign_user_capability('quizaccess/seb:bypassseb', context_module::instance($this->quiz->cmid)->id);
 
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
+
         // Check that correct error message is returned.
         $this->assertFalse($rule->prevent_access());
     }
@@ -266,10 +359,19 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     public function test_mod_quiz_form_cannot_be_saved_if_global_settings_force_quiz_password_and_none_is_set() {
         // Set global settings to require quiz password but set password to be empty.
         set_config('quizpasswordrequired', '1', 'quizaccess_seb');
+        $this->setAdminUser();
+
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid,
+        ], [], $form);
+
         $this->assertContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 
@@ -281,9 +383,17 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Set global settings to require quiz password but set password to be empty.
         set_config('quizpasswordrequired', '1', 'quizaccess_seb');
 
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
+
         $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
         // Validate settings with a dummy form.
-        $errors = quizaccess_seb::validate_settings_form_fields([], ['instance' => 1, 'coursemodule' => 1, 'quizpassword' => 'set'], [], $form);
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid,
+            'quizpassword' => 'set'
+        ], [], $form);
         $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 
@@ -291,15 +401,9 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
      * Test get_download_button_only, checks for empty config setting quizaccess_seb/downloadlink.
      */
     public function test_get_download_button_only() {
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $this->create_quiz(settings_provider::USE_SEB_CONFIG_MANUALLY);
 
-        // Set quiz setting to require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $quizsettings->save();
-
-        $rule = quizaccess_seb::make(new quiz($quiz, get_coursemodule_from_id('quiz', $quiz->cmid), $course), 0, true);
+        $rule = $this->make_rule();
         $reflection = new \ReflectionClass('quizaccess_seb');
         $method = $reflection->getMethod('get_download_button_only');
         $method->setAccessible(true);
