@@ -60,7 +60,7 @@ function quizaccess_seb_send_file(string $contents) {
     header('Expires: '. gmdate('D, d M Y H:i:s', time()) .' GMT');
     header('Pragma: no-cache');
     header('Content-Disposition: attachment; filename=config.seb');
-    header('Content-Type: text/xml');
+    header('Content-Type: application/seb');
 
     echo($contents);
 }
