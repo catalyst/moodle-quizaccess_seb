@@ -140,6 +140,19 @@ class settings_provider {
     public static function add_seb_header_element(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
         $element = $mform->createElement('header', 'seb', get_string('seb', 'quizaccess_seb'));
         self::insert_element($quizform, $mform, $element);
+
+        // Display notification about locked settings.
+        if (self::is_seb_settings_locked($quizform->get_instance())) {
+            global  $OUTPUT;
+
+            $notify = new \core\output\notification(
+                get_string('settingsfrozen', 'quizaccess_seb'),
+                \core\output\notification::NOTIFY_WARNING
+            );
+
+            $notifyelement = $mform->createElement('html', $OUTPUT->render($notify));
+            self::insert_element($quizform, $mform, $notifyelement);
+        }
     }
 
     /**
@@ -315,7 +328,6 @@ class settings_provider {
             }
 
             $mform->freeze(array_keys(self::get_quiz_elements()));
-            $mform->addHelpButton('seb', 'disabledsettings', 'quizaccess_seb');
         }
     }
 

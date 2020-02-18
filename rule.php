@@ -101,7 +101,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      */
     public static function validate_settings_form_fields(array $errors,
                                                          array $data, $files, mod_quiz_mod_form $quizform) : array {
-        global $DB;
 
         if (settings_provider::can_configure_seb($quizform->get_context())) {
             if (!settings_provider::is_seb_settings_locked($data['instance'])) {
@@ -118,14 +117,6 @@ class quizaccess_seb extends quiz_access_rule_base {
                 foreach ($quizsettings->get_errors() as $name => $error) {
                     $name = settings_provider::add_prefix($name); // Re-add prefix to match form element.
                     $errors[$name] = $error->out();
-                }
-
-                // If there have been any quiz attempts, prevent settings being saved.
-                if ($quizform->get_instance()) {
-                    $attempts = $DB->get_records('quiz_attempts', ['quiz' => $quizform->get_instance()]);
-                    if (!empty($attempts)) {
-                        $errors['seb'] = get_string('settingsfrozen', 'quizaccess_seb');
-                    }
                 }
 
                 // Edge case for filemanager_sebconfig.
