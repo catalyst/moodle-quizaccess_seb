@@ -26,6 +26,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array(
+    'quizaccess/seb:managetemplates' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+    ),
     'quizaccess/seb:bypassseb' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -33,23 +37,36 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW
         )
     ),
-    'quizaccess/seb:managetemplates' => array(
+    'quizaccess/seb:manage_seb_requiresafeexambrowser' => array(
         'captype' => 'write',
-        'contextlevel' => CONTEXT_SYSTEM,
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+    'quizaccess/seb:manage_seb_templateid' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
+    'quizaccess/seb:manage_filemanager_sebconfigfile' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW
+        )
     ),
 );
 
 // Individual setting capabilities.
-$settings = \quizaccess_seb\settings_provider::get_quiz_elements();
-foreach ($settings as $name => $type) {
-    // Don't add a capability for the header element.
-    if ($type !== 'header') {
-        $capabilities["quizaccess/seb:manage_$name"] = array(
-            'captype' => 'write',
-            'contextlevel' => CONTEXT_MODULE,
-            'archetypes' => array(
-                'editingteacher' => CAP_ALLOW
-            )
-        );
-    }
+foreach (\quizaccess_seb\settings_provider::get_quiz_elements() as $name => $type) {
+    $capabilities["quizaccess/seb:manage_$name"] = array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW
+        )
+    );
 }

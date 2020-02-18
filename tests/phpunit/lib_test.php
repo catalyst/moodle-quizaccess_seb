@@ -68,7 +68,10 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
     public function test_file_not_served_when_user_not_enrolled_in_course() {
         $user = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
+        ]);
         $this->setUser($user); // Log user in.
 
         $this->expectException(moodle_exception::class);
@@ -101,7 +104,10 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
         global $DB;
         $user = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
+        ]);
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
 
@@ -121,14 +127,12 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
     public function test_config_found() {
         $user = $this->getDataGenerator()->create_user();
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quiz = $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
+        ]);
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
-
-        // Set settings to require seb.
-        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $quizsettings->save();
 
         $config = quizaccess_seb_get_config($quiz->cmid);
 

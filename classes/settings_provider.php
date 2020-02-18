@@ -29,11 +29,11 @@
 
 namespace quizaccess_seb;
 
-use CFPropertyList\CFPropertyList;
 use context_course;
 use context_module;
 use context_user;
 use lang_string;
+use stdClass;
 use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
@@ -68,19 +68,293 @@ class settings_provider {
     const USE_SEB_CLIENT_CONFIG = 4;
 
     /**
+     * Insert form element.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     * @param \HTML_QuickForm_element $element Element to insert.
+     * @param string $before Insert element before.
+     */
+    protected static function insert_element(\mod_quiz_mod_form $quizform,
+                                             \MoodleQuickForm $mform, \HTML_QuickForm_element $element, $before = 'security') {
+        $mform->insertElementBefore($element, $before);
+    }
+
+    /**
+     * Remove element from the form.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     * @param string $elementname Element name.
+     */
+    protected static function remove_element(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform, string  $elementname) {
+        if ($mform->elementExists($elementname)) {
+            $mform->removeElement($elementname);
+            $mform->setDefault($elementname, null);
+        }
+    }
+
+    /**
+     * Add help button to the element.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     * @param string $elementname Element name.
+     */
+    protected static function add_help_button(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform, string $elementname) {
+        if ($mform->elementExists($elementname)) {
+            $mform->addHelpButton($elementname, $elementname, 'quizaccess_seb');
+        }
+    }
+
+    /**
+     * Set default value for the element.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     * @param string $elementname Element name.
+     * @param mixed $value Default value.
+     */
+    public static function set_default(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform, string  $elementname, $value) {
+        $mform->setDefault($elementname, $value);
+    }
+
+    /**
+     * Set element type.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     * @param string $elementname Element name.
+     * @param string $type Type of the form element.
+     */
+    public static function set_type(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform, string $elementname, string $type) {
+        $mform->setType($elementname, $type);
+    }
+
+    /**
+     * Add SEB header element to  the form.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_header_element(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        $element = $mform->createElement('header', 'seb', get_string('seb', 'quizaccess_seb'));
+        self::insert_element($quizform, $mform, $element);
+    }
+
+    /**
+     * Add SEB usage element with all available options.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_usage_options(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        $element = $mform->createElement(
+            'select',
+            'seb_requiresafeexambrowser',
+            get_string('seb_requiresafeexambrowser', 'quizaccess_seb'),
+            self::get_requiresafeexambrowser_options($quizform->get_context())
+        );
+
+        self::insert_element($quizform, $mform, $element);
+        self::set_type($quizform, $mform, 'seb_requiresafeexambrowser', PARAM_INT);
+        self::set_default($quizform, $mform, 'seb_requiresafeexambrowser', self::USE_SEB_NO);
+        self::add_help_button($quizform, $mform, 'seb_requiresafeexambrowser');
+    }
+
+    /**
+     * Add Templates element.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_templates(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        if (self::can_use_seb_template($quizform->get_context())) {
+            $element = $mform->createElement(
+                'select',
+                'seb_templateid',
+                get_string('seb_templateid', 'quizaccess_seb'),
+                self::get_template_options()
+            );
+
+        } else {
+            $element = $mform->createElement('hidden', 'seb_templateid');
+        }
+
+        self::insert_element($quizform, $mform, $element);
+        self::set_type($quizform, $mform, 'seb_templateid', PARAM_INT);
+        self::set_default($quizform, $mform, 'seb_templateid', 0);
+        self::add_help_button($quizform, $mform, 'seb_templateid');
+    }
+
+    /**
+     * Add upload config file element.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_config_file(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        $itemid = null;
+        if ($quizform->get_coursemodule()) {
+            $itemid = $quizform->get_coursemodule()->id;
+        }
+
+        $draftitemid = 0;
+        file_prepare_draft_area(
+            $draftitemid,
+            $quizform->get_context()->id,
+            'quizaccess_seb',
+            'filemanager_sebconfigfile',
+            $itemid
+        );
+
+        if (self::can_upload_seb_file($quizform->get_context())) {
+            $element = $mform->createElement(
+                'filemanager',
+                'filemanager_sebconfigfile',
+                get_string('filemanager_sebconfigfile', 'quizaccess_seb'),
+                null,
+                self::get_filemanager_options()
+            );
+        } else {
+            $element = $mform->createElement('hidden', 'filemanager_sebconfigfile');
+        }
+
+        self::insert_element($quizform, $mform, $element);
+        self::set_type($quizform, $mform, 'filemanager_sebconfigfile', PARAM_RAW);
+        self::set_default($quizform, $mform, 'filemanager_sebconfigfile', $draftitemid);
+        self::add_help_button($quizform, $mform, 'filemanager_sebconfigfile');
+    }
+
+    /**
+     * Add SEB settings elements.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_config_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        $defaults = self::get_quiz_defaults();
+        $types = self::get_quiz_element_types();
+
+        foreach (self::get_quiz_elements() as $name => $type) {
+
+            if (!self::can_manage_setting($name, $quizform->get_context())) {
+                $type = 'hidden';
+            }
+
+            $element = $mform->createElement($type, $name, get_string($name, 'quizaccess_seb'));
+            self::insert_element($quizform, $mform, $element);
+            unset($element); // We need to make sure each &element only references the current element in loop.
+
+            self::add_help_button($quizform, $mform, $name);
+
+            if (isset($defaults[$name])) {
+                self::set_default($quizform, $mform, $name, $defaults[$name]);
+            }
+
+            if (isset($types[$name])) {
+                self::set_type($quizform, $mform, $name, $types[$name]);
+            }
+
+            if (!self::can_manage_setting($name, $quizform->get_context())) {
+                $mform->freeze([$name]);
+            }
+        }
+    }
+
+    /**
+     * Hide SEB elements if required.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function hide_seb_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        foreach (self::get_quiz_hideifs() as $elname => $rules) {
+            if ($mform->elementExists($elname)) {
+                foreach ($rules as $hideif) {
+                    $mform->hideIf(
+                        $hideif->get_element(),
+                        $hideif->get_dependantname(),
+                        $hideif->get_condition(),
+                        $hideif->get_dependantvalue()
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * Lock SEB elements if required.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function lock_seb_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        if (self::is_seb_settings_locked($quizform->get_instance())) {
+            $mform->freeze('seb_requiresafeexambrowser');
+            $mform->freeze('seb_templateid');
+
+            $quizsettings = quiz_settings::get_record(['quizid' => (int) $quizform->get_instance()]);
+
+            if (!empty($quizsettings) && $quizsettings->get('requiresafeexambrowser') == self::USE_SEB_UPLOAD_CONFIG) {
+                self::remove_element($quizform, $mform, 'filemanager_sebconfigfile');
+
+                if ($link = self::get_uploaded_seb_file_download_link($quizform, $mform)) {
+                    $element = $mform->createElement(
+                        'static',
+                        'filemanager_sebconfigfile',
+                        get_string('filemanager_sebconfigfile', 'quizaccess_seb'),
+                        $link
+                    );
+                    self::insert_element($quizform, $mform, $element, 'seb_suppresssebdownloadlink');
+                }
+            }
+
+            if (empty($quizsettings) || $quizsettings->get('requiresafeexambrowser') != self::USE_SEB_TEMPLATE) {
+                $mform->removeElement('seb_templateid');
+            }
+
+            $mform->freeze(array_keys(self::get_quiz_elements()));
+            $mform->addHelpButton('seb', 'disabledsettings', 'quizaccess_seb');
+        }
+    }
+
+    /**
+     * Return uploaded SEB config file link.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     * @return string
+     */
+    protected static function get_uploaded_seb_file_download_link(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) : string {
+        $link = '';
+        $file = self::get_module_context_sebconfig_file($quizform->get_coursemodule()->id);
+
+        if ($file) {
+            $url = \moodle_url::make_pluginfile_url(
+                $file->get_contextid(),
+                $file->get_component(),
+                $file->get_filearea(),
+                $file->get_itemid(),
+                $file->get_filepath(),
+                $file->get_filename(),
+                true
+            );
+            $link = \html_writer::link($url, get_string('downloadsebconfig', 'quizaccess_seb'));
+        }
+
+        return $link;
+    }
+
+    /**
      * Get the type of element for each of the form elements in quiz settings.
      *
      * Contains all setting elements. Array key is name of 'form element'/'database column (excluding prefix)'.
      *
-     * @param context_course|context_module $context Optional parameter, context used with capability checking selection options.
      * @return array All quiz form elements to be added and their types.
      */
-    public static function get_quiz_elements($context = null) : array {
+    public static function get_quiz_elements() : array {
         return [
-            'seb' => 'header',
-            'seb_requiresafeexambrowser' => ['select', self::get_requiresafeexambrowser_options($context)],
-            'seb_templateid' => ['select', self::get_template_options()],
-            'filemanager_sebconfigfile' => ['filemanager', self::get_filemanager_options()],
             'seb_suppresssebdownloadlink' => 'selectyesno',
             'seb_linkquitseb' => 'text',
             'seb_userconfirmquit' => 'selectyesno',
@@ -112,10 +386,7 @@ class settings_provider {
      */
     public static function get_quiz_element_types() : array {
         return [
-            'seb_requiresafeexambrowser' => PARAM_INT,
-            'seb_templateid' => PARAM_INT,
             'seb_suppresssebdownloadlink' => PARAM_BOOL,
-            'filemanager_sebconfigfile' => PARAM_RAW,
             'seb_linkquitseb' => PARAM_URL,
             'seb_userconfirmquit' => PARAM_BOOL,
             'seb_allowuserquitseb' => PARAM_BOOL,
@@ -148,13 +419,13 @@ class settings_provider {
         $options[self::USE_SEB_NO] = get_string('no');
         $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
 
-        if ($context && has_capability('quizaccess/seb:manage_seb_templateid', $context)) {
+        if ($context && self::can_use_seb_template($context)) {
             if (!empty(self::get_template_options())) {
                 $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
             }
         }
 
-        if ($context && has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context)) {
+        if ($context && self::can_upload_seb_file($context)) {
             $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
         }
 
@@ -200,9 +471,6 @@ class settings_provider {
      */
     public static function get_quiz_defaults() : array {
         return [
-            'seb_requiresafeexambrowser' => self::USE_SEB_NO,
-            'seb_templateid' => 0,
-            'filemanager_sebconfigfile' => null,
             'seb_suppresssebdownloadlink' => 0,
             'seb_linkquitseb' => '',
             'seb_userconfirmquit' => 1,
@@ -455,5 +723,122 @@ class settings_provider {
 
         return false;
     }
-}
 
+    /**
+     * Check if the current user can configure SEB.
+     *
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_configure_seb(\context $context) : bool {
+        return has_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', $context);
+    }
+
+    /**
+     * Check if the current user can use preconfigured templates.
+     *
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_use_seb_template(\context $context) : bool {
+        return has_capability('quizaccess/seb:manage_seb_templateid', $context);
+    }
+
+    /**
+     * Check if the current user can upload own SEB config file.
+     *
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_upload_seb_file(\context $context) : bool {
+        return has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context);
+    }
+
+    /**
+     * Check if the current user can manage provided SEB setting.
+     *
+     * @param string $settingname Name of the setting.
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_manage_setting(string $settingname, \context $context) : bool {
+        $capability = 'quizaccess/seb:manage_' . $settingname;
+
+        // Capability must exist.
+        if (!$capinfo = get_capability_info($capability)) {
+            throw new \coding_exception("Capability '{$capability}' was not found! This has to be fixed in code.");
+        }
+
+        return has_capability($capability, $context);
+    }
+
+    /**
+     * Check if settings is locked.
+     *
+     * @param int $quizid Quiz ID.
+     * @return bool
+     */
+    public static function is_seb_settings_locked($quizid) : bool {
+        if (empty($quizid)) {
+            return false;
+        }
+
+        return quiz_has_attempts($quizid);
+    }
+
+    /**
+     * Filter a standard class by prefix.
+     *
+     * @param stdClass $settings Quiz settings object.
+     * @return stdClass Filtered object.
+     */
+    public static function filter_by_prefix(\stdClass $settings): stdClass {
+        $newsettings = new \stdClass();
+        foreach ($settings as $name => $setting) {
+            // Only add it, if not there.
+            if (strpos($name, "seb_") === 0) {
+                $newsettings->$name = $setting; // Add new key.
+            }
+        }
+        return $newsettings;
+    }
+
+    /**
+     * Filter quiz settings for this plugin only.
+     *
+     * @param stdClass $settings Quiz settings.
+     * @return stdClass Filtered settings.
+     */
+    public static function filter_plugin_settings(stdClass $settings) : stdClass {
+        $settings = self::filter_by_prefix($settings);
+        return self::strip_all_prefixes($settings);
+    }
+
+    /**
+     * Strip the seb_ prefix from each setting key.
+     *
+     * @param \stdClass $settings Object containing settings.
+     * @return \stdClass The modified settings object.
+     */
+    public static function strip_all_prefixes(\stdClass $settings): stdClass {
+        $newsettings = new \stdClass();
+        foreach ($settings as $name => $setting) {
+            $newname = preg_replace("/^seb_/", "", $name);
+            $newsettings->$newname = $setting; // Add new key.
+        }
+        return $newsettings;
+    }
+
+    /**
+     * Add prefix to string.
+     *
+     * @param string $name String to add prefix to.
+     * @return string String with prefix.
+     */
+    public static function add_prefix(string $name): string {
+        if (strpos($name, 'seb_') !== 0) {
+            $name = 'seb_' . $name;
+        }
+        return $name;
+    }
+}

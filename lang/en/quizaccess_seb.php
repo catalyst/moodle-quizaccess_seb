@@ -121,6 +121,7 @@ $string['seb_use_upload'] = 'Yes – Upload my own config';
 $string['seb_use_client'] = 'Yes – Use SEB client config';
 $string['disabledsettings'] = 'Disabled settings.';
 $string['disabledsettings_help'] = 'Safe Exam Browser quiz settings are unable to be updated if there is one or more existing quiz attempts. To re-enable settings, all quiz attempts must be deleted.';
+$string['downloadsebconfig'] = 'Download SEB config file';
 
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';

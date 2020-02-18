@@ -23,13 +23,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\settings_provider;
 use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
-class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
+require_once(__DIR__ . '/base.php');
+
+class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase {
 
     /**
      * Called before every test.
@@ -49,13 +52,6 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
 
         // Get all elements to be added to form, that are not in the persistent quiz_settings class.
         $diffelements = array_diff_key($settingelements, $dbsettings);
-
-        // Check expected differences.
-        $this->assertTrue(array_key_exists('seb', $diffelements)); // Table header.
-
-        // Unset expected fields.
-        unset($diffelements['seb']);
-        unset($diffelements['filemanager_sebconfigfile']);
 
         $this->assertEmpty($diffelements);
     }
@@ -93,6 +89,10 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     public function test_setting_hideifs_are_part_of_file_types() {
         $settingelements = settings_provider::get_quiz_elements();
         $settinghideifs = settings_provider::get_quiz_hideifs();
+
+        // Add known additional elements.
+        $settingelements['seb_templateid'] = '';
+        $settingelements['filemanager_sebconfigfile'] = '';
 
         // Get all defaults that have no matching element in settings types.
         $diffelements = array_diff_key($settinghideifs, $settingelements);
@@ -139,14 +139,26 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
         $this->assertCount(5, $settings);
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
 
-        // A new user does not have the capability to use the file manager.
+        // A new user does not have the capability to use the file manager and template.
         $user = $this->getDataGenerator()->create_user();
+
         $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
 
         $settings = settings_provider::get_requiresafeexambrowser_options($context);
 
         $this->assertCount(3, $settings);
         $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
+
+        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $context->id);
+        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(4, $settings);
+
+        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
+        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(5, $settings);
     }
 
     /**
@@ -264,46 +276,170 @@ class quizaccess_seb_settings_provider_testcase extends advanced_testcase {
     }
 
     /**
-     * Strip the seb_ prefix from each setting key.
-     *
-     * @param \stdClass $settings Object containing settings.
-     * @return \stdClass The modified settings object.
+     * Test file manager options.
      */
-    private function strip_all_prefixes(\stdClass $settings) : \stdClass {
-        $newsettings = new \stdClass();
-        foreach ($settings as $name => $setting) {
-            $newname = preg_replace("/^seb_/", "", $name);
-            $newsettings->$newname = $setting; // Add new key.
-        }
-        return $newsettings;
+    public function test_get_filemanager_options() {
+        $expected = [
+            'subdirs' => 0,
+            'maxfiles' => 1,
+            'accepted_types' => ['.seb']
+        ];
+        $this->assertSame($expected, settings_provider::get_filemanager_options());
     }
 
     /**
-     * Creates a file in the user draft area.
-     *
-     * @param string $xml
-     * @return int The user draftarea id
+     * Test that users can or can not configure seb settings.
      */
-    private function create_test_draftarea_file(string $xml) : int {
-        global $USER;
+    public function test_can_configure_seb() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = context_module::instance($quiz->cmid);
+        $this->setAdminUser();
 
-        $itemid = 0;
-        $usercontext = context_user::instance($USER->id);
-        $filerecord = [
-            'contextid' => \context_user::instance($USER->id)->id,
-            'component' => 'user',
-            'filearea' => 'draft',
-            'itemid' => $itemid,
-            'filepath' => '/',
-            'filename' => 'test.xml'
-        ];
+        $this->assertTrue(settings_provider::can_configure_seb($context));
 
-        $fs = get_file_storage();
-        $fs->create_file_from_string($filerecord, $xml);
+        $user = $this->getDataGenerator()->create_user();
 
-        $draftitemid = 0;
-        file_prepare_draft_area($draftitemid, $usercontext->id, 'user', 'draft', 0);
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
 
-        return $draftitemid;
+        $this->assertFalse(settings_provider::can_configure_seb($context));
+
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $context->id);
+        $this->assertTrue(settings_provider::can_configure_seb($context));
     }
+
+    /**
+     * Test that users can or can not use seb template.
+     */
+    public function test_can_use_seb_template() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = context_module::instance($quiz->cmid);
+        $this->setAdminUser();
+
+        $this->assertTrue(settings_provider::can_use_seb_template($context));
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        $this->assertFalse(settings_provider::can_use_seb_template($context));
+
+        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $context->id);
+        $this->assertTrue(settings_provider::can_use_seb_template($context));
+    }
+
+    /**
+     * Test that users can or can n ot upload seb config file.
+     */
+    public function test_can_upload_seb_file() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = context_module::instance($quiz->cmid);
+        $this->setAdminUser();
+
+        $this->assertTrue(settings_provider::can_upload_seb_file($context));
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        $this->assertFalse(settings_provider::can_upload_seb_file($context));
+
+        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
+        $this->assertTrue(settings_provider::can_upload_seb_file($context));
+    }
+
+    /**
+     * Test that we can check if the seb settings are locked.
+     */
+    public function test_is_seb_settings_locked() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course);
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->assertFalse(settings_provider::is_seb_settings_locked($quiz->id));
+
+        $this->attempt_quiz($quiz, $user);
+        $this->assertTrue(settings_provider::is_seb_settings_locked($quiz->id));
+    }
+
+    /**
+     * Test filter_by_prefix helper method.
+     */
+    public function test_filter_by_prefix() {
+        $test = new stdClass();
+        $test->one = 'one';
+        $test->seb_two = 'two';
+        $test->seb_seb_three = 'three';
+        $test->four = 'four';
+
+        $newsettings = (array)settings_provider::filter_by_prefix($test);
+        $this->assertFalse(key_exists('one', $newsettings));
+        $this->assertFalse(key_exists('four', $newsettings));
+
+        $this->assertCount(2, $newsettings);
+        $this->assertEquals('two', $newsettings['seb_two']);
+        $this->assertEquals('three', $newsettings['seb_seb_three']);
+    }
+
+    /**
+     * Test strip_all_prefixes helper method.
+     */
+    public function test_strip_all_prefixes() {
+        $test = new stdClass();
+        $test->one = 'one';
+        $test->seb_two = 'two';
+        $test->seb_seb_three = 'three';
+        $test->four = 'four';
+
+        $newsettings = (array)settings_provider::strip_all_prefixes($test);
+        $this->assertFalse(key_exists('seb_two', $newsettings));
+        $this->assertFalse(key_exists('seb_seb_three', $newsettings));
+
+        $this->assertCount(4, $newsettings);
+        $this->assertEquals('one', $newsettings['one']);
+        $this->assertEquals('two', $newsettings['two']);
+        $this->assertEquals('three', $newsettings['seb_three']);
+        $this->assertEquals('four', $newsettings['four']);
+    }
+
+    /**
+     * Test add_prefix helper method.
+     */
+    public function test_add_prefix() {
+        $this->assertEquals('seb_one', settings_provider::add_prefix('one'));
+        $this->assertEquals('seb_two', settings_provider::add_prefix('seb_two'));
+        $this->assertEquals('seb_seb_three', settings_provider::add_prefix('seb_seb_three'));
+        $this->assertEquals('seb_', settings_provider::add_prefix('seb_'));
+        $this->assertEquals('seb_', settings_provider::add_prefix(''));
+        $this->assertEquals('seb_one_seb', settings_provider::add_prefix('one_seb'));
+    }
+
+    /**
+     * Test filter_plugin_settings helper method.
+     */
+    public function test_filter_plugin_settings() {
+        $test = new stdClass();
+        $test->one = 'one';
+        $test->seb_two = 'two';
+        $test->seb_seb_three = 'three';
+        $test->four = 'four';
+
+        $newsettings = (array)settings_provider::filter_plugin_settings($test);
+
+        $this->assertFalse(key_exists('one', $newsettings));
+        $this->assertFalse(key_exists('four', $newsettings));
+
+        $this->assertCount(2, $newsettings);
+        $this->assertEquals('two', $newsettings['two']);
+        $this->assertEquals('three', $newsettings['seb_three']);
+    }
+
 }
