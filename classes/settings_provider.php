@@ -207,10 +207,7 @@ class settings_provider {
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function add_seb_config_file(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
-        $itemid = null;
-        if ($quizform->get_coursemodule()) {
-            $itemid = $quizform->get_coursemodule()->id;
-        }
+        $itemid = 0;
 
         $draftitemid = 0;
         file_prepare_draft_area(
@@ -710,7 +707,7 @@ class settings_provider {
         $fs = new \file_storage();
         $context = context_module::instance($cmid);
 
-        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', $cmid,
+        if (!$files = $fs->get_area_files($context->id, 'quizaccess_seb', 'filemanager_sebconfigfile', 0,
             'id DESC', false)) {
             return null;
         }
@@ -721,6 +718,7 @@ class settings_provider {
     /**
      * Saves filemanager_sebconfigfile files to the moodle storage backend.
      *
+     * @param string $draftitemid The id of the draft area to use.
      * @param string $cmid The cmid of for the quiz.
      * @return bool Always true
      */
@@ -728,7 +726,7 @@ class settings_provider {
         if ($draftitemid) {
             $context = context_module::instance($cmid);
             file_save_draft_area_files($draftitemid, $context->id, 'quizaccess_seb', 'filemanager_sebconfigfile',
-                $cmid, []);
+                0, []);
         }
 
         return true;
