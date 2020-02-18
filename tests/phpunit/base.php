@@ -27,6 +27,8 @@
 
 namespace quizaccess_seb\tests\phpunit;
 
+use quizaccess_seb\settings_provider;
+
 defined('MOODLE_INTERNAL') || die();
 
 abstract class quizaccess_seb_testcase extends \advanced_testcase {
@@ -109,10 +111,11 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
     /**
      * Create a test quiz for the specified course.
      *
-     * @param   \stdClass $course
+     * @param \stdClass $course
+     * @param int $requiresafeexambrowser How to use SEB for this quiz?
      * @return  array
      */
-    protected function create_test_quiz($course) {
+    protected function create_test_quiz($course, $requiresafeexambrowser = settings_provider::USE_SEB_NO) {
         $quizgenerator = $this->getDataGenerator()->get_plugin_generator('mod_quiz');
 
         $quiz = $quizgenerator->create_instance([
@@ -120,6 +123,7 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
             'questionsperpage' => 0,
             'grade' => 100.0,
             'sumgrades' => 2,
+            'seb_requiresafeexambrowser' => $requiresafeexambrowser,
         ]);
 
         // Create a couple of questions.

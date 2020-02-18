@@ -238,9 +238,13 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
         $quizsettings->set('templateid', $template->get('id'));
         $quizsettings->set('allowuserquitseb', 0);
+        $quizsettings->set('quitpassword', '123');
         $quizsettings->save();
         $this->assertContains("<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id={$this->quiz->cmid}</string>", $quizsettings->get('config'));
-        $this->assertContains("<key>allowQuit</key><false/>", $quizsettings->get('config'));
+        $this->assertContains("<key>allowQuit</key><true/>", $quizsettings->get('config'));
+        $hashedpassword = hash('SHA256', '123');
+        $this->assertNotContains("<key>hashedQuitPassword</key><string>123</string>", $quizsettings->get('config'));
+        $this->assertContains("<key>hashedQuitPassword</key><string>{$hashedpassword}</string>", $quizsettings->get('config'));
     }
 
     /**
@@ -263,6 +267,53 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $hashedpassword = hash('SHA256', '123');
         $this->assertNotContains("<key>hashedQuitPassword</key><string>hashedpassword</string>", $config);
         $this->assertContains("<key>hashedQuitPassword</key><string>{$hashedpassword}</string>", $config);
+    }
+
+    /**
+     * Test using USE_SEB_TEMPLATE populates the linkquitseb setting if a quitURL is found.
+     */
+    public function test_template_has_quit_url_set() {
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+            . "<key>allowWlan</key><false/><key>quitURL</key><string>http://seb.quit.url</string>"
+            . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
+
+        $template = new template();
+        $template->set('content', $xml);
+        $template->set('name', 'test');
+        $template->save();
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $template->get('id'));
+
+        $this->assertEmpty($quizsettings->get('linkquitseb'));
+        $quizsettings->save();
+
+        $this->assertNotEmpty($quizsettings->get('linkquitseb'));
+        $this->assertEquals('http://seb.quit.url', $quizsettings->get('linkquitseb'));
+    }
+
+    /**
+     * Test using USE_SEB_UPLOAD_CONFIG populates the linkquitseb setting if a quitURL is found.
+     */
+    public function test_config_file_uploaded_has_quit_url_set() {
+        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
+            . "<key>allowWlan</key><false/><key>quitURL</key><string>http://seb.quit.url</string>"
+            . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
+
+        $itemid = $this->create_module_test_file($xml);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+
+        $this->assertEmpty($quizsettings->get('linkquitseb'));
+        $quizsettings->save();
+
+        $this->assertNotEmpty($quizsettings->get('linkquitseb'));
+        $this->assertEquals('http://seb.quit.url', $quizsettings->get('linkquitseb'));
     }
 
     /**
