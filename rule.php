@@ -274,12 +274,17 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      reason if access should be prevented.
      */
     public function prevent_access() {
+        global $PAGE;
+
         $quizsettings = $this->accessmanager->get_quiz_settings();
 
         // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
         if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
             return false;
         }
+
+        // If the rule is active, enforce a secure view whilst taking the quiz.
+        $PAGE->set_pagelayout('secure');
 
         // If using client configuration with no browser exam keys, do basic check that user is using Safe Exam Browser.
         // It is more secure to use Browser Exam Keys than to rely on this check.
