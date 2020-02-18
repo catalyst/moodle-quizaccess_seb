@@ -384,9 +384,8 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return string empty or a button which has the configured seb quit link.
      */
     private function display_quit_button() : string {
-        global $PAGE, $USER;
+        global $OUTPUT, $USER;
 
-        $output = $PAGE->get_renderer('mod_quiz');
         $quizsettings = $this->accessmanager->get_quiz_settings();
         $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, 'finished', false);
         $quitbutton = '';
@@ -398,7 +397,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         // Only display if the link has been configured and attempts are greater than 0.
         if ($quizsettings->get('linkquitseb')) {
             $url = new moodle_url($quizsettings->get('linkquitseb'));
-            $quitbutton = $output->start_attempt_button(get_string('exitsebbutton', 'quizaccess_seb'), $url);
+            $quitbutton = $OUTPUT->single_button($url, get_string('exitsebbutton', 'quizaccess_seb'), 'get');
         }
 
         return $quitbutton;
