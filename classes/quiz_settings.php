@@ -391,6 +391,12 @@ class quiz_settings extends persistent {
         if (!empty($settings->linkquitseb) && is_string($settings->linkquitseb)) {
             $this->plist->add_element_to_root('quitURL', new CFString($settings->linkquitseb));
         }
+
+        // Does the plist (template or config file) have an existing quitURL?
+        $quiturl = $this->plist->get_element_value('quitURL');
+        if (!empty($quiturl)) {
+            $this->set('linkquitseb', $quiturl);
+        }
     }
 
     /**
