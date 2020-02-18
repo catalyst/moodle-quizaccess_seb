@@ -315,7 +315,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         global $OUTPUT, $USER;
 
         $quizsettings = $this->accessmanager->get_quiz_settings();
-        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, 'finished', false);
+        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, quiz_attempt::FINISHED, false);
         $quitbutton = '';
 
         if (empty($attempts)) {
