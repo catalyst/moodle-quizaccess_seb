@@ -274,6 +274,8 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      reason if access should be prevented.
      */
     public function prevent_access() {
+        global $PAGE;
+
         $quizsettings = $this->accessmanager->get_quiz_settings();
 
         // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
