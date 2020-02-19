@@ -256,7 +256,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      */
     public function test_get_module_context_sebconfig_file() {
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_UPLOAD_CONFIG);
         $user = $this->getDataGenerator()->create_user();
         $context = context_module::instance($quiz->cmid);
         $this->setUser($user);

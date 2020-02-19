@@ -65,9 +65,7 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         $quizsettings = new quiz_settings(0, $data);
         $quizsettings->save();
 
-        $this->add_related_files('quizaccess_seb',
-            'filemanager_sebconfigfile',
-            null);
+        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
     }
 
     /**
