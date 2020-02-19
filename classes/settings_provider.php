@@ -399,7 +399,7 @@ class settings_provider {
     public static function get_quiz_element_types() : array {
         return [
             'seb_suppresssebdownloadlink' => PARAM_BOOL,
-            'seb_linkquitseb' => PARAM_URL,
+            'seb_linkquitseb' => PARAM_RAW,
             'seb_userconfirmquit' => PARAM_BOOL,
             'seb_allowuserquitseb' => PARAM_BOOL,
             'seb_quitpassword' => PARAM_RAW,
