@@ -25,9 +25,8 @@
 
 namespace quizaccess_seb\event;
 
-use context_module;
 use core\event\base;
-use quizaccess_seb\quiz_settings;
+use quizaccess_seb\access_manager;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -39,35 +38,24 @@ class access_prevented extends base {
      * Define strict parameters to create event with instead of relying on internal validation of array. Better code practice.
      * Easier for consumers of this class to know what data must be supplied and observers can have more trust in event data.
      *
-     * @param quiz_settings $quizsettings SEB settings of quiz.
-     * @param string $courseid ID of course containing quiz.
-     * @param context_module $context Context of quiz course module.
+     * @param access_manager $accessmanager Access manager.
      * @param string $reason Reason that access was prevented.
-     * @param string $url URL of page that received request.
-     * @param string|null $receivedconfigkey Config key retrieved from page header.
-     * @param string|null $receivedbrowserexamkey Browser exam key retrieved from page header.
      * @return base
      */
-    public static function create_strict(quiz_settings $quizsettings, string $courseid,
-                                         context_module $context, string $reason, string $url,
-                                         string $receivedconfigkey = null, string $receivedbrowserexamkey = null) : base {
+    public static function create_strict(access_manager $accessmanager, string $reason) : base {
         global $USER;
-        $other = []; // Extra event data.
-        $quizid = $quizsettings->get('quizid');
 
-        // Set extra data.
+        $other = [];
         $other['reason'] = $reason;
-        $other['url'] = $url;
-        $other['savedconfigkey'] = $quizsettings->get('configkey');
-        $other['receivedconfigkey'] = $receivedconfigkey;
-        // TODO: Issue #16 - Provide browser exam key data.
-        $other['receivedbrowserexamkey'] = $receivedbrowserexamkey;
+        $other['savedconfigkey'] = $accessmanager->get_quiz_settings()->get('configkey');
+        $other['receivedconfigkey'] = $accessmanager->get_received_config_key();
+        $other['receivedbrowserexamkey'] = $accessmanager->get_received_browser_exam_key();
 
         return self::create([
             'userid' => $USER->id,
-            'objectid' => $quizid,
-            'courseid' => $courseid,
-            'context' => $context,
+            'objectid' => $accessmanager->get_quiz()->get_quizid(),
+            'courseid' => $accessmanager->get_quiz()->get_courseid(),
+            'context' => $accessmanager->get_quiz()->get_context(),
             'other' => $other,
         ]);
     }
