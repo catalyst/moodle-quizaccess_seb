@@ -292,7 +292,7 @@ class quiz_settings extends persistent {
 
         $this->process_bool_settings();
         $this->process_quit_password_settings();
-        $this->process_quit_url_from_form();
+        $this->process_quit_url_from_settings();
         $this->process_url_filters();
         $this->process_required_enforced_settings();
 
@@ -375,13 +375,19 @@ class quiz_settings extends persistent {
         }
     }
 
-    private function process_quit_url_from_form() {
+    /**
+     * Sets the quitURL if found in the quiz_settings.
+     */
+    private function process_quit_url_from_settings() {
         $settings = $this->to_record();
         if (!empty($settings->linkquitseb) && is_string($settings->linkquitseb)) {
             $this->plist->set_or_update_value('quitURL', new CFString($settings->linkquitseb));
         }
     }
 
+    /**
+     * Sets the quiz_setting's linkquitseb if a quitURL value was found in a template or uploaded config.
+     */
     private function process_quit_url_from_template_or_config() {
         // Does the plist (template or config file) have an existing quitURL?
         $quiturl = $this->plist->get_element_value('quitURL');
