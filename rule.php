@@ -329,7 +329,7 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Only display if the link has been configured and attempts are greater than 0.
         if ($quizsettings->get('linkquitseb')) {
-            $url = new moodle_url($quizsettings->get('linkquitseb'));
+            $url = $quizsettings->get('linkquitseb');
             $quitbutton = $OUTPUT->single_button($url, get_string('exitsebbutton', 'quizaccess_seb'), 'get');
         }
 
