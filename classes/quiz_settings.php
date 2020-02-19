@@ -320,8 +320,10 @@ class quiz_settings extends persistent {
     private function process_seb_upload_config() {
         $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
 
-        // If file has been uploaded, overwrite existing config.
-        if (!empty($file)) {
+        // If there was no file, create an empty plist so the rest of this wont explode.
+        if (empty($file)) {
+            $this->plist = new property_list();
+        } else {
             $this->plist = new property_list($file->get_content());
         }
 
