@@ -59,8 +59,12 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
         $this->assertEquals('Quiz access was prevented', $event->get_name());
-        $this->assertEquals("The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
-            . "Safe Exam Browser access plugin. The reason was 'Because I said so.'.", $event->get_description());
+        $this->assertEquals(
+            "The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
+            . "Safe Exam Browser access plugin. The reason was 'Because I said so.'. "
+            . "Expected config key: '3c9ba14a9bb3c8c0b7987c5e04155fadc624cf069d989c757be6b6e646827cad'. "
+            . "Received config key: 'configkey'. Received browser exam key: 'configkey'.",
+            $event->get_description());
         $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
         $this->assertEquals($user->id, $event->userid);
         $this->assertEquals($quiz->id, $event->objectid);

@@ -84,8 +84,13 @@ class access_prevented extends base {
      * @return string Description.
      */
     public function get_description() {
-        return "The user with id '$this->userid' has been prevented from accessing quiz with id '$this->objectid' by the "
-                . "Safe Exam Browser access plugin. The reason was '{$this->other['reason']}'.";
+        $description = "The user with id '$this->userid' has been prevented from accessing quiz with id '$this->objectid' by the "
+                . "Safe Exam Browser access plugin. The reason was '{$this->other['reason']}'. "
+            . "Expected config key: '{$this->other['savedconfigkey']}'. "
+            . "Received config key: '{$this->other['receivedconfigkey']}'. "
+            . "Received browser exam key: '{$this->other['receivedconfigkey']}'.";
+
+        return $description;
     }
 
     /**
