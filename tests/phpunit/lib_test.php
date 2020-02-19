@@ -146,7 +146,8 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
                 . "<false/><key>audioMute</key><false/><key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key>"
                 . "<true/><key>URLFilterEnable</key><false/><key>URLFilterEnableContentFilter</key><false/>"
                 . "<key>URLFilterRules</key><array/><key>startURL</key><string>$url</string>"
-                . "<key>sendBrowserExamKey</key><true/></dict></plist>\n", $config);
+                . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/>"
+                . "</dict></plist>\n", $config);
     }
 
     /**

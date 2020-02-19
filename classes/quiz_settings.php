@@ -262,17 +262,20 @@ class quiz_settings extends persistent {
             case settings_provider::USE_SEB_NO:
                 break;
 
+            case settings_provider::USE_SEB_CONFIG_MANUALLY:
+                $this->process_seb_config_manually();
+                break;
+
             case settings_provider::USE_SEB_TEMPLATE:
-                $this->process_template_settings();
+                $this->process_seb_template();
                 break;
 
             case settings_provider::USE_SEB_UPLOAD_CONFIG:
-                $this->process_seb_config_file();
+                $this->process_seb_upload_config();
                 break;
 
-            default:
-                // Remaining case settings_provider::USE_SEB_CONFIG_MANUALLY.
-                $this->process_default_case();
+            default: // Also settings_provider::USE_SEB_CLIENT_CONFIG.
+                $this->process_seb_client_config();
         }
 
         // Export and save the config, ready for DB.
@@ -280,45 +283,59 @@ class quiz_settings extends persistent {
     }
 
     /**
-     * Creates an initial plist, then applies all settings associated with the quiz.
+     * Case for USE_SEB_CONFIG_MANUALLY. This creates a plist and applies all settings from the posted form, along with
+     * some defaults.
      */
-    private function process_default_case() {
+    private function process_seb_config_manually() {
         // If at any point a configuration file has been uploaded and parsed, clear the settings.
         $this->plist = new property_list();
-        $this->progress_default_standard_settings();
+
+        $this->process_bool_settings();
+        $this->process_quit_password_settings();
+        $this->process_quit_url_from_form();
+        $this->process_url_filters();
+        $this->process_required_enforced_settings();
+
+        // One of the requirements for USE_SEB_CONFIG_MANUALLY is setting examSessionClearCookiesOnStart to false.
+        $this->plist->set_or_update_value('examSessionClearCookiesOnStart', new CFBoolean(false));
     }
 
     /**
-     * Creates an initial plist from the template uploaded, then applies all settings associated with the quiz.
+     * Case for USE_SEB_TEMPLATE. This creates a plist from the template uploaded, then applies the quit password
+     * setting and some defaults.
      */
-    private function process_template_settings() {
+    private function process_seb_template() {
         $template = template::get_record(['id' => $this->get('templateid')]);
         $this->plist = new property_list($template->get('content'));
 
-        // Process quit settings.
-        $this->process_quit_settings();
-
-        // Add the sensible default options to the configuration and exported SEB files.
+        $this->process_quit_password_settings();
+        $this->process_quit_url_from_template_or_config();
         $this->process_required_enforced_settings();
     }
 
     /**
-     * This function processes the elements that have been set via the modform fields.
-     *
-     * It's called during case USE_SEB_TEMPLATE and USE_SEB_CONFIG_MANUALLY.
+     * Case for USE_SEB_UPLOAD_CONFIG. This creates a plist from an uploaded configuration file, then applies the quiz
+     * password settings and some defaults.
      */
-    private function progress_default_standard_settings() {
-        // Process all settings that are boolean.
-        $this->process_bool_settings();
+    private function process_seb_upload_config() {
+        $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
 
-        // Process quit settings.
-        $this->process_quit_settings();
+        // If file has been uploaded, overwrite existing config.
+        if (!empty($file)) {
+            $this->plist = new property_list($file->get_content());
+        }
 
-        // Add all the URL filters.
-        $this->process_url_filters();
-
-        // Add the sensible default options to the configuration and exported SEB files.
+        $this->process_quit_password_settings();
+        $this->process_quit_url_from_template_or_config();
         $this->process_required_enforced_settings();
+    }
+
+    /**
+     * Case for USE_SEB_CLIENT_CONFIG. This creates an empty plist to remove the config stored.
+     */
+    private function process_seb_client_config() {
+        // Just setup an empty plist.
+        $this->plist = new property_list();
     }
 
     /**
@@ -328,39 +345,8 @@ class quiz_settings extends persistent {
         global $CFG;
 
         $quizurl = new moodle_url($CFG->wwwroot . "/mod/quiz/view.php", ['id' => $this->get('cmid')]);
-
-        $starturl = $this->plist->get_element_value('startURL');
-        if ($starturl) {
-            $this->plist->update_element_value('startURL', $quizurl->out(true));
-        } else {
-            $this->plist->add_element_to_root('startURL', new CFString($quizurl->out(true)));
-        }
-
-        $sendbrowserexamkey = $this->plist->get_element_value('sendBrowserExamKey');
-        if ($sendbrowserexamkey) {
-            $this->plist->update_element_value('sendBrowserExamKey', true);
-        } else {
-            $this->plist->add_element_to_root('sendBrowserExamKey', new CFBoolean(true));
-        }
-    }
-
-    /**
-     * If file is uploaded, save the file to the config field.
-     * This is processed after the validation step, so a SEB file should exist at this point.
-     */
-    private function process_seb_config_file() {
-        $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
-
-        // If file has been uploaded, overwrite existing config.
-        if (!empty($file)) {
-            $this->plist = new property_list($file->get_content());
-        }
-
-        // Process quit settings.
-        $this->process_quit_settings();
-
-        // Add the sensible default options to the configuration and exported SEB files.
-        $this->process_required_enforced_settings();
+        $this->plist->set_or_update_value('startURL', new CFString($quizurl->out(true)));
+        $this->plist->set_or_update_value('sendBrowserExamKey', new CFBoolean(true));
     }
 
     /**
@@ -380,18 +366,23 @@ class quiz_settings extends persistent {
     /**
      * Turn hashed quit password and quit link into PList strings and add to config PList.
      */
-    private function process_quit_settings() {
+    private function process_quit_password_settings() {
         $settings = $this->to_record();
         if (!empty($settings->quitpassword) && is_string($settings->quitpassword)) {
             // Hash quit password.
             $hashedpassword = hash('SHA256', $settings->quitpassword);
             $this->plist->add_element_to_root('hashedQuitPassword', new CFString($hashedpassword));
         }
+    }
 
+    private function process_quit_url_from_form() {
+        $settings = $this->to_record();
         if (!empty($settings->linkquitseb) && is_string($settings->linkquitseb)) {
-            $this->plist->add_element_to_root('quitURL', new CFString($settings->linkquitseb));
+            $this->plist->set_or_update_value('quitURL', new CFString($settings->linkquitseb));
         }
+    }
 
+    private function process_quit_url_from_template_or_config() {
         // Does the plist (template or config file) have an existing quitURL?
         $quiturl = $this->plist->get_element_value('quitURL');
         if (!empty($quiturl)) {

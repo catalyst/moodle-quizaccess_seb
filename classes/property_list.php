@@ -174,6 +174,21 @@ class property_list {
     }
 
     /**
+     * Helper function to either set or update a CF type value to the plist.
+     *
+     * @param string $key
+     * @param CFType $input
+     */
+    public function set_or_update_value(string $key, CFType $input) {
+        $value = $this->get_element_value($key);
+        if (empty($value)) {
+            $this->add_element_to_root($key, $input);
+        } else {
+            $this->update_element_value($key, $input->getValue());
+        }
+    }
+
+    /**
      * Convert the PList to XML.
      *
      * @return string XML ready for creating an XML file.
