@@ -210,15 +210,16 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertEquals($xml, $config);
     }
 
-    public function test_no_config_file_uploaded_doesnt_overwrite_config() {
+    /**
+     * Test test_no_config_file_uploaded
+     */
+    public function test_no_config_file_uploaded() {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $quizsettings->set('showsebtaskbar', 0);
+        $cmid = $quizsettings->get('cmid');
+        $this->expectException(moodle_exception::class);
+        $this->expectExceptionMessage("No uploaded SEB config file could be found for quiz with cmid: {$cmid}");
         $quizsettings->save();
-        $originalconfig = $quizsettings->get('config');
-        $quizsettings->save();
-        $newconfig = $quizsettings->get('config');
-        $this->assertEquals($originalconfig, $newconfig);
     }
 
     /**
