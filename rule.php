@@ -344,12 +344,12 @@ class quizaccess_seb extends quiz_access_rule_base {
     }
 
     /**
-     * Hepler function to display an Exit Safe Exam Browser button if configured to do so and attempts are > 0.
+     * Helper function to display an Exit Safe Exam Browser button if configured to do so and attempts are > 0.
      *
      * @return string empty or a button which has the configured seb quit link.
      */
     private function display_quit_button() : string {
-        global $OUTPUT, $USER;
+        global $USER;
 
         $quizsettings = $this->accessmanager->get_quiz_settings();
         $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, quiz_attempt::FINISHED, false);
