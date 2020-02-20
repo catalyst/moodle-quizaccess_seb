@@ -88,7 +88,7 @@ class access_prevented extends base {
                 . "Safe Exam Browser access plugin. The reason was '{$this->other['reason']}'. "
             . "Expected config key: '{$this->other['savedconfigkey']}'. "
             . "Received config key: '{$this->other['receivedconfigkey']}'. "
-            . "Received browser exam key: '{$this->other['receivedconfigkey']}'.";
+            . "Received browser exam key: '{$this->other['receivedbrowserexamkey']}'.";
 
         return $description;
     }

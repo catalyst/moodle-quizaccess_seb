@@ -65,7 +65,7 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
             "The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
             . "Safe Exam Browser access plugin. The reason was 'Because I said so.'. "
             . "Expected config key: '$expectedconfigkey'. "
-            . "Received config key: 'configkey'. Received browser exam key: 'configkey'.",
+            . "Received config key: 'configkey'. Received browser exam key: 'browserexamkey'.",
             $event->get_description());
         $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
         $this->assertEquals($user->id, $event->userid);
