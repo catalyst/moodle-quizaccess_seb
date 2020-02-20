@@ -59,6 +59,7 @@ class template_list extends \flexible_table {
             'name',
             'description',
             'enabled',
+            'used',
             'actions',
         ]);
 
@@ -66,6 +67,7 @@ class template_list extends \flexible_table {
             get_string('name', 'quizaccess_seb'),
             get_string('description', 'quizaccess_seb'),
             get_string('enabled', 'quizaccess_seb'),
+            get_string('used', 'quizaccess_seb'),
             get_string('actions'),
         ]);
 
@@ -106,6 +108,16 @@ class template_list extends \flexible_table {
      */
     protected function col_enabled(template $data): string {
         return empty($data->get('enabled')) ? get_string('no') : get_string('yes');
+    }
+
+    /**
+     * Display if a template is being used.
+     *
+     * @param \quizaccess_seb\template $data Template for this row.
+     * @return string
+     */
+    protected function col_used(template $data): string {
+        return $data->can_delete() ? get_string('no') : get_string('yes');
     }
 
     /**
