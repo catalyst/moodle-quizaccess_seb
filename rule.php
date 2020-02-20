@@ -27,6 +27,7 @@
 use quizaccess_seb\access_manager;
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\settings_provider;
+use \quizaccess_seb\event\access_prevented;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -276,39 +277,70 @@ class quizaccess_seb extends quiz_access_rule_base {
     public function prevent_access() {
         global $PAGE;
 
-        $quizsettings = $this->accessmanager->get_quiz_settings();
+        if (!$this->accessmanager->seb_required()) {
+            return false;
+        }
 
-        // If Safe Exam Browser is not required or user can bypass check, access to quiz should not be prevented.
-        if (!$this->accessmanager->seb_required() || $this->accessmanager->can_bypass_seb()) {
+        if ($this->accessmanager->can_bypass_seb()) {
             return false;
         }
 
         // If the rule is active, enforce a secure view whilst taking the quiz.
         $PAGE->set_pagelayout('secure');
+        $quizsettings = $this->accessmanager->get_quiz_settings();
 
-        // If using client configuration with no browser exam keys, do basic check that user is using Safe Exam Browser.
-        // It is more secure to use Browser Exam Keys than to rely on this check.
-        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG
-                && empty($quizsettings->get('allowedbrowserexamkeys'))
-                && !$this->accessmanager->validate_basic_header()) {
-            // Return error message with download link.
-            $errormessage = get_string('clientrequiresseb', 'quizaccess_seb')
-                    . $this->get_download_button_only();
-            // TODO: Issue #8 - Trigger event if access is prevented.
-            return $errormessage;
-        }
-
-        // Check if the quiz can be validated with the quiz Config Key or Browser Exam Keys.
-        if ($this->accessmanager->validate_access_keys()) {
-            return false;
+        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
+            if (!$this->accessmanager->validate_basic_header()) {
+                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('not_seb'))->trigger();
+                return $this->get_require_seb_error_message();
+            }
         } else {
-            // Return error message with download link and links to get the seb config.
-            $errormessage = get_string('invalidkeys', 'quizaccess_seb')
-                    . $this->get_action_buttons();
-            // Display action buttons to assist user in gaining access to quiz.
-            // TODO: Issue #8 - Trigger event if access is prevented.
-            return $errormessage;
+            if (!$this->accessmanager->validate_config_key()) {
+                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
+                return $this->get_invalid_key_error_message();
+            }
         }
+
+        if (!$this->accessmanager->validate_browser_exam_keys()) {
+            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
+            return $this->get_invalid_key_error_message();
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns reason for access prevention as a text.
+     *
+     * @param string $identifier Reason string identifier.
+     * @return string
+     */
+    private function get_reason_text(string $identifier) : string {
+        if (in_array($identifier, ['not_seb', 'invalid_config_key', 'invalid_browser_key'])) {
+            return get_string($identifier, 'quizaccess_seb');
+        }
+
+        return get_string('unknown_reason', 'quizaccess_seb');
+    }
+
+    /**
+     * Return error message when a SEB key is not valid.
+     *
+     * @return string
+     */
+    private function get_invalid_key_error_message() : string {
+        // Return error message with download link and links to get the seb config.
+        return get_string('invalidkeys', 'quizaccess_seb') . $this->get_action_buttons();
+    }
+
+    /**
+     * Return error message when a SEB browser is not used.
+     *
+     * @return string
+     */
+    private function get_require_seb_error_message() : string {
+        // Return error message with download link.
+        return get_string('clientrequiresseb', 'quizaccess_seb') . $this->get_download_button_only();
     }
 
     /**

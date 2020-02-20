@@ -495,7 +495,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
      * @return int Item ID of file.
      */
     private function create_module_test_file(string $xml) : int {
-        $itemid = $this->quiz->cmid;
+        $itemid = 0;
         $fs = get_file_storage();
         $filerecord = [
             'contextid' => \context_module::instance($this->quiz->cmid)->id,

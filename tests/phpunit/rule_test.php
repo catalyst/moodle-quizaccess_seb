@@ -220,6 +220,10 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     public function test_access_prevented_if_access_keys_invalid() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
         $rule = $this->make_rule();
+
+        // Create an event sink, trigger event and retrieve event.
+        $sink = $this->redirectEvents();
+
         // Check that correct error message is returned.
         $errormsg = $rule->prevent_access();
         $this->assertNotEmpty($errormsg);
@@ -228,6 +232,14 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
         $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
         $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+
+        $events = $sink->get_events();
+        $this->assertEquals(1, count($events));
+        $event = reset($events);
+
+        // Test that the event data is as expected.
+        $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
+        $this->assertEquals('Invalid SEB config key', $event->other['reason']);
     }
 
     /**
@@ -276,6 +288,45 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test access prevented if browser exam keys do not match headers.
+     */
+    public function test_access_prevented_if_browser_exam_keys_are_invalid() {
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $browserexamkey = hash('sha256', 'testkey');
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG); // Doesn't check config key.
+        $quizsettings->set('allowedbrowserexamkeys', $browserexamkey);
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken key';
+
+        $rule = $this->make_rule();
+
+        // Create an event sink, trigger event and retrieve event.
+        $sink = $this->redirectEvents();
+
+        // Check that correct error message is returned.
+        $errormsg = $rule->prevent_access();
+        $this->assertNotEmpty($errormsg);
+        $this->assertContains("The config key or browser exam keys could not be validated. "
+            . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
+        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
+        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+
+        $events = $sink->get_events();
+        $this->assertEquals(1, count($events));
+        $event = reset($events);
+
+        // Test that the event data is as expected.
+        $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
+        $this->assertEquals('Invalid SEB browser key', $event->other['reason']);
+    }
+
+    /**
      * Test access allowed if using client configuration and SEB user agent header is valid.
      */
     public function test_access_allowed_if_using_client_config_basic_header_is_valid() {
@@ -308,12 +359,23 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Set up basic dummy request.
         $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
 
+        // Create an event sink, trigger event and retrieve event.
+        $sink = $this->redirectEvents();
+
         $rule = $this->make_rule();
         // Check that correct error message is returned.
         $this->assertContains(
             'This quiz has been configured to use the Safe Exam Browser with client configuration.',
             $rule->prevent_access()
         );
+
+        $events = $sink->get_events();
+        $this->assertEquals(1, count($events));
+        $event = reset($events);
+
+        // Test that the event data is as expected.
+        $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
+        $this->assertEquals('No SEB browser is being used', $event->other['reason']);
     }
 
     /**

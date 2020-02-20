@@ -172,6 +172,10 @@ $string['httplinkbutton'] = 'Download Configuration';
 
 // Events.
 $string['event:accessprevented'] = "Quiz access was prevented";
+$string['not_seb'] = "No SEB browser is being used";
+$string['invalid_config_key'] = "Invalid SEB config key";
+$string['invalid_browser_key'] = "Invalid SEB browser key";
+$string['unknown_reason'] = "Unknown reason";
 $string['event:templatecreated'] = "SEB Template was created";
 $string['event:templatedeleted'] = "SEB Template was deleted";
 $string['event:templatedisabled'] = "SEB Template was disabled";
@@ -197,3 +201,4 @@ $string['confirmtemplateremovaltitle'] = 'Confirm template removal?';
 $string['confirmtemplateremovalquestion'] = 'Are you sure that you wish to remove this template?';
 $string['notemplate'] = 'No template';
 $string['restoredfrom'] = '{$a->name} (restored via cmid {$a->cmid})';
+$string['used'] = 'In use';

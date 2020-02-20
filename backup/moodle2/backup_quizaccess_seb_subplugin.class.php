@@ -74,12 +74,7 @@ class backup_quizaccess_seb_subplugin extends backup_mod_quiz_access_subplugin {
         $subpluginquizsettings->set_source_table(quizaccess_seb\quiz_settings::TABLE, ['quizid' => $quizid]);
 
         $contextid = $this->get_setting_value(backup::VAR_CONTEXTID);
-        $subpluginquizsettings->annotate_files(
-            'quizaccess_seb',
-            'filemanager_sebconfigfile',
-            null,
-            $contextid
-        );
+        $subpluginquizsettings->annotate_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
 
         $params = ['id' => '../templateid'];
         $subplugintemplatesettings->set_source_table(\quizaccess_seb\template::TABLE, $params);
