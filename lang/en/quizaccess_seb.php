@@ -126,6 +126,7 @@ $string['downloadsebconfig'] = 'Download SEB config file';
 // Exceptions.
 $string['missingrequiredsettings'] = 'Config settings not provided all required settings.';
 $string['noconfigfound'] = 'No SEB config could be found for quiz with cmid: {$a}';
+$string['noconfigfilefound'] = 'No uploaded SEB config file could be found for quiz with cmid: {$a}';
 $string['allowedbrowserkeysdistinct'] = 'The keys must all be different.';
 $string['allowedbrowserkeyssyntax'] = 'A key should be a 64-character hex string.';
 $string['filenotpresent'] = 'Please upload a SEB config file.';

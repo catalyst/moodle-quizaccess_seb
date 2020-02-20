@@ -32,6 +32,7 @@ use CFPropertyList\CFNumber;
 use CFPropertyList\CFString;
 use core\persistent;
 use lang_string;
+use moodle_exception;
 use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
@@ -322,7 +323,7 @@ class quiz_settings extends persistent {
 
         // If there was no file, create an empty plist so the rest of this wont explode.
         if (empty($file)) {
-            $this->plist = new property_list();
+            throw new moodle_exception('noconfigfilefound', 'quizaccess_seb', '', $this->get('cmid'));
         } else {
             $this->plist = new property_list($file->get_content());
         }
