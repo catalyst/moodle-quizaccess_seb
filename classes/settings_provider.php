@@ -29,7 +29,6 @@
 
 namespace quizaccess_seb;
 
-use context_course;
 use context_module;
 use context_user;
 use lang_string;
@@ -138,15 +137,25 @@ class settings_provider {
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function add_seb_header_element(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        global  $OUTPUT;
+
         $element = $mform->createElement('header', 'seb', get_string('seb', 'quizaccess_seb'));
         self::insert_element($quizform, $mform, $element);
 
         // Display notification about locked settings.
         if (self::is_seb_settings_locked($quizform->get_instance())) {
-            global  $OUTPUT;
-
             $notify = new \core\output\notification(
                 get_string('settingsfrozen', 'quizaccess_seb'),
+                \core\output\notification::NOTIFY_WARNING
+            );
+
+            $notifyelement = $mform->createElement('html', $OUTPUT->render($notify));
+            self::insert_element($quizform, $mform, $notifyelement);
+        }
+
+        if (self::is_conflicting_permissions($quizform->get_context())) {
+            $notify = new \core\output\notification(
+                get_string('conflictingsettings', 'quizaccess_seb'),
                 \core\output\notification::NOTIFY_WARNING
             );
 
@@ -173,6 +182,47 @@ class settings_provider {
         self::set_type($quizform, $mform, 'seb_requiresafeexambrowser', PARAM_INT);
         self::set_default($quizform, $mform, 'seb_requiresafeexambrowser', self::USE_SEB_NO);
         self::add_help_button($quizform, $mform, 'seb_requiresafeexambrowser');
+
+        if (self::is_conflicting_permissions($quizform->get_context())) {
+            $mform->freeze(['seb_requiresafeexambrowser']);
+        }
+    }
+
+    /**
+     * Check that we have conflicting permissions.
+     *
+     * In Some point we can have settings save by the person who use specific
+     * type of SEB usage (e.g. use templates). But then another person who can't
+     * use template (but still can update other settings) edit the same quiz. This is
+     * conflict of permissions and we'd like to build the settings form having this in
+     * mind.
+     *
+     * @param \context $context Context used with capability checking.
+     *
+     * @return bool
+     */
+    public static function is_conflicting_permissions(\context $context) {
+        if ($context instanceof \context_course) {
+            return false;
+        }
+
+        $settings = quiz_settings::get_record(['cmid' => (int) $context->instanceid]);
+
+        if (empty($settings)) {
+            return false;
+        }
+
+        if (!self::can_use_seb_template($context) &&
+            $settings->get('requiresafeexambrowser') == self::USE_SEB_TEMPLATE) {
+            return true;
+        }
+
+        if (!self::can_upload_seb_file($context) &&
+            $settings->get('requiresafeexambrowser') == self::USE_SEB_UPLOAD_CONFIG) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -182,14 +232,13 @@ class settings_provider {
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function add_seb_templates(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
-        if (self::can_use_seb_template($quizform->get_context())) {
+        if (self::can_use_seb_template($quizform->get_context()) || self::is_conflicting_permissions($quizform->get_context())) {
             $element = $mform->createElement(
                 'select',
                 'seb_templateid',
                 get_string('seb_templateid', 'quizaccess_seb'),
                 self::get_template_options()
             );
-
         } else {
             $element = $mform->createElement('hidden', 'seb_templateid');
         }
@@ -198,6 +247,12 @@ class settings_provider {
         self::set_type($quizform, $mform, 'seb_templateid', PARAM_INT);
         self::set_default($quizform, $mform, 'seb_templateid', 0);
         self::add_help_button($quizform, $mform, 'seb_templateid');
+
+        // In case if the user can't use templates, but the quiz is configured to use them,
+        // we'd like to display template, but freeze it.
+        if (self::is_conflicting_permissions($quizform->get_context())) {
+            $mform->freeze(['seb_templateid']);
+        }
     }
 
     /**
@@ -300,7 +355,7 @@ class settings_provider {
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function lock_seb_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
-        if (self::is_seb_settings_locked($quizform->get_instance())) {
+        if (self::is_seb_settings_locked($quizform->get_instance()) || self::is_conflicting_permissions($quizform->get_context())) {
             $mform->freeze('seb_requiresafeexambrowser');
             $mform->freeze('seb_templateid');
 
@@ -421,20 +476,21 @@ class settings_provider {
 
     /**
      * Returns a list of all options of SEB usage.
-     * @param context_course|context_module $context Optional parameter, context used with capability checking selection options.
+     *
+     * @param \context $context Context used with capability checking selection options.
      * @return array
      */
-    public static function get_requiresafeexambrowser_options($context = null) : array {
+    public static function get_requiresafeexambrowser_options(\context $context) : array {
         $options[self::USE_SEB_NO] = get_string('no');
         $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
 
-        if ($context && self::can_use_seb_template($context)) {
+        if (self::can_use_seb_template($context) || self::is_conflicting_permissions($context)) {
             if (!empty(self::get_template_options())) {
                 $options[self::USE_SEB_TEMPLATE] = get_string('seb_use_template', 'quizaccess_seb');
             }
         }
 
-        if ($context && self::can_upload_seb_file($context)) {
+        if (self::can_upload_seb_file($context) || self::is_conflicting_permissions($context)) {
             $options[self::USE_SEB_UPLOAD_CONFIG] = get_string('seb_use_upload', 'quizaccess_seb');
         }
 
