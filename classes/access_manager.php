@@ -62,22 +62,12 @@ class access_manager {
     }
 
     /**
-     * Check if the current request contains the required key hashes in header.
-     *
-     * @param string $pageurl URL to validate keys on.
-     * @return bool true if the user is using a browser with a permitted key, false if not.
-     */
-    public function validate_access_keys(string $pageurl = '') : bool {
-        return $this->validate_browser_exam_keys($pageurl) && $this->validate_config_key($pageurl);
-    }
-
-    /**
      * Check if the browser exam key hash in header matches one of the listed browser exam keys from quiz settings.
      *
      * @param string $pageurl URL of page that is attempting to access restricted quiz.
      * @return bool True if header key matches one of the saved keys.
      */
-    private function validate_browser_exam_keys(string $pageurl = '') : bool {
+    public function validate_browser_exam_keys(string $pageurl = '') : bool {
         // If browser exam keys are entered in settings, check they match the header.
         $browserexamkeys = $this->quizsettings->get('allowedbrowserexamkeys');
         if (empty($browserexamkeys)) {
@@ -85,7 +75,7 @@ class access_manager {
         }
 
         // If the Browser Exam Key header isn't present, prevent access.
-        if (!array_key_exists(self::BROWSER_EXAM_KEY_HEADER, $_SERVER)) {
+        if (is_null($this->get_received_browser_exam_key())) {
             return false;
         }
 
@@ -93,7 +83,7 @@ class access_manager {
             $pageurl = $this->get_this_page_url();
         }
 
-        return $this->check_browser_exam_keys($browserexamkeys, $pageurl, trim($_SERVER[self::BROWSER_EXAM_KEY_HEADER]));
+        return $this->check_browser_exam_keys($browserexamkeys, $pageurl, $this->get_received_browser_exam_key());
     }
 
     /**
@@ -102,7 +92,7 @@ class access_manager {
      * @param string $pageurl URL of page that is attempting to access restricted quiz.
      * @return bool True if header key matches saved key.
      */
-    private function validate_config_key(string $pageurl = '') : bool {
+    public function validate_config_key(string $pageurl = '') : bool {
         // If using client config, or with no requirement, then no check required.
         $requiredtype = $this->quizsettings->get('requiresafeexambrowser');
         if ($requiredtype == settings_provider::USE_SEB_NO
@@ -110,13 +100,13 @@ class access_manager {
             return true;
         }
 
-        $configkey = $this->quizsettings->get('configkey');
-        if (empty($configkey)) {
+        $savedconfigkey = $this->quizsettings->get('configkey');
+        if (empty($savedconfigkey)) {
             return false; // No config key has been saved.
         }
 
         // If the Config Key header isn't present, prevent access.
-        if (!array_key_exists(self::CONFIG_KEY_HEADER, $_SERVER)) {
+        if (is_null($this->get_received_config_key())) {
             return false;
         }
 
@@ -124,7 +114,7 @@ class access_manager {
             $pageurl = $this->get_this_page_url();
         }
 
-        return $this->check_key($configkey, $pageurl, trim($_SERVER[self::CONFIG_KEY_HEADER]));
+        return $this->check_key($savedconfigkey, $pageurl, $this->get_received_config_key());
     }
 
     /**
@@ -148,7 +138,8 @@ class access_manager {
      * @return bool
      */
     public function validate_basic_header() : bool {
-        if ($this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
+        if (isset($_SERVER['HTTP_USER_AGENT'])
+            && $this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
             return strpos($_SERVER['HTTP_USER_AGENT'], 'SEB') !== false;
         }
         return true;
@@ -186,6 +177,15 @@ class access_manager {
     }
 
     /**
+     * Getter for the quiz object.
+     *
+     * @return quiz
+     */
+    public function get_quiz() : quiz {
+        return $this->quiz;
+    }
+
+    /**
      * Check the hash from the request header against the permitted browser exam keys.
      *
      * @param array $keys Allowed browser exam keys.
@@ -213,4 +213,31 @@ class access_manager {
     private function check_key($key, $url, $header) : bool {
         return hash('sha256', $url . $key) === $header;
     }
+
+    /**
+     * Returns Safe Exam Browser Config Key hash.
+     *
+     * @return string|null
+     */
+    public function get_received_config_key() {
+        if (isset($_SERVER[self::CONFIG_KEY_HEADER])) {
+            return trim($_SERVER[self::CONFIG_KEY_HEADER]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the Browser Exam Key hash.
+     *
+     * @return string|null
+     */
+    public function get_received_browser_exam_key() {
+        if (isset($_SERVER[self::BROWSER_EXAM_KEY_HEADER])) {
+            return trim($_SERVER[self::BROWSER_EXAM_KEY_HEADER]);
+        }
+
+        return null;
+    }
+
 }

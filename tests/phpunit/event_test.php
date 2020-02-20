@@ -23,9 +23,13 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
+
 defined('MOODLE_INTERNAL') || die();
 
-class quizaccess_seb_event_testcase extends advanced_testcase {
+require_once(__DIR__ . '/base.php');
+
+class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
 
     /**
      * Test creating the access_prevented event.
@@ -36,19 +40,14 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', [
-            'course' => $course->id,
-            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
-        ]);
-        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $quiz->id]);
-        $event = \quizaccess_seb\event\access_prevented::create_strict(
-                $quizsettings,
-                $course->id,
-                context_module::instance($quiz->cmid),
-                'Because I said so.',
-                'www.example.com/moodle',
-                hash('sha256', 'configkey'),
-                hash('sha256', 'browserexamkey'));
+        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $accessmanager = new \quizaccess_seb\access_manager(new quiz($quiz,
+            get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = 'configkey';
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'browserexamkey';
+
+        $event = \quizaccess_seb\event\access_prevented::create_strict($accessmanager, 'Because I said so.');
 
         // Create an event sink, trigger event and retrieve event.
         $sink = $this->redirectEvents();
@@ -57,20 +56,25 @@ class quizaccess_seb_event_testcase extends advanced_testcase {
         $this->assertEquals(1, count($events));
         $event = reset($events);
 
+        $expectedconfigkey = $accessmanager->get_quiz_settings()->get('configkey');
+
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
         $this->assertEquals('Quiz access was prevented', $event->get_name());
-        $this->assertEquals("The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
-            . "Safe Exam Browser access plugin. The reason was 'Because I said so.'.", $event->get_description());
+        $this->assertEquals(
+            "The user with id '$user->id' has been prevented from accessing quiz with id '$quiz->id' by the "
+            . "Safe Exam Browser access plugin. The reason was 'Because I said so.'. "
+            . "Expected config key: '$expectedconfigkey'. "
+            . "Received config key: 'configkey'. Received browser exam key: 'configkey'.",
+            $event->get_description());
         $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
         $this->assertEquals($user->id, $event->userid);
         $this->assertEquals($quiz->id, $event->objectid);
         $this->assertEquals($course->id, $event->courseid);
         $this->assertEquals('Because I said so.', $event->other['reason']);
-        $this->assertEquals('www.example.com/moodle', $event->other['url']);
-        $this->assertEquals($quizsettings->get('configkey'), $event->other['savedconfigkey']);
-        $this->assertEquals(hash('sha256', 'configkey'), $event->other['receivedconfigkey']);
-        $this->assertEquals(hash('sha256', 'browserexamkey'), $event->other['receivedbrowserexamkey']);
+        $this->assertEquals($accessmanager->get_quiz_settings()->get('configkey'), $event->other['savedconfigkey']);
+        $this->assertEquals('configkey', $event->other['receivedconfigkey']);
+        $this->assertEquals('browserexamkey', $event->other['receivedbrowserexamkey']);
     }
 
     /**
