@@ -256,7 +256,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      */
     public function test_get_module_context_sebconfig_file() {
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
         $user = $this->getDataGenerator()->create_user();
         $context = context_module::instance($quiz->cmid);
         $this->setUser($user);
@@ -269,6 +269,10 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertCount(0, $files);
 
         settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $quiz->cmid);
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $quizsettings->save();
 
         $file = settings_provider::get_module_context_sebconfig_file($quiz->cmid);
 

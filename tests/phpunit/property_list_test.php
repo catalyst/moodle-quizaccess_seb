@@ -247,6 +247,39 @@ class quizaccess_seb_property_list_testcase extends advanced_testcase {
     }
 
     /**
+     * Test the set_or_update_value function.
+     */
+    public function test_set_or_update_value() {
+        $plist = new property_list();
+
+        $this->assertEmpty($plist->get_element_value('string'));
+        $this->assertEmpty($plist->get_element_value('bool'));
+        $this->assertEmpty($plist->get_element_value('number'));
+
+        // Setting values.
+        $plist->set_or_update_value('string', new \CFPropertyList\CFString('initial string'));
+        $plist->set_or_update_value('bool', new \CFPropertyList\CFBoolean(true));
+        $plist->set_or_update_value('number', new \CFPropertyList\CFNumber('10'));
+
+        $this->assertEquals('initial string', $plist->get_element_value('string'));
+        $this->assertEquals(true, $plist->get_element_value('bool'));
+        $this->assertEquals(10, $plist->get_element_value('number'));
+
+        // Updating values.
+        $plist->set_or_update_value('string', new \CFPropertyList\CFString('new string'));
+        $plist->set_or_update_value('bool', new \CFPropertyList\CFBoolean(false));
+        $plist->set_or_update_value('number', new \CFPropertyList\CFNumber('42'));
+
+        $this->assertEquals('new string', $plist->get_element_value('string'));
+        $this->assertEquals(false, $plist->get_element_value('bool'));
+        $this->assertEquals(42, $plist->get_element_value('number'));
+
+        // Type exception.
+        $this->expectException(TypeError::class);
+        $plist->set_or_update_value('someKey', 'We really need to pass in CFTypes here');
+    }
+
+    /**
      * Get a valid PList header. Must also use footer.
      *
      * @return string

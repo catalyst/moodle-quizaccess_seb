@@ -66,8 +66,13 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
     /**
      * Test no errors are found with valid data.
+     *
+     * @param string $setting
+     * @param string $data
+     *
+     * @dataProvider valid_form_data_provider
      */
-    public function test_validate_settings_with_valid_data() {
+    public function test_validate_settings_with_valid_data(string $setting, string $data) {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
 
@@ -77,15 +82,21 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Validate settings with a dummy form.
         $errors = quizaccess_seb::validate_settings_form_fields([], [
             'instance' => $this->quiz->id,
-            'coursemodule' => $this->quiz->cmid
+            'coursemodule' => $this->quiz->cmid,
+            $setting => $data
         ], [], $form);
         $this->assertEmpty($errors);
     }
 
     /**
      * Test errors are found with invalid data.
+     *
+     * @param string $setting
+     * @param string $data
+     *
+     * @dataProvider invalid_form_data_provider
      */
-    public function test_validate_settings_with_invalid_data() {
+    public function test_validate_settings_with_invalid_data(string $setting, string $data) {
         $this->setAdminUser();
 
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
@@ -95,9 +106,10 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Validate settings with a dummy form and quiz instance.
         $errors = quizaccess_seb::validate_settings_form_fields([], [
             'instance' => $this->quiz->id,
-            'coursemodule' => $this->quiz->cmid, 'seb_requiresafeexambrowser' => 'Uh oh!'
+            'coursemodule' => $this->quiz->cmid,
+            $setting => $data
         ], [], $form);
-        $this->assertEquals(['seb_requiresafeexambrowser' => 'Data submitted is invalid'], $errors);
+        $this->assertEquals([$setting => 'Data submitted is invalid'], $errors);
     }
 
     /**
@@ -525,5 +537,37 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // The button is contained in the description when a quiz attempt is finished.
         $this->assertContains("http://test.quit.link", $description[1]);
+    }
+
+    /**
+     * Provider to return valid form field data when saving settings.
+     *
+     * @return array
+     */
+    public function valid_form_data_provider() : array {
+        return [
+            'valid seb_requiresafeexambrowser' => ['seb_requiresafeexambrowser', 0],
+            'valid seb_linkquitseb0' => ['seb_linkquitseb', 'http://safeexambrowser.org/macosx'],
+            'valid seb_linkquitseb1' => ['seb_linkquitseb', 'safeexambrowser.org/macosx'],
+            'valid seb_linkquitseb2' => ['seb_linkquitseb', 'www.safeexambrowser.org/macosx'],
+            'valid seb_linkquitseb3' => ['seb_linkquitseb', 'any.type.of.url.looking.thing'],
+            'valid seb_linkquitseb4' => ['seb_linkquitseb', 'http://any.type.of.url.looking.thing'],
+        ];
+    }
+
+    /**
+     * Provider to return invalid form field data when saving settings.
+     *
+     * @return array
+     */
+    public function invalid_form_data_provider() : array {
+        return [
+            'invalid seb_requiresafeexambrowser' => ['seb_requiresafeexambrowser', 'Uh oh!'],
+            'invalid seb_linkquitseb0' => ['seb_linkquitseb', '\0'],
+            'invalid seb_linkquitseb1' => ['seb_linkquitseb', 'invalid url'],
+            'invalid seb_linkquitseb2' => ['seb_linkquitseb', 'http]://safeexambrowser.org/macosx'],
+            'invalid seb_linkquitseb3' => ['seb_linkquitseb', '0'],
+            'invalid seb_linkquitseb4' => ['seb_linkquitseb', 'seb://any.type.of.url.looking.thing'],
+        ];
     }
 }
