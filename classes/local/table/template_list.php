@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_seb\table;
+namespace quizaccess_seb\local\table;
 
 use quizaccess_seb\helper;
 use quizaccess_seb\template;
