@@ -191,7 +191,6 @@ $string['content'] = 'Template';
 $string['name'] = 'Name';
 $string['description'] = 'Description';
 $string['enabled'] = 'Enabled';
-$string['name'] = 'Name';
 $string['duplicatetemplate'] = "Template with the same name already exists";
 $string['exitsebbutton'] = 'Exit Safe Exam Browser';
 $string['invalidtemplate'] = "Invalid SEB config template";
