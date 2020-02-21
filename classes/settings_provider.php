@@ -189,43 +189,6 @@ class settings_provider {
     }
 
     /**
-     * Check that we have conflicting permissions.
-     *
-     * In Some point we can have settings save by the person who use specific
-     * type of SEB usage (e.g. use templates). But then another person who can't
-     * use template (but still can update other settings) edit the same quiz. This is
-     * conflict of permissions and we'd like to build the settings form having this in
-     * mind.
-     *
-     * @param \context $context Context used with capability checking.
-     *
-     * @return bool
-     */
-    public static function is_conflicting_permissions(\context $context) {
-        if ($context instanceof \context_course) {
-            return false;
-        }
-
-        $settings = quiz_settings::get_record(['cmid' => (int) $context->instanceid]);
-
-        if (empty($settings)) {
-            return false;
-        }
-
-        if (!self::can_use_seb_template($context) &&
-            $settings->get('requiresafeexambrowser') == self::USE_SEB_TEMPLATE) {
-            return true;
-        }
-
-        if (!self::can_upload_seb_file($context) &&
-            $settings->get('requiresafeexambrowser') == self::USE_SEB_UPLOAD_CONFIG) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Add Templates element.
      *
      * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
@@ -472,6 +435,43 @@ class settings_provider {
             'seb_regexblocked' => PARAM_RAW,
             'seb_allowedbrowserexamkeys' => PARAM_RAW,
         ];
+    }
+
+    /**
+     * Check that we have conflicting permissions.
+     *
+     * In Some point we can have settings save by the person who use specific
+     * type of SEB usage (e.g. use templates). But then another person who can't
+     * use template (but still can update other settings) edit the same quiz. This is
+     * conflict of permissions and we'd like to build the settings form having this in
+     * mind.
+     *
+     * @param \context $context Context used with capability checking.
+     *
+     * @return bool
+     */
+    public static function is_conflicting_permissions(\context $context) {
+        if ($context instanceof \context_course) {
+            return false;
+        }
+
+        $settings = quiz_settings::get_record(['cmid' => (int) $context->instanceid]);
+
+        if (empty($settings)) {
+            return false;
+        }
+
+        if (!self::can_use_seb_template($context) &&
+            $settings->get('requiresafeexambrowser') == self::USE_SEB_TEMPLATE) {
+            return true;
+        }
+
+        if (!self::can_upload_seb_file($context) &&
+            $settings->get('requiresafeexambrowser') == self::USE_SEB_UPLOAD_CONFIG) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
