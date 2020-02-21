@@ -36,13 +36,16 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
      */
     public function test_event_access_prevented() {
         $this->resetAfterTest();
-        // Set up event with data.
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+
+        $this->setAdminUser();
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
         $accessmanager = new \quizaccess_seb\access_manager(new quiz($quiz,
             get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+
+        // Set up event with data.
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
 
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = 'configkey';
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'browserexamkey';
