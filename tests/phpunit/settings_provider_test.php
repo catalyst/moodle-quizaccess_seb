@@ -26,7 +26,6 @@
 use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\settings_provider;
-use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -112,32 +111,28 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test SEB usage options.
      */
     public function test_get_requiresafeexambrowser_options() {
+        $this->setAdminUser();
+
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
         $context = context_module::instance($quiz->cmid);
-        $this->setAdminUser();
 
-        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
 
-        $this->assertCount(4, $settings);
-        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $settings));
-        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $settings));
-        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
-        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
-        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $settings));
+        $this->assertCount(4, $options);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
 
         // Create a template.
-        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
-        $template = new template();
-        $template->set('content', $xml);
-        $template->set('name', 'test');
-        $template->set('enabled', 1);
-        $template->save();
+        $this->create_template();
 
         // The template options should be visible now.
-        $settings = settings_provider::get_requiresafeexambrowser_options($context);
-        $this->assertCount(5, $settings);
-        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $settings));
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(5, $options);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
 
         // A new user does not have the capability to use the file manager and template.
         $user = $this->getDataGenerator()->create_user();
@@ -147,18 +142,79 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
 
-        $settings = settings_provider::get_requiresafeexambrowser_options($context);
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
 
-        $this->assertCount(3, $settings);
-        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $settings));
+        $this->assertCount(3, $options);
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $options));
 
         assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $context->id);
-        $settings = settings_provider::get_requiresafeexambrowser_options($context);
-        $this->assertCount(4, $settings);
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(4, $options);
 
         assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
-        $settings = settings_provider::get_requiresafeexambrowser_options($context);
-        $this->assertCount(5, $settings);
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(5, $options);
+    }
+
+    /**
+     * Test SEB usage options with conflicting permissions.
+     */
+    public function test_get_requiresafeexambrowser_options_with_conflicting_permissions() {
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $context = context_module::instance($quiz->cmid);
+
+        $template = $this->create_template();
+
+        $settings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $settings->set('templateid', $template->get('id'));
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $settings->save();
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
+
+        // If there is nay conflict we return full list of options.
+        $this->assertCount(5, $options);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
+    }
+
+    /**
+     * Test that SEB options and templates are frozen if conflicting permissions.
+     */
+    public function test_form_elements_are_frozen_if_conflicting_permissions() {
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $context = context_module::instance($quiz->cmid);
+
+        // Setup conflicting permissions.
+        $template = $this->create_template();
+        $settings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $settings->set('templateid', $template->get('id'));
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $settings->save();
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $quizform = $this->createMock('mod_quiz_mod_form');
+        $quizform->method('get_context')->willReturn($context);
+        $testform = new \MoodleQuickForm('test', 'post', '');
+        $testform->addElement('static', 'security');
+
+        settings_provider::add_seb_usage_options($quizform, $testform);
+        settings_provider::add_seb_templates($quizform, $testform);
+
+        $this->assertTrue($testform->isElementFrozen('seb_requiresafeexambrowser'));
+        $this->assertTrue($testform->isElementFrozen('seb_templateid'));
     }
 
     /**
@@ -255,10 +311,13 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test getting the file from the context module id file area.
      */
     public function test_get_module_context_sebconfig_file() {
+        $this->setAdminUser();
+
         $course = $this->getDataGenerator()->create_course();
         $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $user = $this->getDataGenerator()->create_user();
         $context = context_module::instance($quiz->cmid);
+
+        $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
@@ -372,6 +431,65 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->attempt_quiz($quiz, $user);
         $this->assertTrue(settings_provider::is_seb_settings_locked($quiz->id));
+    }
+
+    /**
+     * Test that we can check identify conflicting permissions if set to use template.
+     */
+    public function test_is_conflicting_permissions_for_manage_templates() {
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $context = context_module::instance($quiz->cmid);
+
+        // Create a template.
+        $template = $this->create_template();
+        $settings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $settings->set('templateid', $template->get('id'));
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $settings->save();
+
+        $this->assertFalse(settings_provider::is_conflicting_permissions($context));
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $this->assertTrue(settings_provider::is_conflicting_permissions($context));
+
+        $roleid = $this->getDataGenerator()->create_role();
+        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $context->id);
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+        $this->assertFalse(settings_provider::is_conflicting_permissions($context));
+    }
+
+    /**
+     * Test that we can check identify conflicting permissions if set to use own seb file.
+     */
+    public function test_is_conflicting_permissions_for_upload_seb_file() {
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $context = context_module::instance($quiz->cmid);
+
+        // Save file.
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $draftitemid = $this->create_test_draftarea_file($xml);
+        settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $quiz->cmid);
+        $settings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $settings->save();
+
+        $this->assertFalse(settings_provider::is_conflicting_permissions($context));
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $this->assertTrue(settings_provider::is_conflicting_permissions($context));
+
+        $roleid = $this->getDataGenerator()->create_role();
+        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+        $this->assertFalse(settings_provider::is_conflicting_permissions($context));
     }
 
     /**

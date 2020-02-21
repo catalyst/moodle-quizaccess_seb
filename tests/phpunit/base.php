@@ -28,8 +28,13 @@
 namespace quizaccess_seb\tests\phpunit;
 
 use quizaccess_seb\settings_provider;
+use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot . "/mod/quiz/accessrule/seb/rule.php"); // Include plugin rule class.
+require_once($CFG->dirroot . "/mod/quiz/mod_form.php"); // Include plugin rule class.
 
 abstract class quizaccess_seb_testcase extends \advanced_testcase {
 
@@ -125,6 +130,7 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
             'sumgrades' => 2,
             'seb_requiresafeexambrowser' => $requiresafeexambrowser,
         ]);
+        $quiz->coursemodule = $quiz->cmid;
 
         // Create a couple of questions.
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
@@ -176,5 +182,21 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
         $this->setUser();
 
         return [$quizobj, $quba, $attemptobj];
+    }
+
+    /**
+     * Create test template.
+     *
+     * @return \quizaccess_seb\template Just created template.
+     */
+    public function create_template() {
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $template = new template();
+        $template->set('content', $xml);
+        $template->set('name', 'test');
+        $template->set('enabled', 1);
+        $template->save();
+
+        return $template;
     }
 }
