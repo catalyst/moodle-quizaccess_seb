@@ -26,7 +26,7 @@
 namespace quizaccess_seb;
 
 use core\notification;
-use quizaccess_seb\table\template_list;
+use quizaccess_seb\local\table\template_list;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -153,12 +153,12 @@ class template_controller {
      *
      * @param \quizaccess_seb\template|null $instance
      *
-     * @return form\template
+     * @return \quizaccess_seb\local\form\template
      */
-    protected function get_form($instance) : form\template {
+    protected function get_form($instance) : \quizaccess_seb\local\form\template {
         global $PAGE;
 
-        return new form\template($PAGE->url->out(false), ['persistent' => $instance]);
+        return new \quizaccess_seb\local\form\template($PAGE->url->out(false), ['persistent' => $instance]);
     }
 
     /**

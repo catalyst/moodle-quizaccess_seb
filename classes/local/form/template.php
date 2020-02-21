@@ -23,14 +23,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_seb\form;
-
-use CFPropertyList\CFPropertyList;
-use core\notification;
+namespace quizaccess_seb\local\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(__DIR__ . '/../../vendor/autoload.php');
+require_once(__DIR__ . '/../../../vendor/autoload.php');
 
 
 class template extends \core\form\persistent {
