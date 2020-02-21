@@ -23,6 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
@@ -32,7 +33,9 @@ use quizaccess_seb\quiz_settings;
 
 defined('MOODLE_INTERNAL') || die();
 
-class quizaccess_seb_provider_testcase extends advanced_testcase {
+require_once(__DIR__ . '/base.php');
+
+class quizaccess_seb_provider_testcase extends quizaccess_seb_testcase {
 
     /** @var stdClass $user A test logged-in user. */
     private $user;
@@ -52,13 +55,12 @@ class quizaccess_seb_provider_testcase extends advanced_testcase {
      * Setup the user, the quiz and ensure that the user is the last user to modify the SEB quiz settings.
      */
     public function setup_test_data() {
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $this->quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+
         $this->user = $this->getDataGenerator()->create_user();
         $this->setUser($this->user);
-        $course = $this->getDataGenerator()->create_course();
-        $this->quiz = $this->getDataGenerator()->create_module('quiz', [
-            'course' => $course->id,
-            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
-        ]);
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $template = new \quizaccess_seb\template();

@@ -23,12 +23,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
+require_once(__DIR__ . '/base.php');
 require_once("$CFG->dirroot/mod/quiz/accessrule/seb/lib.php");
 
-class quizaccess_seb_lib_testcase extends advanced_testcase {
+class quizaccess_seb_lib_testcase extends quizaccess_seb_testcase {
 
     /**
      * Called before every test.
@@ -66,12 +69,11 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
      * Test that the user must be enrolled to download a file.
      */
     public function test_file_not_served_when_user_not_enrolled_in_course() {
-        $user = $this->getDataGenerator()->create_user();
+        $this->setAdminUser();
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', [
-            'course' => $course->id,
-            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
-        ]);
+        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
         $this->setUser($user); // Log user in.
 
         $this->expectException(moodle_exception::class);
@@ -84,9 +86,12 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
      */
     public function test_file_not_served_if_config_not_found_for_cmid() {
         global $DB;
-        $user = $this->getDataGenerator()->create_user();
+
+        $this->setAdminUser();
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quiz = $this->create_test_quiz($course);
+
+        $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
 
@@ -102,12 +107,13 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
      */
     public function test_file_not_served_if_config_empty() {
         global $DB;
-        $user = $this->getDataGenerator()->create_user();
+
+        $this->setAdminUser();
+
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', [
-            'course' => $course->id,
-            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
-        ]);
+        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
 
@@ -125,12 +131,12 @@ class quizaccess_seb_lib_testcase extends advanced_testcase {
      * Test file is served successfully.
      */
     public function test_config_found() {
-        $user = $this->getDataGenerator()->create_user();
+        $this->setAdminUser();
+
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->getDataGenerator()->create_module('quiz', [
-            'course' => $course->id,
-            'seb_requiresafeexambrowser' => \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY,
-        ]);
+        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
 

@@ -134,6 +134,7 @@ $string['fileparsefailed'] = 'The uploaded file could not be saved as a SEB conf
 $string['clientrequiresseb'] = 'This quiz has been configured to use the Safe Exam Browser with client configuration.';
 $string['settingsfrozen'] = 'Due to there being at least one quiz attempt, the Safe Exam Browser settings can no longer be updated.';
 $string['passwordnotset'] = 'Using Safe Exam Browser requires to set a quiz password.';
+$string['conflictingsettings'] = 'You don\'t have permissions to update existing Safe Exam Browser settings';
 
 // Capabilities.
 $string['seb:bypassseb'] = 'Bypass the requirement to view quiz in Safe Exam Browser.';

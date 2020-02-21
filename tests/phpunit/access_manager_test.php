@@ -47,6 +47,7 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
         parent::setUp();
         $this->resetAfterTest();
         $this->course = $this->getDataGenerator()->create_course();
+        $this->setAdminUser();
     }
 
     /**
@@ -94,6 +95,10 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      */
     public function test_user_can_bypass_seb_check() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
         // Set the bypass SEB check capability to $USER.
         $this->assign_user_capability('quizaccess/seb:bypassseb', context_module::instance($this->quiz->cmid)->id);
 
@@ -107,6 +112,10 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      */
     public function test_user_cannot_bypass_seb_check() {
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
         $accessmanager = new access_manager(new quiz($this->quiz,
                 get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
         $this->assertFalse($accessmanager->can_bypass_seb());
