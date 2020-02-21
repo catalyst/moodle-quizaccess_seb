@@ -9,4 +9,4 @@ The following minimum versions of the Safe Exam Browser client are required for 
 
 |macOS|Windows|iOS|
 |---|---|---|
-|2.1.4|2.4|2.1.14|
+|2.1.5pre2|3.0|2.1.14|
