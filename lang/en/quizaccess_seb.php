@@ -43,6 +43,7 @@ $string['quizsettings'] = 'Quiz settings';
 
 // Admin settings.
 $string['seb_managetemplates'] = 'Manage Safe Exam Browser templates';
+$string['manage_templates'] = 'Safe Exam Browser templates';
 $string['setting:downloadlink'] = 'Safe Exam Browser download link';
 $string['setting:downloadlink_desc'] = 'URL for downloading the Safe Exam Browser application.';
 $string['setting:quizpasswordrequired'] = 'Quiz password required';

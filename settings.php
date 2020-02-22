@@ -55,7 +55,7 @@ if (has_capability('quizaccess/seb:managetemplates', context_system::instance())
     $ADMIN->add('modsettingsquizcat',
         new admin_externalpage(
             'quizaccess_seb/template',
-            'Safe Exam Browser templates',
+            get_string('manage_templates', 'quizaccess_seb'),
             new moodle_url('/mod/quiz/accessrule/seb/template.php'),
             'quizaccess/seb:managetemplates'
         )
