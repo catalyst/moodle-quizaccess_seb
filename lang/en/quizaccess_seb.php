@@ -30,10 +30,10 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'Safe Exam Browser access rule';
 
 // Privacy.
-$string['privacy:metadata:quizaccess_seb_template'] = 'Safe Exam Browser template settings. This includes the ID of the last user to create or modify the settings.';
-$string['privacy:metadata:quizaccess_seb_template:usermodified'] = 'ID of user who last created or modified the settings.';
-$string['privacy:metadata:quizaccess_seb_template:timecreated'] = 'Unix time that the settings were created.';
-$string['privacy:metadata:quizaccess_seb_template:timemodified'] = 'Unix time that the settings were last modified.';
+$string['privacy:metadata:quizaccess_seb_template'] = 'Safe Exam Browser template settings. This includes the ID of the last user to create or modify the template.';
+$string['privacy:metadata:quizaccess_seb_template:usermodified'] = 'ID of user who last created or modified the template.';
+$string['privacy:metadata:quizaccess_seb_template:timecreated'] = 'Unix time that the template was created.';
+$string['privacy:metadata:quizaccess_seb_template:timemodified'] = 'Unix time that the template was last modified.';
 $string['privacy:metadata:quizaccess_seb_quizsettings'] = 'Safe Exam Browser settings for a quiz. This includes the ID of the last user to create or modify the settings.';
 $string['privacy:metadata:quizaccess_seb_quizsettings:usermodified'] = 'ID of user who last created or modified the settings.';
 $string['privacy:metadata:quizaccess_seb_quizsettings:timecreated'] = 'Unix time that the settings were created.';
