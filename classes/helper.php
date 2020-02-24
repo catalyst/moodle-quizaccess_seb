@@ -80,6 +80,8 @@ class helper {
             $plist->parse($sebconfig);
         } catch (\ErrorException $e) {
             $result = false;
+        } catch (\Exception $e) {
+            $result = false;
         }
 
         restore_error_handler();
