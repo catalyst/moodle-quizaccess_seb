@@ -31,6 +31,12 @@ use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Event for when a template is enabled.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class template_enabled extends base {
 
     /**

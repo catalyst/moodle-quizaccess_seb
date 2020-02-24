@@ -31,6 +31,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/base.php');
 
+/**
+ * PHPUnit tests for settings_provider.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase {
 
     /**

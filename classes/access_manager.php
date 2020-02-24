@@ -33,6 +33,12 @@ use quiz;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Manage the access to the quiz.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class access_manager {
 
     /** Header sent by Safe Exam Browser containing the Config Key hash. */

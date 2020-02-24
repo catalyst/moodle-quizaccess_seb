@@ -37,6 +37,12 @@ use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Entity model representing quiz settings for the seb plugin.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quiz_settings extends persistent {
 
     /** Table name for the persistent. */

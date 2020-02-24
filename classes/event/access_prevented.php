@@ -30,6 +30,12 @@ use quizaccess_seb\access_manager;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Event for when access to a quiz is prevented by this subplugin.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class access_prevented extends base {
 
     /**

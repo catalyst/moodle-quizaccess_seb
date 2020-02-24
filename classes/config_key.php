@@ -27,6 +27,12 @@ namespace quizaccess_seb;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Class for generating and representing a Safe Exam Browser config key.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class config_key {
 
     /** @var string $hash The Config Key hash. */

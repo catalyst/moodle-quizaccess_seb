@@ -27,6 +27,12 @@ use quizaccess_seb\property_list;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * PHPUnit for property_list class.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_property_list_testcase extends advanced_testcase {
 
     /**

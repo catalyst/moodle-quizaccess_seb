@@ -40,6 +40,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
+/**
+ * Wrapper for CFPropertyList to handle low level iteration.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class property_list {
 
     /** A random 4 character unicode string to replace backslashes during json_encode. */

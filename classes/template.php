@@ -30,7 +30,12 @@ use core\persistent;
 
 defined('MOODLE_INTERNAL') || die();
 
-
+/**
+ * Entity model representing template settings for the seb plugin.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class template extends persistent {
 
     /** Table name for the persistent. */

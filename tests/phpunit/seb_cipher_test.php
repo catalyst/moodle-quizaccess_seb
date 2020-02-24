@@ -27,6 +27,12 @@ use quizaccess_seb\seb_cipher;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * PHPUnit Tests for the SEB cipher.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class seb_cipher_testcase extends advanced_testcase {
 
     /**

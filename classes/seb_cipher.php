@@ -32,6 +32,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
+/**
+ * Class cipher is for encrypting and decrypting SEB config files.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class seb_cipher {
 
     /**

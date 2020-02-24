@@ -39,6 +39,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
+/**
+ * Helper class for providing quiz settings, to make setting up quiz form manageable.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class settings_provider {
 
     /**

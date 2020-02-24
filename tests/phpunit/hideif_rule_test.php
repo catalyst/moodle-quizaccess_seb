@@ -27,6 +27,12 @@ use quizaccess_seb\hideif_rule;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * PHPUnit tests for hideif_rule.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_hideif_rule_testcase extends advanced_testcase {
 
     /**

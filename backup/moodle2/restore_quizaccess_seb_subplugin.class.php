@@ -30,6 +30,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/quiz/backup/moodle2/restore_mod_quiz_access_subplugin.class.php');
 
+/**
+ * Restore instructions for the seb (Safe Exam Browser) quiz access subplugin.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin {
 
     /**

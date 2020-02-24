@@ -29,6 +29,12 @@ use quizaccess_seb\settings_provider;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * PHPUnit tests for quiz_settings class.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
 
     /**

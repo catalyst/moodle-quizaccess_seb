@@ -27,6 +27,12 @@ namespace quizaccess_seb;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Class to store data for "hide if" rules for the settings form.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class hideif_rule {
 
     /**

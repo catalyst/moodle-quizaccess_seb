@@ -29,7 +29,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/../../../vendor/autoload.php');
 
-
+/**
+ * Form for manipulating with the template records.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class template extends \core\form\persistent {
 
     /** @var string Persistent class name. */

@@ -27,6 +27,12 @@ use quizaccess_seb\link_generator;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * PHPUnit tests for link_generator.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_link_generator_testcase extends advanced_testcase {
 
     /**

@@ -31,6 +31,12 @@ global $CFG;
 require_once(__DIR__ . '/base.php');
 require_once("$CFG->dirroot/mod/quiz/accessrule/seb/lib.php");
 
+/**
+ * Tests for plugin lib.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_lib_testcase extends quizaccess_seb_testcase {
 
     /**

@@ -32,6 +32,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/base.php');
 
+/**
+ * PHPUnit tests for the access manager.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
 
     /** @var stdClass $course Test course to contain quiz. */

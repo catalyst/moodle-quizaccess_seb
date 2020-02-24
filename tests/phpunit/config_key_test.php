@@ -27,6 +27,12 @@ use quizaccess_seb\config_key;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * PHPUnit Tests for config_key class.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb_config_key_testcase extends advanced_testcase {
 
     /**

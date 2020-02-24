@@ -30,6 +30,12 @@ use quizaccess_seb\local\table\template_list;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Class for manipulating with the template records.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class template_controller {
     /**
      * View action.

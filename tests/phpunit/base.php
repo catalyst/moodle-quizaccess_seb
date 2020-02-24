@@ -15,9 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This is a Moodle file.
- *
- * This is a longer description of the file.
+ * Base class for tests. All tests should extend it to get common helper methods.
  *
  * @package    mod_mymodule
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
@@ -36,6 +34,12 @@ global $CFG;
 require_once($CFG->dirroot . "/mod/quiz/accessrule/seb/rule.php"); // Include plugin rule class.
 require_once($CFG->dirroot . "/mod/quiz/mod_form.php"); // Include plugin rule class.
 
+/**
+ * Base class for tests. All tests should extend it to get common helper methods.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 abstract class quizaccess_seb_testcase extends \advanced_testcase {
 
     /**

@@ -29,6 +29,12 @@ use moodle_url;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Generate the links to open/download the Safe Exam Browser with correct settings.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class link_generator {
 
     /**
