@@ -435,9 +435,9 @@ class quiz_settings extends persistent {
     /**
      * Create a CFDictionary represeting a URL filter rule.
      *
+     * @param string $rulestring The expression to filter with.
      * @param bool $allowed Allowed or blocked.
      * @param bool $isregex Regex or simple.
-     * @param string $rulestring The expression to filter with.
      * @return CFDictionary A PList dictionary.
      */
     private function create_filter_rule(string $rulestring, bool $allowed, bool $isregex) : CFDictionary {

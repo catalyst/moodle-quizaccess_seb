@@ -17,7 +17,7 @@
 /**
  * Base class for tests. All tests should extend it to get common helper methods.
  *
- * @package    mod_mymodule
+ * @package    quizacces_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
  * @copyright  2019 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

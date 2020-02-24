@@ -258,6 +258,13 @@ class property_list {
      *
      * This will mutate the PList.
      */
+
+    /**
+     * Recursively convert PList date values from unix to iso 8601 format, and ensure strings are UTF 8 encoded.
+     *
+     * This will mutate the PList.
+     * @param \Iterator $root The root element of the PList. Must be a dictionary or array.
+     */
     private function prepare_plist_for_json_encoding($root) {
         $this->plist_map( function($value, $key, $parent) {
             // Convert date to ISO 8601 if date object.
@@ -308,10 +315,6 @@ class property_list {
             }
 
             // Callback function called for every element.
-            //
-            // @param mixed $value Value of current element.
-            // @param string $key Key of element.
-            // @param CFType $parent Parent of element.
             $callback($value, $key, $root);
 
             $root->next();
