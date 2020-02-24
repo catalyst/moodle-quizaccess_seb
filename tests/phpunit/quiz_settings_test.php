@@ -86,6 +86,9 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n", $config);
     }
 
+    /**
+     * Test that config string gets updated from quiz settings.
+     */
     public function test_config_is_updated_from_quiz_settings() {
         // Test settings to populate the in the object.
         $settings = $this->get_test_settings();
@@ -188,8 +191,10 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
     }
 
     /**
-     * @param $bek
-     * @param $expectederrorstring
+     * Test validation of Browser Exam Keys.
+     *
+     * @param string $bek Browser Exam Key.
+     * @param string $expectederrorstring Expected error.
      *
      * @dataProvider bad_browser_exam_key_provider
      */
@@ -201,6 +206,9 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         $this->assertContains($expectederrorstring, $errors);
     }
 
+    /**
+     * Test that uploaded seb file gets converted to config string.
+     */
     public function test_config_file_uploaded_converted_to_config() {
         $url = new moodle_url("/mod/quiz/view.php", ['id' => $this->quiz->cmid]);
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

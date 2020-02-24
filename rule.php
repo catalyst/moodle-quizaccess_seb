@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementaton of the quizaccess_seb plugin.
+ * Implementation of the quizaccess_seb plugin.
  *
  * @package    quizaccess_seb
  * @author     Andrew Madden <andrewmadden@catalyst-au.net>
@@ -34,6 +34,12 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 
+/**
+ * Implementation of the quizaccess_seb plugin.
+ *
+ * @copyright  2020 Catalyst IT
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class quizaccess_seb extends quiz_access_rule_base {
 
     /** @var access_manager $accessmanager Instance to manage the access to the quiz for this plugin. */
@@ -429,7 +435,10 @@ class quizaccess_seb extends quiz_access_rule_base {
         // If suppresssebdownloadlink setting is enabled, do not show download button.
         if (empty($this->quiz->seb_suppresssebdownloadlink)) {
             if (!empty($this->get_seb_download_url())) {
-                $buttons .= $OUTPUT->single_button($this->get_seb_download_url(), get_string('sebdownloadbutton', 'quizaccess_seb'));
+                $buttons .= $OUTPUT->single_button(
+                    $this->get_seb_download_url(),
+                    get_string('sebdownloadbutton', 'quizaccess_seb')
+                );
             }
         }
 

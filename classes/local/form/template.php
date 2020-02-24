@@ -41,7 +41,7 @@ class template extends \core\form\persistent {
     protected static $persistentclass = 'quizaccess_seb\\template';
 
     /**
-     * @inheritdoc
+     * Form definition.
      */
     protected function definition() {
         $mform = $this->_form;
@@ -73,7 +73,10 @@ class template extends \core\form\persistent {
     }
 
     /**
-     * @inheritdoc
+     * Filter out the foreign fields of the persistent.
+     *
+     * @param \stdClass $data The data to filter the fields out of.
+     * @return \stdClass.
      */
     protected function filter_data_for_persistent($data) {
         // Uploading a new template file.
