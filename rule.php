@@ -301,8 +301,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         // If the rule is active, enforce a secure view whilst taking the quiz.
-        // TODO: this will work only with MDL-68009.
-        $PAGE->set_pagelayout('seb');
+        $PAGE->set_pagelayout('secure');
         $quizsettings = $this->accessmanager->get_quiz_settings();
 
         if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
@@ -414,8 +413,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         $page->set_cacheable(false);
         $page->set_popup_notification_allowed(false); // Prevent message notifications.
         $page->set_heading($page->title);
-        // TODO: this will work only with MDL-68009.
-        $page->set_pagelayout('seb');
+        $page->set_pagelayout('secure');
     }
 
     /**
