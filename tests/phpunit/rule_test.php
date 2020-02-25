@@ -68,6 +68,54 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * A helper method to set up quiz view page.
+     */
+    private function set_up_quiz_view_page() {
+        global $PAGE;
+
+        $page = new moodle_page();
+        $page->set_context(context_module::instance($this->quiz->cmid));
+        $page->set_course($this->course);
+        $page->set_pagelayout('standard');
+        $page->set_pagetype("mod-quiz-view");
+        $page->set_url('/mod/quiz/view.php?id=' . $this->quiz->cmid);
+
+        $PAGE = $page;
+    }
+
+    /**
+     * Provider to return valid form field data when saving settings.
+     *
+     * @return array
+     */
+    public function valid_form_data_provider() : array {
+        return [
+            'valid seb_requiresafeexambrowser' => ['seb_requiresafeexambrowser', 0],
+            'valid seb_linkquitseb0' => ['seb_linkquitseb', 'http://safeexambrowser.org/macosx'],
+            'valid seb_linkquitseb1' => ['seb_linkquitseb', 'safeexambrowser.org/macosx'],
+            'valid seb_linkquitseb2' => ['seb_linkquitseb', 'www.safeexambrowser.org/macosx'],
+            'valid seb_linkquitseb3' => ['seb_linkquitseb', 'any.type.of.url.looking.thing'],
+            'valid seb_linkquitseb4' => ['seb_linkquitseb', 'http://any.type.of.url.looking.thing'],
+        ];
+    }
+
+    /**
+     * Provider to return invalid form field data when saving settings.
+     *
+     * @return array
+     */
+    public function invalid_form_data_provider() : array {
+        return [
+            'invalid seb_requiresafeexambrowser' => ['seb_requiresafeexambrowser', 'Uh oh!'],
+            'invalid seb_linkquitseb0' => ['seb_linkquitseb', '\0'],
+            'invalid seb_linkquitseb1' => ['seb_linkquitseb', 'invalid url'],
+            'invalid seb_linkquitseb2' => ['seb_linkquitseb', 'http]://safeexambrowser.org/macosx'],
+            'invalid seb_linkquitseb3' => ['seb_linkquitseb', '0'],
+            'invalid seb_linkquitseb4' => ['seb_linkquitseb', 'seb://any.type.of.url.looking.thing'],
+        ];
+    }
+
+    /**
      * Test no errors are found with valid data.
      *
      * @param string $setting
@@ -585,34 +633,76 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Provider to return valid form field data when saving settings.
-     *
-     * @return array
+     * Test block display before a quiz started.
      */
-    public function valid_form_data_provider() : array {
-        return [
-            'valid seb_requiresafeexambrowser' => ['seb_requiresafeexambrowser', 0],
-            'valid seb_linkquitseb0' => ['seb_linkquitseb', 'http://safeexambrowser.org/macosx'],
-            'valid seb_linkquitseb1' => ['seb_linkquitseb', 'safeexambrowser.org/macosx'],
-            'valid seb_linkquitseb2' => ['seb_linkquitseb', 'www.safeexambrowser.org/macosx'],
-            'valid seb_linkquitseb3' => ['seb_linkquitseb', 'any.type.of.url.looking.thing'],
-            'valid seb_linkquitseb4' => ['seb_linkquitseb', 'http://any.type.of.url.looking.thing'],
-        ];
+    public function test_blocks_display_before_attempt_started() {
+        global $PAGE;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // We will check if we show only fake blocks. Which means no other blocks on a page.
+        $reflection = new \ReflectionClass('block_manager');
+        $property = $reflection->getProperty('fakeblocksonly');
+        $property->setAccessible(true);
+
+        $this->assertFalse($property->getValue($PAGE->blocks));
+
+        // Don't display blocks before start.
+        set_config('displayblocksbeforestart', 0, 'quizaccess_seb');
+        $this->set_up_quiz_view_page();
+        $rule = $this->make_rule();
+        $rule->prevent_access();
+        $this->assertEquals('secure', $PAGE->pagelayout);
+        $this->assertTrue($property->getValue($PAGE->blocks));
+
+        // Display blocks before start.
+        set_config('displayblocksbeforestart', 1, 'quizaccess_seb');
+        $this->set_up_quiz_view_page();
+        $rule = $this->make_rule();
+        $rule->prevent_access();
+        $this->assertEquals('secure', $PAGE->pagelayout);
+        $this->assertFalse($property->getValue($PAGE->blocks));
     }
 
     /**
-     * Provider to return invalid form field data when saving settings.
-     *
-     * @return array
+     * Test block display after a quiz completed.
      */
-    public function invalid_form_data_provider() : array {
-        return [
-            'invalid seb_requiresafeexambrowser' => ['seb_requiresafeexambrowser', 'Uh oh!'],
-            'invalid seb_linkquitseb0' => ['seb_linkquitseb', '\0'],
-            'invalid seb_linkquitseb1' => ['seb_linkquitseb', 'invalid url'],
-            'invalid seb_linkquitseb2' => ['seb_linkquitseb', 'http]://safeexambrowser.org/macosx'],
-            'invalid seb_linkquitseb3' => ['seb_linkquitseb', '0'],
-            'invalid seb_linkquitseb4' => ['seb_linkquitseb', 'seb://any.type.of.url.looking.thing'],
-        ];
+    public function test_blocks_display_after_attempt_finished() {
+        global $PAGE;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
+
+        // Finish the quiz.
+        $user = $this->getDataGenerator()->create_user();
+        $this->attempt_quiz($this->quiz, $user);
+        $this->setUser($user);
+
+        // We will check if we show only fake blocks. Which means no other blocks on a page.
+        $reflection = new \ReflectionClass('block_manager');
+        $property = $reflection->getProperty('fakeblocksonly');
+        $property->setAccessible(true);
+
+        $this->assertFalse($property->getValue($PAGE->blocks));
+
+        // Don't display blocks after finish.
+        set_config('displayblockswhenfinihsed', 0, 'quizaccess_seb');
+        $this->set_up_quiz_view_page();
+        $rule = $this->make_rule();
+        $rule->prevent_access();
+        $this->assertEquals('secure', $PAGE->pagelayout);
+        $this->assertTrue($property->getValue($PAGE->blocks));
+
+        // Display blocks after finish.
+        set_config('displayblockswhenfinihsed', 1, 'quizaccess_seb');
+        $this->set_up_quiz_view_page();
+        $rule = $this->make_rule();
+        $rule->prevent_access();
+        $this->assertEquals('secure', $PAGE->pagelayout);
+        $this->assertFalse($property->getValue($PAGE->blocks));
     }
 }
