@@ -310,31 +310,19 @@ class quizaccess_seb extends quiz_access_rule_base {
         $PAGE->set_pagelayout('secure');
         $this->prevent_display_blocks();
 
-        $quizsettings = $this->accessmanager->get_quiz_settings();
-
-        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
-            if (!$this->accessmanager->validate_basic_header()) {
-                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('not_seb'))->trigger();
-                return $this->get_require_seb_error_message();
-            }
-        } else {
-            if (!$this->accessmanager->validate_config_key()) {
-                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
-                return $this->get_invalid_key_error_message();
-            }
+        if ($this->accessmanager->should_validate_basic_header() && !$this->accessmanager->validate_basic_header()) {
+            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('not_seb'))->trigger();
+            return $this->get_require_seb_error_message();
         }
 
-        // Only check BEK for Uploaded and Client configuration sets.
-        $browserexamcheck = [
-            settings_provider::USE_SEB_UPLOAD_CONFIG,
-            settings_provider::USE_SEB_CLIENT_CONFIG
-        ];
+        if ($this->accessmanager->should_validate_config_key() && !$this->accessmanager->validate_config_key()) {
+            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
+            return $this->get_invalid_key_error_message();
+        }
 
-        if (in_array($quizsettings->get('requiresafeexambrowser'), $browserexamcheck)) {
-            if (!$this->accessmanager->validate_browser_exam_keys()) {
-                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
-                return $this->get_invalid_key_error_message();
-            }
+        if ($this->accessmanager->should_validate_browser_exam_key()&& !$this->accessmanager->validate_browser_exam_keys()) {
+            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
+            return $this->get_invalid_key_error_message();
         }
 
         return false;

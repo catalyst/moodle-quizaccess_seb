@@ -100,7 +100,7 @@ class access_manager {
      */
     public function validate_config_key(string $pageurl = '') : bool {
         // If using client config, or with no requirement, then no check required.
-        $requiredtype = $this->quizsettings->get('requiresafeexambrowser');
+        $requiredtype = $this->get_seb_use_type();
         if ($requiredtype == settings_provider::USE_SEB_NO
                 || $requiredtype == settings_provider::USE_SEB_CLIENT_CONFIG) {
             return true;
@@ -133,7 +133,7 @@ class access_manager {
         if (!$this->quizsettings) {
             return false;
         } else {
-            return $this->quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO;
+            return $this->get_seb_use_type() != settings_provider::USE_SEB_NO;
         }
     }
 
@@ -144,8 +144,7 @@ class access_manager {
      * @return bool
      */
     public function validate_basic_header() : bool {
-        if (isset($_SERVER['HTTP_USER_AGENT'])
-            && $this->quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
+        if (isset($_SERVER['HTTP_USER_AGENT']) && $this->get_seb_use_type() == settings_provider::USE_SEB_CLIENT_CONFIG) {
             return strpos($_SERVER['HTTP_USER_AGENT'], 'SEB') !== false;
         }
         return true;
@@ -246,4 +245,51 @@ class access_manager {
         return null;
     }
 
+    /**
+     * Get type of SEB usage for the quiz.
+     *
+     * @return int
+     */
+    public function get_seb_use_type() : int {
+        if (empty($this->quizsettings)) {
+            return settings_provider::USE_SEB_NO;
+        } else {
+            return $this->quizsettings->get('requiresafeexambrowser');
+        }
+    }
+
+    /**
+     * Should validate basic header?
+     *
+     * @return bool
+     */
+    public function should_validate_basic_header() : bool {
+        return in_array($this->get_seb_use_type(), [
+            settings_provider::USE_SEB_CLIENT_CONFIG,
+        ]);
+    }
+
+    /**
+     * Should validate SEB config key?
+     * @return bool
+     */
+    public function should_validate_config_key() : bool {
+        return in_array($this->get_seb_use_type(), [
+            settings_provider::USE_SEB_CONFIG_MANUALLY,
+            settings_provider::USE_SEB_TEMPLATE,
+            settings_provider::USE_SEB_UPLOAD_CONFIG,
+        ]);
+    }
+
+    /**
+     * Should validate browser exam key?
+     *
+     * @return bool
+     */
+    public function should_validate_browser_exam_key() : bool {
+        return in_array($this->get_seb_use_type(), [
+            settings_provider::USE_SEB_UPLOAD_CONFIG,
+            settings_provider::USE_SEB_CLIENT_CONFIG,
+        ]);
+    }
 }
