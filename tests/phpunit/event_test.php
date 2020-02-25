@@ -95,11 +95,7 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
-        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
-        $template = new \quizaccess_seb\template();
-        $template->set('content', $xml);
-        $template->set('name', 'test');
-        $template->save();
+        $template = $this->create_template();
 
         $event = \quizaccess_seb\event\template_created::create_strict(
             $template,

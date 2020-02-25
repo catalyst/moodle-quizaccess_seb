@@ -68,11 +68,7 @@ class quizaccess_seb_provider_testcase extends quizaccess_seb_testcase {
         $this->user = $this->getDataGenerator()->create_user();
         $this->setUser($this->user);
 
-        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
-        $template = new \quizaccess_seb\template();
-        $template->set('name', 'test');
-        $template->set('content', $xml);
-        $template->save();
+        $template = $this->create_template();
 
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
 
