@@ -308,6 +308,8 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // If the rule is active, enforce a secure view whilst taking the quiz.
         $PAGE->set_pagelayout('secure');
+        $this->prevent_display_blocks();
+
         $quizsettings = $this->accessmanager->get_quiz_settings();
 
         if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
@@ -328,6 +330,27 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         return false;
+    }
+
+    /**
+     * Prevent block displaying as configured.
+     */
+    protected function prevent_display_blocks() {
+        global $PAGE, $USER;
+
+        if ($PAGE->has_set_url() && $PAGE->url == $this->quizobj->view_url()) {
+            $attempts = quiz_get_user_attempts($this->quizobj->get_quizid(), $USER->id, quiz_attempt::FINISHED);
+
+            // Don't display blocks before starting an attempt.
+            if (empty($attempts) && !get_config('quizaccess_seb', 'displayblocksbeforestart')) {
+                $PAGE->blocks->show_only_fake_blocks();
+            }
+
+            // Don't display blocks after finishing an attempt.
+            if (!empty($attempts) && !get_config('quizaccess_seb', 'displayblockswhenfinihsed')) {
+                $PAGE->blocks->show_only_fake_blocks();
+            }
+        }
     }
 
     /**

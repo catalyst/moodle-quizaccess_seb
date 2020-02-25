@@ -52,6 +52,10 @@ $string['setting:showseblink'] = 'Show seb:// link';
 $string['setting:showhttplink'] = 'Show http:// link';
 $string['setting:showseblinks'] = 'Show Safe Exam Browser config links';
 $string['setting:showseblinks_desc'] = 'Decide whether to show links for the user to access the Safe Exam Browser configuration file when access to quiz is prevented. Note that seb:// links may not work for every browser.';
+$string['setting:displayblocksbeforestart'] = 'Display blocks before quiz started';
+$string['setting:displayblocksbeforestart_desc'] = 'If enabled blocks will be displayed before students start a quiz.';
+$string['setting:displayblockswhenfinihsed'] = 'Display blocks after quiz finished';
+$string['setting:displayblockswhenfinihsed_desc'] = 'If enabled blocks will be displayed after students finished a quiz.';
 
 // Quiz form settings.
 $string['seb'] = 'Safe Exam Browser';

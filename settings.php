@@ -49,6 +49,16 @@ if ($hassiteconfig) {
         get_string('setting:quizpasswordrequired', 'quizaccess_seb'),
         get_string('setting:quizpasswordrequired_desc', 'quizaccess_seb'),
         '0'));
+
+    $settings->add(new admin_setting_configcheckbox('quizaccess_seb/displayblocksbeforestart',
+        get_string('setting:displayblocksbeforestart', 'quizaccess_seb'),
+        get_string('setting:displayblocksbeforestart_desc', 'quizaccess_seb'),
+        '0'));
+
+    $settings->add(new admin_setting_configcheckbox('quizaccess_seb/displayblockswhenfinihsed',
+        get_string('setting:displayblockswhenfinihsed', 'quizaccess_seb'),
+        get_string('setting:displayblockswhenfinihsed_desc', 'quizaccess_seb'),
+        '1'));
 }
 
 if (has_capability('quizaccess/seb:managetemplates', context_system::instance())) {
