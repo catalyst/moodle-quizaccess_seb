@@ -40,12 +40,6 @@ require_once(__DIR__ . '/base.php');
  */
 class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
 
-    /** @var stdClass $course Test course to contain quiz. */
-    private $course;
-
-    /** @var stdClass $quiz A test quiz. */
-    private $quiz;
-
     /**
      * Called before every test.
      */
@@ -265,6 +259,150 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
 
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Test browser key';
         $this->assertEquals('Test browser key', $accessmanager->get_received_browser_exam_key());
+    }
+
+    /**
+     * Test can correctly get type of SEB usage for the quiz.
+     */
+    public function test_get_seb_use_type() {
+        // No SEB.
+        $this->quiz = $this->create_test_quiz($this->course);
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertEquals(settings_provider::USE_SEB_NO, $accessmanager->get_seb_use_type());
+
+        // Manually.
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertEquals(settings_provider::USE_SEB_CONFIG_MANUALLY, $accessmanager->get_seb_use_type());
+
+        // Use template.
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $this->create_template()->get('id'));
+        $quizsettings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertEquals(settings_provider::USE_SEB_TEMPLATE, $accessmanager->get_seb_use_type());
+
+        // Use uploaded config.
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG); // Doesn't check basic header.
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertEquals(settings_provider::USE_SEB_UPLOAD_CONFIG, $accessmanager->get_seb_use_type());
+
+        // Use client config.
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+        $this->assertEquals(settings_provider::USE_SEB_CLIENT_CONFIG, $accessmanager->get_seb_use_type());
+    }
+
+    /**
+     * Data provider for self::test_should_validate_basic_header.
+     *
+     * @return array
+     */
+    public function should_validate_basic_header_data_provider() {
+        return [
+            [settings_provider::USE_SEB_NO, false],
+            [settings_provider::USE_SEB_CONFIG_MANUALLY, false],
+            [settings_provider::USE_SEB_TEMPLATE, false],
+            [settings_provider::USE_SEB_UPLOAD_CONFIG, false],
+            [settings_provider::USE_SEB_CLIENT_CONFIG, true],
+        ];
+    }
+
+    /**
+     * Test we know when we should validate basic header.
+     *
+     * @param int $type Type of SEB usage.
+     * @param bool $expected Expected result.
+     *
+     * @dataProvider should_validate_basic_header_data_provider
+     */
+    public function test_should_validate_basic_header($type, $expected) {
+        $accessmanager = $this->getMockBuilder(access_manager::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['get_seb_use_type'])
+            ->getMock();
+        $accessmanager->method('get_seb_use_type')->willReturn($type);
+
+        $this->assertEquals($expected, $accessmanager->should_validate_basic_header());
+
+    }
+
+    /**
+     * Data provider for self::test_should_validate_config_key.
+     *
+     * @return array
+     */
+    public function should_validate_config_key_data_provider() {
+        return [
+            [settings_provider::USE_SEB_NO, false],
+            [settings_provider::USE_SEB_CONFIG_MANUALLY, true],
+            [settings_provider::USE_SEB_TEMPLATE, true],
+            [settings_provider::USE_SEB_UPLOAD_CONFIG, true],
+            [settings_provider::USE_SEB_CLIENT_CONFIG, false],
+        ];
+    }
+
+    /**
+     * Test we know when we should validate config key.
+     *
+     * @param int $type Type of SEB usage.
+     * @param bool $expected Expected result.
+     *
+     * @dataProvider should_validate_config_key_data_provider
+     */
+    public function test_should_validate_config_key($type, $expected) {
+        $accessmanager = $this->getMockBuilder(access_manager::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['get_seb_use_type'])
+            ->getMock();
+        $accessmanager->method('get_seb_use_type')->willReturn($type);
+
+        $this->assertEquals($expected, $accessmanager->should_validate_config_key());
+    }
+
+    /**
+     * Data provider for self::test_should_validate_browser_exam_key.
+     *
+     * @return array
+     */
+    public function should_validate_browser_exam_key_data_provider() {
+        return [
+            [settings_provider::USE_SEB_NO, false],
+            [settings_provider::USE_SEB_CONFIG_MANUALLY, false],
+            [settings_provider::USE_SEB_TEMPLATE, false],
+            [settings_provider::USE_SEB_UPLOAD_CONFIG, true],
+            [settings_provider::USE_SEB_CLIENT_CONFIG, true],
+        ];
+    }
+
+    /**
+     * Test we know when we should browser exam key.
+     *
+     * @param int $type Type of SEB usage.
+     * @param bool $expected Expected result.
+     *
+     * @dataProvider should_validate_browser_exam_key_data_provider
+     */
+    public function test_should_validate_browser_exam_key($type, $expected) {
+        $accessmanager = $this->getMockBuilder(access_manager::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['get_seb_use_type'])
+            ->getMock();
+        $accessmanager->method('get_seb_use_type')->willReturn($type);
+
+        $this->assertEquals($expected, $accessmanager->should_validate_browser_exam_key());
     }
 
 }
