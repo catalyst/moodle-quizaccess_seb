@@ -408,7 +408,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         $quizsettings = $this->accessmanager->get_quiz_settings();
         $quitbutton = '';
 
-        if (empty($this->get_user_finished_attempts()) {
+        if (empty($this->get_user_finished_attempts())) {
             return $quitbutton;
         }
 
