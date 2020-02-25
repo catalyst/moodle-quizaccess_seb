@@ -329,13 +329,29 @@ class quizaccess_seb extends quiz_access_rule_base {
     }
 
     /**
+     * Returns a list of finished attempts for the current user.
+     *
+     * @return array
+     */
+    private function get_user_finished_attempts() : array {
+        global $USER;
+
+        return quiz_get_user_attempts(
+            $this->quizobj->get_quizid(),
+            $USER->id,
+            quiz_attempt::FINISHED,
+            false
+        );
+    }
+
+    /**
      * Prevent block displaying as configured.
      */
-    protected function prevent_display_blocks() {
-        global $PAGE, $USER;
+    private function prevent_display_blocks() {
+        global $PAGE;
 
         if ($PAGE->has_set_url() && $PAGE->url == $this->quizobj->view_url()) {
-            $attempts = quiz_get_user_attempts($this->quizobj->get_quizid(), $USER->id, quiz_attempt::FINISHED);
+            $attempts = $this->get_user_finished_attempts();
 
             // Don't display blocks before starting an attempt.
             if (empty($attempts) && !get_config('quizaccess_seb', 'displayblocksbeforestart')) {
@@ -389,13 +405,10 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return string empty or a button which has the configured seb quit link.
      */
     private function display_quit_button() : string {
-        global $USER;
-
         $quizsettings = $this->accessmanager->get_quiz_settings();
-        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, quiz_attempt::FINISHED, false);
         $quitbutton = '';
 
-        if (empty($attempts)) {
+        if (empty($this->get_user_finished_attempts()) {
             return $quitbutton;
         }
 
