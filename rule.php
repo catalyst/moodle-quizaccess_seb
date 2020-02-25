@@ -324,9 +324,17 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
         }
 
-        if (!$this->accessmanager->validate_browser_exam_keys()) {
-            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
-            return $this->get_invalid_key_error_message();
+        // Only check BEK for Uploaded and Client configuration sets.
+        $browserexamcheck = [
+            settings_provider::USE_SEB_UPLOAD_CONFIG,
+            settings_provider::USE_SEB_CLIENT_CONFIG
+        ];
+
+        if (in_array($quizsettings->get('requiresafeexambrowser'), $browserexamcheck)) {
+            if (!$this->accessmanager->validate_browser_exam_keys()) {
+                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
+                return $this->get_invalid_key_error_message();
+            }
         }
 
         return false;
