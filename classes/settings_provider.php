@@ -712,6 +712,7 @@ class settings_provider {
             'seb_allowedbrowserexamkeys' => [
                 new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
                 new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CONFIG_MANUALLY),
+                new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
             ]
         ];
     }
