@@ -131,7 +131,7 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
      * Create a file in a modules filearea.
      *
      * @param string $xml XML content of the file.
-     * @param settings_provider $cmid Course module id.
+     * @param string $cmid Course module id.
      * @return int Item ID of file.
      */
     protected function create_module_test_file(string $xml, string $cmid) : int {
