@@ -310,21 +310,17 @@ class quizaccess_seb extends quiz_access_rule_base {
         $PAGE->set_pagelayout('secure');
         $this->prevent_display_blocks();
 
-        $quizsettings = $this->accessmanager->get_quiz_settings();
-
-        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_CLIENT_CONFIG) {
-            if (!$this->accessmanager->validate_basic_header()) {
-                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('not_seb'))->trigger();
-                return $this->get_require_seb_error_message();
-            }
-        } else {
-            if (!$this->accessmanager->validate_config_key()) {
-                access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
-                return $this->get_invalid_key_error_message();
-            }
+        if ($this->accessmanager->should_validate_basic_header() && !$this->accessmanager->validate_basic_header()) {
+            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('not_seb'))->trigger();
+            return $this->get_require_seb_error_message();
         }
 
-        if (!$this->accessmanager->validate_browser_exam_keys()) {
+        if ($this->accessmanager->should_validate_config_key() && !$this->accessmanager->validate_config_key()) {
+            access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
+            return $this->get_invalid_key_error_message();
+        }
+
+        if ($this->accessmanager->should_validate_browser_exam_key() && !$this->accessmanager->validate_browser_exam_keys()) {
             access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
             return $this->get_invalid_key_error_message();
         }
@@ -333,13 +329,29 @@ class quizaccess_seb extends quiz_access_rule_base {
     }
 
     /**
+     * Returns a list of finished attempts for the current user.
+     *
+     * @return array
+     */
+    private function get_user_finished_attempts() : array {
+        global $USER;
+
+        return quiz_get_user_attempts(
+            $this->quizobj->get_quizid(),
+            $USER->id,
+            quiz_attempt::FINISHED,
+            false
+        );
+    }
+
+    /**
      * Prevent block displaying as configured.
      */
-    protected function prevent_display_blocks() {
-        global $PAGE, $USER;
+    private function prevent_display_blocks() {
+        global $PAGE;
 
         if ($PAGE->has_set_url() && $PAGE->url == $this->quizobj->view_url()) {
-            $attempts = quiz_get_user_attempts($this->quizobj->get_quizid(), $USER->id, quiz_attempt::FINISHED);
+            $attempts = $this->get_user_finished_attempts();
 
             // Don't display blocks before starting an attempt.
             if (empty($attempts) && !get_config('quizaccess_seb', 'displayblocksbeforestart')) {
@@ -393,13 +405,10 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return string empty or a button which has the configured seb quit link.
      */
     private function display_quit_button() : string {
-        global $USER;
-
         $quizsettings = $this->accessmanager->get_quiz_settings();
-        $attempts = quiz_get_user_attempts($quizsettings->get('quizid'), $USER->id, quiz_attempt::FINISHED, false);
         $quitbutton = '';
 
-        if (empty($attempts)) {
+        if (empty($this->get_user_finished_attempts())) {
             return $quitbutton;
         }
 

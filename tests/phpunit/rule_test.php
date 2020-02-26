@@ -39,12 +39,6 @@ require_once(__DIR__ . '/base.php');
  */
 class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
-    /** @var stdClass $course Test course to contain quiz. */
-    private $course;
-
-    /** @var stdClass $quiz A test quiz. */
-    private $quiz;
-
     /**
      * Called before every test.
      */
@@ -268,24 +262,17 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test access prevented if access keys are invalid.
+     * A helper method to check invalid config key.
      */
-    public function test_access_prevented_if_access_keys_invalid() {
-        $this->setAdminUser();
-        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $rule = $this->make_rule();
-
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-
+    protected function check_invalid_config_key() {
         // Create an event sink, trigger event and retrieve event.
         $sink = $this->redirectEvents();
 
         // Check that correct error message is returned.
-        $errormsg = $rule->prevent_access();
+        $errormsg = $this->make_rule()->prevent_access();
         $this->assertNotEmpty($errormsg);
         $this->assertContains("The config key or browser exam keys could not be validated. "
-                . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
+            . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
         $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
         $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
         $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
@@ -297,6 +284,76 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
         $this->assertEquals('Invalid SEB config key', $event->other['reason']);
+    }
+
+    /**
+     * Test access prevented if config key is invalid.
+     */
+    public function test_access_prevented_if_config_key_invalid() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = 'Broken config key';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->check_invalid_config_key();
+    }
+
+    /**
+     * Test access prevented if config keys is invalid and using uploaded config.
+     */
+    public function test_access_prevented_if_config_key_invalid_uploaded_config() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = 'Broken config key';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->check_invalid_config_key();
+    }
+
+    /**
+     * Test access prevented if config keys is invalid and using template.
+     */
+    public function test_access_prevented_if_config_key_invalid_uploaded_template() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $this->create_template()->get('id'));
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = 'Broken config key';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->check_invalid_config_key();
     }
 
     /**
@@ -313,16 +370,69 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set quiz setting to require seb.
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $configkey = $quizsettings->get('configkey');
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $configkey);
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
-        $rule = $this->make_rule();
         // Check that correct error message is returned.
-        $this->assertFalse($rule->prevent_access());
+        $this->assertFalse($this->make_rule()->prevent_access());
+    }
+
+    /**
+     * Test access not prevented if config key matches header.
+     */
+    public function test_access_allowed_if_config_key_valid_uploaded_config() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $this->create_template()->get('id'));
+        $quizsettings->save();
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+
+        // Check that correct error message is returned.
+        $this->assertFalse($this->make_rule()->prevent_access());
+    }
+
+    /**
+     * Test access not prevented if config key matches header.
+     */
+    public function test_access_allowed_if_config_key_valid_template() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+
+        // Check that correct error message is returned.
+        $this->assertFalse($this->make_rule()->prevent_access());
     }
 
     /**
@@ -349,9 +459,65 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $expectedhash = hash('sha256', $FULLME . $browserexamkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
 
-        $rule = $this->make_rule();
         // Check that correct error message is returned.
-        $this->assertFalse($rule->prevent_access());
+        $this->assertFalse($this->make_rule()->prevent_access());
+    }
+
+    /**
+     * Test access not prevented if browser exam keys match headers.
+     */
+    public function test_access_allowed_if_browser_exam_keys_valid_use_uploaded_file() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $browserexamkey = hash('sha256', 'testkey');
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $quizsettings->set('allowedbrowserexamkeys', $browserexamkey);
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedbrowserkey = hash('sha256', $FULLME . $browserexamkey);
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedbrowserkey;
+        $expectedconfigkey = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedconfigkey;
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Check that correct error message is returned.
+        $this->assertFalse($this->make_rule()->prevent_access());
+    }
+
+    /**
+     * A helper method to check invalid browser key.
+     */
+    protected function check_invalid_browser_exam_key() {
+        // Create an event sink, trigger event and retrieve event.
+        $sink = $this->redirectEvents();
+
+        // Check that correct error message is returned.
+        $errormsg = $this->make_rule()->prevent_access();
+        $this->assertNotEmpty($errormsg);
+        $this->assertContains("The config key or browser exam keys could not be validated. "
+            . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
+        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
+        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+
+        $events = $sink->get_events();
+        $this->assertEquals(1, count($events));
+        $event = reset($events);
+
+        // Test that the event data is as expected.
+        $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
+        $this->assertEquals('Invalid SEB browser key', $event->other['reason']);
     }
 
     /**
@@ -372,29 +538,73 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $quizsettings->save();
 
         // Set up dummy request.
-        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken key';
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
 
-        $rule = $this->make_rule();
+        $this->check_invalid_browser_exam_key();
+    }
 
-        // Create an event sink, trigger event and retrieve event.
-        $sink = $this->redirectEvents();
+    /**
+     * Test access prevented if browser exam keys do not match headers and using uploaded config.
+     */
+    public function test_access_prevented_if_browser_exam_keys_are_invalid_use_uploaded_file() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $browserexamkey = hash('sha256', 'testkey');
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $quizsettings->set('allowedbrowserexamkeys', $browserexamkey);
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+
+        // Set  up broken browser key.
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $this->check_invalid_browser_exam_key();
+    }
+
+    /**
+     * Test access not prevented if browser exam keys do not match headers and using template.
+     */
+    public function test_access_prevented_if_browser_exam_keys_are_invalid_use_template() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb and save BEK.
+        $browserexamkey = hash('sha256', 'testkey');
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('allowedbrowserexamkeys', $browserexamkey);
+        $quizsettings->set('templateid', $this->create_template()->get('id'));
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+
+        // Set  up broken browser key.
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
 
         // Check that correct error message is returned.
-        $errormsg = $rule->prevent_access();
-        $this->assertNotEmpty($errormsg);
-        $this->assertContains("The config key or browser exam keys could not be validated. "
-            . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
-        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
-        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
-        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
-
-        $events = $sink->get_events();
-        $this->assertEquals(1, count($events));
-        $event = reset($events);
-
-        // Test that the event data is as expected.
-        $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
-        $this->assertEquals('Invalid SEB browser key', $event->other['reason']);
+        $this->assertFalse($this->make_rule()->prevent_access());
     }
 
     /**
@@ -415,9 +625,8 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Set up basic dummy request.
         $_SERVER['HTTP_USER_AGENT'] = 'SEB_TEST_SITE';
 
-        $rule = $this->make_rule();
         // Check that correct error message is returned.
-        $this->assertFalse($rule->prevent_access());
+        $this->assertFalse($this->make_rule()->prevent_access());
     }
 
     /**
@@ -441,11 +650,10 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Create an event sink, trigger event and retrieve event.
         $sink = $this->redirectEvents();
 
-        $rule = $this->make_rule();
         // Check that correct error message is returned.
         $this->assertContains(
             'This quiz has been configured to use the Safe Exam Browser with client configuration.',
-            $rule->prevent_access()
+            $this->make_rule()->prevent_access()
         );
 
         $events = $sink->get_events();
@@ -455,6 +663,63 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
         $this->assertEquals('No SEB browser is being used', $event->other['reason']);
+    }
+
+    /**
+     * Test access allowed if using client configuration and SEB user agent header is invalid and use uploaded file.
+     */
+    public function test_access_allowed_if_using_client_configuration_and_basic_head_is_invalid_use_uploaded_config() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG); // Doesn't check basic header.
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+        $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Check that correct error message is returned.
+        $this->assertFalse($this->make_rule()->prevent_access());
+    }
+
+    /**
+     * Test access allowed if using client configuration and SEB user agent header is invalid and use template.
+     */
+    public function test_access_allowed_if_using_client_configuration_and_basic_head_is_invalid_use_template() {
+        global $FULLME;
+
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        // Set quiz setting to require seb.
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $this->create_template()->get('id'));
+        $quizsettings->save();
+
+        // Set up dummy request.
+        $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
+        $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        // Check that correct error message is returned.
+        $this->assertFalse($this->make_rule()->prevent_access());
     }
 
     /**
@@ -472,10 +737,8 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
         $quizsettings->save();
 
-        $rule = $this->make_rule();
-
         // The rule will not exist as the settings are not configured for SEB usage.
-        $this->assertNull($rule);
+        $this->assertNull($this->make_rule());
     }
 
     /**
@@ -488,18 +751,11 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
-        // Set quiz setting to require seb.
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CONFIG_MANUALLY);
-        $quizsettings->save();
-
         // Set the bypass SEB check capability to $USER.
         $this->assign_user_capability('quizaccess/seb:bypassseb', context_module::instance($this->quiz->cmid)->id);
 
-        $rule = $this->make_rule();
-
         // Check that correct error message is returned.
-        $this->assertFalse($rule->prevent_access());
+        $this->assertFalse($this->make_rule()->prevent_access());
     }
 
     /**
@@ -556,18 +812,17 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->setUser($user);
 
-        $rule = $this->make_rule();
         $reflection = new \ReflectionClass('quizaccess_seb');
         $method = $reflection->getMethod('get_download_button_only');
         $method->setAccessible(true);
 
         // The current default contents.
-        $this->assertContains('https://safeexambrowser.org/download_en.html', $method->invoke($rule));
+        $this->assertContains('https://safeexambrowser.org/download_en.html', $method->invoke($this->make_rule()));
 
         set_config('downloadlink', '', 'quizaccess_seb');
 
         // Will not return any button if the URL is empty.
-        $this->assertSame('', $method->invoke($rule));
+        $this->assertSame('', $method->invoke($this->make_rule()));
     }
 
     /**
@@ -585,15 +840,12 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->attempt_quiz($this->quiz, $user);
         $this->setUser($user);
 
-        // Create the rule.
-        $rule = $this->make_rule();
-
         // Set-up the button to be called.
         $reflection = new \ReflectionClass('quizaccess_seb');
         $method = $reflection->getMethod('display_quit_button');
         $method->setAccessible(true);
 
-        $button = $method->invoke($rule);
+        $button = $method->invoke($this->make_rule());
         $this->assertContains("http://test.quit.link", $button);
     }
 
@@ -614,17 +866,14 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->attempt_quiz($this->quiz, $user);
 
-        // Create the rule.
-        $rule = $this->make_rule();
-
-        $description = $rule->description();
+        $description = $this->make_rule()->description();
         $this->assertCount(2, $description);
         $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
         $this->assertEquals($description[1], '');
 
         // Set the user as display_quit_button() uses the global $USER.
         $this->setUser($user);
-        $description = $rule->description();
+        $description = $this->make_rule()->description();
         $this->assertCount(2, $description);
         $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
 
@@ -654,16 +903,14 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Don't display blocks before start.
         set_config('displayblocksbeforestart', 0, 'quizaccess_seb');
         $this->set_up_quiz_view_page();
-        $rule = $this->make_rule();
-        $rule->prevent_access();
+        $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertTrue($property->getValue($PAGE->blocks));
 
         // Display blocks before start.
         set_config('displayblocksbeforestart', 1, 'quizaccess_seb');
         $this->set_up_quiz_view_page();
-        $rule = $this->make_rule();
-        $rule->prevent_access();
+        $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertFalse($property->getValue($PAGE->blocks));
     }
@@ -692,16 +939,14 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Don't display blocks after finish.
         set_config('displayblockswhenfinihsed', 0, 'quizaccess_seb');
         $this->set_up_quiz_view_page();
-        $rule = $this->make_rule();
-        $rule->prevent_access();
+        $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertTrue($property->getValue($PAGE->blocks));
 
         // Display blocks after finish.
         set_config('displayblockswhenfinihsed', 1, 'quizaccess_seb');
         $this->set_up_quiz_view_page();
-        $rule = $this->make_rule();
-        $rule->prevent_access();
+        $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertFalse($property->getValue($PAGE->blocks));
     }

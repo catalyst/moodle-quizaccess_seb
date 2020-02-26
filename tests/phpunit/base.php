@@ -42,6 +42,16 @@ require_once($CFG->dirroot . "/mod/quiz/mod_form.php"); // Include plugin rule c
  */
 abstract class quizaccess_seb_testcase extends \advanced_testcase {
 
+    /** @var \stdClass $course Test course to contain quiz. */
+    protected $course;
+
+    /** @var \stdClass $quiz A test quiz. */
+    protected $quiz;
+
+    /** @var \stdClass $user A test logged-in user. */
+    protected $user;
+
+
     /**
      * Assign a capability to $USER
      * The function creates a student $USER if $USER->id is empty
@@ -115,6 +125,27 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
         file_prepare_draft_area($draftitemid, $usercontext->id, 'user', 'draft', 0);
 
         return $draftitemid;
+    }
+
+    /**
+     * Create a file in a modules filearea.
+     *
+     * @param string $xml
+     * @return int Item ID of file.
+     */
+    protected function create_module_test_file(string $xml, string $cmid) : int {
+        $itemid = 0;
+        $fs = get_file_storage();
+        $filerecord = [
+            'contextid' => \context_module::instance($cmid)->id,
+            'component' => 'quizaccess_seb',
+            'filearea' => 'filemanager_sebconfigfile',
+            'itemid' => $itemid,
+            'filepath' => '/',
+            'filename' => 'test.xml'
+        ];
+        $fs->create_file_from_string($filerecord, $xml);
+        return $itemid;
     }
 
     /**

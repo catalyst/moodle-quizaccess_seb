@@ -43,12 +43,6 @@ require_once(__DIR__ . '/base.php');
  */
 class quizaccess_seb_provider_testcase extends quizaccess_seb_testcase {
 
-    /** @var stdClass $user A test logged-in user. */
-    private $user;
-
-    /** @var stdClass $quiz A test quiz activity. */
-    private $quiz;
-
     /**
      * Called before every test.
      */

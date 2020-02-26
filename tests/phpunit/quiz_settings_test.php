@@ -26,16 +26,18 @@
 use quizaccess_seb\quiz_settings;
 use quizaccess_seb\template;
 use quizaccess_seb\settings_provider;
+use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once(__DIR__ . '/base.php');
 /**
  * PHPUnit tests for quiz_settings class.
  *
  * @copyright  2020 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
+class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
 
     /**
      * Called before every test.
@@ -216,7 +218,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
                 . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
                 . "<key>allowWlan</key><false/><key>startURL</key><string>$url</string>"
                 . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
-        $itemid = $this->create_module_test_file($xml);
+        $itemid = $this->create_module_test_file($xml, $this->quiz->cmid);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings->save();
@@ -272,7 +274,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             . "<plist version=\"1.0\"><dict><key>hashedQuitPassword</key><string>hashedpassword</string>"
             . "<key>allowWlan</key><false/><key>startURL</key><string>$url</string>"
             . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
-        $itemid = $this->create_module_test_file($xml);
+        $itemid = $this->create_module_test_file($xml, $this->quiz->cmid);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings->set('quitpassword', '123');
@@ -320,7 +322,7 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
             . "<key>allowWlan</key><false/><key>quitURL</key><string>http://seb.quit.url</string>"
             . "<key>sendBrowserExamKey</key><true/></dict></plist>\n";
 
-        $itemid = $this->create_module_test_file($xml);
+        $itemid = $this->create_module_test_file($xml, $this->quiz->cmid);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
 
@@ -502,24 +504,4 @@ class quizaccess_seb_quiz_settings_testcase extends advanced_testcase {
         ];
     }
 
-    /**
-     * Create a file in a modules filearea.
-     *
-     * @param string $xml
-     * @return int Item ID of file.
-     */
-    private function create_module_test_file(string $xml) : int {
-        $itemid = 0;
-        $fs = get_file_storage();
-        $filerecord = [
-            'contextid' => \context_module::instance($this->quiz->cmid)->id,
-            'component' => 'quizaccess_seb',
-            'filearea' => 'filemanager_sebconfigfile',
-            'itemid' => $itemid,
-            'filepath' => '/',
-            'filename' => 'test.xml'
-        ];
-        $fs->create_file_from_string($filerecord, $xml);
-        return $itemid;
-    }
 }
