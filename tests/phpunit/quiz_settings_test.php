@@ -75,7 +75,8 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->save();
 
         $config = $quizsettings->get('config');
-        $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+        $this->assertEquals(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
                 . "<key>showTime</key><false/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
@@ -85,7 +86,8 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                 . "<string>9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08</string><key>URLFilterRules</key>"
                 . "<array><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
                 . "<string>test.com</string><key>regex</key><false/></dict></array><key>startURL</key><string>$this->url</string>"
-                . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n", $config);
+                . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n",
+            $config);
     }
 
     /**
@@ -257,7 +259,10 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->set('allowuserquitseb', 0);
         $quizsettings->set('quitpassword', '123');
         $quizsettings->save();
-        $this->assertContains("<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id={$this->quiz->cmid}</string>", $quizsettings->get('config'));
+        $this->assertContains(
+            "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id={$this->quiz->cmid}</string>",
+            $quizsettings->get('config')
+        );
         $this->assertContains("<key>allowQuit</key><true/>", $quizsettings->get('config'));
         $hashedpassword = hash('SHA256', '123');
         $this->assertNotContains("<key>hashedQuitPassword</key><string>123</string>", $quizsettings->get('config'));
@@ -368,14 +373,18 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/>"
+                . "<key>allowWlan</key><false/><key>showReloadButton</key>"
                 . "<true/><key>showTime</key><true/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
                 . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
                 . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><false/>"
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
-                . "<dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
-                . "<key>regex</key><false/></dict><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
+                . "<dict><key>action</key><integer>1</integer><key>active</key><true/>"
+                . "<key>expression</key><string>test.com</string>"
+                . "<key>regex</key><false/></dict><dict><key>action</key><integer>1</integer>"
+                . "<key>active</key><true/><key>expression</key>"
+                . "<string>second.hello</string><key>regex</key><false/></dict></array>"
+                . "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n",
             ],
             'blocked simple expessions' => [
@@ -390,14 +399,18 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/>"
+                . "<key>allowWlan</key><false/><key>showReloadButton</key>"
                 . "<true/><key>showTime</key><true/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
                 . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
                 . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><false/>"
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
-                . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
-                . "<key>regex</key><false/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><false/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
+                . "<dict><key>action</key><integer>0</integer><key>active</key><true/>"
+                . "<key>expression</key><string>test.com</string>"
+                . "<key>regex</key><false/></dict><dict><key>action</key><integer>0</integer>"
+                . "<key>active</key><true/><key>expression</key>"
+                . "<string>second.hello</string><key>regex</key><false/></dict></array>"
+                . "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n",
             ],
             'enabled regex expessions' => [
@@ -412,14 +425,18 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/>"
+                . "<key>allowWlan</key><false/><key>showReloadButton</key>"
                 . "<true/><key>showTime</key><true/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
                 . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
                 . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><false/>"
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
-                . "<dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
-                . "<key>regex</key><true/></dict><dict><key>action</key><integer>1</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
+                . "<dict><key>action</key><integer>1</integer><key>active</key><true/>"
+                . "<key>expression</key><string>test.com</string>"
+                . "<key>regex</key><true/></dict><dict><key>action</key><integer>1</integer>"
+                . "<key>active</key><true/><key>expression</key>"
+                . "<string>second.hello</string><key>regex</key><true/></dict></array>"
+                . "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n",
             ],
             'blocked regex expessions' => [
@@ -434,14 +451,18 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/>"
+                . "<key>allowWlan</key><false/><key>showReloadButton</key>"
                 . "<true/><key>showTime</key><true/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
                 . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
                 . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><false/>"
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array>"
-                . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
-                . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
+                . "<dict><key>action</key><integer>0</integer><key>active</key><true/>"
+                . "<key>expression</key><string>test.com</string>"
+                . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer>"
+                . "<key>active</key><true/><key>expression</key>"
+                . "<string>second.hello</string><key>regex</key><true/></dict></array>"
+                . "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n",
             ],
             'multiple simple expessions' => [
@@ -456,15 +477,20 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key>"
+                . "<plist version=\"1.0\"><dict><key>showTaskBar</key><true/>"
+                . "<key>allowWlan</key><false/><key>showReloadButton</key>"
                 . "<true/><key>showTime</key><true/><key>showInputLanguage</key><true/><key>allowQuit</key><true/>"
                 . "<key>quitURLConfirm</key><true/><key>audioControlEnabled</key><false/><key>audioMute</key><false/>"
                 . "<key>allowSpellCheck</key><false/><key>browserWindowAllowReload</key><true/><key>URLFilterEnable</key><false/>"
                 . "<key>URLFilterEnableContentFilter</key><false/><key>URLFilterRules</key><array><dict><key>action</key>"
-                . "<integer>1</integer><key>active</key><true/><key>expression</key><string>*</string><key>regex</key><false/></dict>"
-                . "<dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key><string>test.com</string>"
-                . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer><key>active</key><true/><key>expression</key>"
-                . "<string>second.hello</string><key>regex</key><true/></dict></array><key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
+                . "<integer>1</integer><key>active</key><true/><key>expression</key><string>*</string>"
+                . "<key>regex</key><false/></dict>"
+                . "<dict><key>action</key><integer>0</integer><key>active</key><true/>"
+                . "<key>expression</key><string>test.com</string>"
+                . "<key>regex</key><true/></dict><dict><key>action</key><integer>0</integer>"
+                . "<key>active</key><true/><key>expression</key>"
+                . "<string>second.hello</string><key>regex</key><true/></dict></array>"
+                . "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id=1</string>"
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/></dict></plist>\n",
             ],
         ];
