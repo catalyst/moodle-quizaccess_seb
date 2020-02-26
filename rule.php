@@ -320,7 +320,7 @@ class quizaccess_seb extends quiz_access_rule_base {
             return $this->get_invalid_key_error_message();
         }
 
-        if ($this->accessmanager->should_validate_browser_exam_key()&& !$this->accessmanager->validate_browser_exam_keys()) {
+        if ($this->accessmanager->should_validate_browser_exam_key() && !$this->accessmanager->validate_browser_exam_keys()) {
             access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_browser_key'))->trigger();
             return $this->get_invalid_key_error_message();
         }
