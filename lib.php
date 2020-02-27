@@ -56,11 +56,9 @@ function quizaccess_seb_get_config(string $cmid) : string {
  */
 function quizaccess_seb_send_file(string $contents) {
     // We can now send the file back to the browser.
-    header("Cache-Control: private, max-age=1, no-transform");
-    header('Expires: '. gmdate('D, d M Y H:i:s', time()) .' GMT');
-    header('Pragma: no-cache');
-    header('Content-Disposition: attachment; filename=config.seb');
-    header('Content-Type: application/seb');
+    foreach (\quizaccess_seb\helper::get_seb_file_headers() as $header) {
+        header($header);
+    }
 
     echo($contents);
 }

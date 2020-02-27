@@ -54,4 +54,19 @@ class quizaccess_seb_helper_testcase extends advanced_testcase {
         $this->assertFalse(\quizaccess_seb\helper::is_valid_seb_config($invalidseb));
         $this->assertFalse(\quizaccess_seb\helper::is_valid_seb_config($emptyseb));
     }
+
+    /**
+     * Test that we can get seb file headers.
+     */
+    public function test_get_seb_file_headers() {
+        $expiretime = 1582767914;
+        $headers = \quizaccess_seb\helper::get_seb_file_headers($expiretime);
+
+        $this->assertCount(5, $headers);
+        $this->assertEquals('Cache-Control: private, max-age=1, no-transform', $headers[0]);
+        $this->assertEquals('Expires: Thu, 27 Feb 2020 01:45:14 GMT', $headers[1]);
+        $this->assertEquals('Pragma: no-cache', $headers[2]);
+        $this->assertEquals('Content-Disposition: attachment; filename=config.seb', $headers[3]);
+        $this->assertEquals('Content-Type: application/seb', $headers[4]);
+    }
 }
