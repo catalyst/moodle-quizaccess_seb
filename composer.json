@@ -3,7 +3,6 @@
     "description": "Moodle plugin to allow quiz access to be restricted to the Safe Exam Browser application",
     "type": "project",
     "require": {
-        "rncryptor/rncryptor": "4.2.0",
         "rodneyrehm/plist": "2.0.1"
     },
     "license": "GNU GPLv3",

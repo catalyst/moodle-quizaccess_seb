@@ -6,20 +6,6 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitb91e8b0efbca869877632ec4c6eb0386
 {
-    public static $prefixLengthsPsr4 = array (
-        'R' => 
-        array (
-            'RNCryptor\\' => 10,
-        ),
-    );
-
-    public static $prefixDirsPsr4 = array (
-        'RNCryptor\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/rncryptor/rncryptor/src',
-        ),
-    );
-
     public static $prefixesPsr0 = array (
         'C' => 
         array (
@@ -33,8 +19,6 @@ class ComposerStaticInitb91e8b0efbca869877632ec4c6eb0386
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb91e8b0efbca869877632ec4c6eb0386::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb91e8b0efbca869877632ec4c6eb0386::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInitb91e8b0efbca869877632ec4c6eb0386::$prefixesPsr0;
 
         }, null, ClassLoader::class);
