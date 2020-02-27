@@ -89,5 +89,25 @@ class helper {
         return $result;
     }
 
+    /**
+     * A helper function to get a list of seb config file headers.
+     *
+     * @param int|null $expiretime  Unix timestamp
+     * @return array
+     */
+    public static function get_seb_file_headers(int $expiretime = null) : array {
+        if (is_null($expiretime)) {
+            $expiretime = time();
+        }
+        $headers = [];
+        $headers[] = 'Cache-Control: private, max-age=1, no-transform';
+        $headers[] = 'Expires: '. gmdate('D, d M Y H:i:s', $expiretime) .' GMT';
+        $headers[] = 'Pragma: no-cache';
+        $headers[] = 'Content-Disposition: attachment; filename=config.seb';
+        $headers[] = 'Content-Type: application/seb';
+
+        return $headers;
+    }
+
 }
 

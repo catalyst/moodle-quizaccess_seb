@@ -161,16 +161,4 @@ class quizaccess_seb_lib_testcase extends quizaccess_seb_testcase {
                 . "<key>sendBrowserExamKey</key><true/><key>examSessionClearCookiesOnStart</key><false/>"
                 . "</dict></plist>\n", $config);
     }
-
-    /**
-     * Test that file is served to the user.
-     *
-     * To prevent headers throwing error, run this test in a separate process.
-     *
-     * @runInSeparateProcess
-     */
-    public function test_file_sent() {
-        $this->expectOutputString('Hello world');
-        quizaccess_seb_send_file('Hello world');
-    }
 }
