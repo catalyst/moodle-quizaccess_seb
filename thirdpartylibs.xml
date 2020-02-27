@@ -1,13 +1,6 @@
 <?xml version="1.0"?>
 <libraries>
     <library>
-        <location>vendor/rncryptor/rncryptor/</location>
-        <name>rncryptor</name>
-        <version>4.2.0</version>
-        <license>MIT</license>
-        <licenseversion></licenseversion>
-    </library>
-    <library>
         <location>vendor/rodneyrehm/plist/</location>
         <name>plist</name>
         <version>2.0.1</version>
