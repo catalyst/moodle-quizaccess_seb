@@ -63,6 +63,9 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
      * @param stdClass $data Data for quizaccess_seb_quizsettings retrieved from backup xml.
      */
     public function process_quizaccess_seb_quizsettings($data) {
+        // Process the files first as we will need them when saving quiz_setting.
+        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
+
         // Process quizsettings.
         $data = (object) $data;
         $data->quizid = $this->get_new_parentid('quiz'); // Update quizid with new reference.
@@ -70,8 +73,6 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
 
         $quizsettings = new quiz_settings(0, $data);
         $quizsettings->save();
-
-        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
     }
 
     /**
