@@ -715,7 +715,6 @@ class settings_provider {
             ],
             'seb_suppresssebdownloadlink' => [
                 new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
             ],
             'seb_allowedbrowserexamkeys' => [
                 new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
