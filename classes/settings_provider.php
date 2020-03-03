@@ -852,7 +852,7 @@ class settings_provider {
     }
 
     /**
-     * Check if the current user can config SEb manually.
+     * Check if the current user can config SEB manually.
      *
      * @param \context $context Context to check access in.
      * @return bool
