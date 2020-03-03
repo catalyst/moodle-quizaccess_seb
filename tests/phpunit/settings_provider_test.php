@@ -48,6 +48,22 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
+     * Capability data for testing.
+     *
+     * @return array
+     */
+    public function settings_capability_data_provider() {
+        $data = [];
+
+        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+            $cap = settings_provider::build_setting_capability_name($name);
+            $data[] = [$cap];
+        }
+
+        return $data;
+    }
+
+    /**
      * Test that settings types to be added to quiz settings, are part of quiz_settings persistent class.
      */
     public function test_setting_elements_are_part_of_quiz_settings_table() {
@@ -114,9 +130,35 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
-     * Test SEB usage options.
+     * Test that exception thrown if we try to build capability name from the incorrect setting name.
      */
-    public function test_get_requiresafeexambrowser_options() {
+    public function test_build_setting_capability_name_incorrect_setting() {
+        $this->expectException(coding_exception::class);
+        $this->expectExceptionMessage('Incorrect SEB quiz setting broken');
+
+        $broken = settings_provider::build_setting_capability_name('broken');
+    }
+
+    /**
+     * Test we can build capability name from the the setting name.
+     */
+    public function test_build_setting_capability_name_correct_setting() {
+        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+            $expected = 'quizaccess/seb:manage_' . $name;
+            $actual = settings_provider::build_setting_capability_name($name);
+
+            $this->assertSame($expected, $actual);
+        }
+    }
+
+    /**
+     * Test SEB usage options.
+     *
+     * @param string $settingcapability Setting capability to check manual option against.
+     *
+     * @dataProvider settings_capability_data_provider
+     */
+    public function test_get_requiresafeexambrowser_options($settingcapability) {
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course();
@@ -150,16 +192,39 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $options = settings_provider::get_requiresafeexambrowser_options($context);
 
-        $this->assertCount(3, $options);
+        $this->assertCount(2, $options);
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
         $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
+
+        assign_capability($settingcapability, CAP_ALLOW, $roleid, $context->id);
+        $options = settings_provider::get_requiresafeexambrowser_options($context);
+        $this->assertCount(3, $options);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
 
         assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $context->id);
         $options = settings_provider::get_requiresafeexambrowser_options($context);
         $this->assertCount(4, $options);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
+        $this->assertFalse(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
 
         assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
         $options = settings_provider::get_requiresafeexambrowser_options($context);
         $this->assertCount(5, $options);
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_UPLOAD_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
+        $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
     }
 
     /**
@@ -403,7 +468,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
-     * Test that users can or can n ot upload seb config file.
+     * Test that users can or can not upload seb config file.
      */
     public function test_can_upload_seb_file() {
         $course = $this->getDataGenerator()->create_course();
@@ -423,6 +488,33 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
         $this->assertTrue(settings_provider::can_upload_seb_file($context));
+    }
+
+    /**
+     * Test that users can or can not Configure SEb manually
+     *
+     * @param string $settingcapability Setting capability to check manual option against.
+     *
+     * @dataProvider settings_capability_data_provider
+     */
+    public function test_can_configure_manually($settingcapability) {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = context_module::instance($quiz->cmid);
+        $this->setAdminUser();
+
+        $this->assertTrue(settings_provider::can_configure_manually($context));
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        $this->assertFalse(settings_provider::can_configure_manually($context));
+
+        assign_capability($settingcapability, CAP_ALLOW, $roleid, $context->id);
+        $this->assertTrue(settings_provider::can_configure_manually($context));
     }
 
     /**
@@ -494,6 +586,32 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $roleid = $this->getDataGenerator()->create_role();
         assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $context->id);
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+        $this->assertFalse(settings_provider::is_conflicting_permissions($context));
+    }
+
+    /**
+     * Test that we can check identify conflicting permissions if set to use own configure manually.
+     *
+     * @param string $settingcapability Setting capability to check manual option against.
+     *
+     * @dataProvider settings_capability_data_provider
+     */
+    public function test_is_conflicting_permissions_for_configure_manually($settingcapability) {
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $context = context_module::instance($quiz->cmid);
+
+        $this->assertFalse(settings_provider::is_conflicting_permissions($context));
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $this->assertTrue(settings_provider::is_conflicting_permissions($context));
+
+        $roleid = $this->getDataGenerator()->create_role();
+        assign_capability($settingcapability, CAP_ALLOW, $roleid, $context->id);
         $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
         $this->assertFalse(settings_provider::is_conflicting_permissions($context));
     }
