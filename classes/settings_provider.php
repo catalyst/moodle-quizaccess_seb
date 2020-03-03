@@ -477,6 +477,11 @@ class settings_provider {
             return true;
         }
 
+        if (!self::can_configure_manually($context) &&
+            $settings->get('requiresafeexambrowser') == self::USE_SEB_CONFIG_MANUALLY) {
+            return true;
+        }
+
         return false;
     }
 
@@ -488,7 +493,10 @@ class settings_provider {
      */
     public static function get_requiresafeexambrowser_options(\context $context) : array {
         $options[self::USE_SEB_NO] = get_string('no');
-        $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
+
+        if (self::can_configure_manually($context) || self::is_conflicting_permissions($context)) {
+            $options[self::USE_SEB_CONFIG_MANUALLY] = get_string('seb_use_manually', 'quizaccess_seb');
+        }
 
         if (self::can_use_seb_template($context) || self::is_conflicting_permissions($context)) {
             if (!empty(self::get_template_options())) {
@@ -841,6 +849,22 @@ class settings_provider {
      */
     public static function can_upload_seb_file(\context $context) : bool {
         return has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context);
+    }
+
+    /**
+     * Check if the current user can config SEb manually.
+     *
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_configure_manually(\context $context) : bool {
+        foreach (self::get_quiz_elements() as $name => $type) {
+            if (self::can_manage_setting($name, $context)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
