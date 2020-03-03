@@ -875,7 +875,7 @@ class settings_provider {
      * @return bool
      */
     public static function can_manage_setting(string $settingname, \context $context) : bool {
-        $capability = 'quizaccess/seb:manage_' . $settingname;
+        $capability = self::build_setting_capability_name($settingname);
 
         // Capability must exist.
         if (!$capinfo = get_capability_info($capability)) {
@@ -883,6 +883,20 @@ class settings_provider {
         }
 
         return has_capability($capability, $context);
+    }
+
+    /**
+     * Build a capability name for the provided SEB setting.
+     *
+     * @param string $settingname Name of the setting.
+     * @return string
+     */
+    public static function build_setting_capability_name(string $settingname) : string {
+        if (!key_exists($settingname, self::get_quiz_elements())) {
+            throw new \coding_exception('Incorrect SEB quiz setting ' . $settingname);
+        }
+
+        return 'quizaccess/seb:manage_' . $settingname;
     }
 
     /**

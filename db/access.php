@@ -62,7 +62,9 @@ $capabilities = array(
 
 // Individual setting capabilities.
 foreach (\quizaccess_seb\settings_provider::get_quiz_elements() as $name => $type) {
-    $capabilities["quizaccess/seb:manage_$name"] = array(
+    $capability = \quizaccess_seb\settings_provider::build_setting_capability_name($name);
+
+    $capabilities[$capability] = array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
