@@ -179,6 +179,34 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test settings validation is not run if settings are conflicting.
+     */
+    public function test_settings_validation_is_not_run_if_conflicting_permissions() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
+        $user = $this->getDataGenerator()->create_user();
+        $roleid = $this->getDataGenerator()->create_role();
+        $context = context_module::instance($this->quiz->cmid);
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $context->id);
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        // By default The user won't have permissions to configure manually.
+        $this->setUser($user);
+
+        // Validate settings with a dummy form and quiz instance.
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid,
+            'seb_requiresafeexambrowser' => 'Uh oh!'
+        ], [], $form);
+        $this->assertEmpty($errors);
+    }
+
+    /**
      * Test bypassing validation if user don't have permissions to manage seb settings.
      */
     public function test_validate_settings_is_not_run_if_a_user_do_not_have_permissions_to_manage_seb_settings() {
@@ -231,6 +259,29 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->quiz->seb_requiresafeexambrowser = settings_provider::USE_SEB_CONFIG_MANUALLY;
         quizaccess_seb::save_settings($this->quiz);
         $this->assertFalse($DB->record_exists('quizaccess_seb_quizsettings', ['quizid' => $this->quiz->id]));
+    }
+
+    /**
+     * Test settings are not saved to DB if conflicting permissions.
+     */
+    public function test_settings_are_not_saved_if_conflicting_permissions() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
+        $roleid = $this->getDataGenerator()->create_role();
+        $context = context_module::instance($this->quiz->cmid);
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $context->id);
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        // By default The user won't have permissions to configure manually.
+        $this->setUser($user);
+
+        $this->quiz->seb_requiresafeexambrowser = settings_provider::USE_SEB_NO;
+        quizaccess_seb::save_settings($this->quiz);
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEquals(settings_provider::USE_SEB_CONFIG_MANUALLY, $quizsettings->get('requiresafeexambrowser'));
     }
 
     /**
