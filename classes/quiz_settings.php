@@ -445,7 +445,7 @@ class quiz_settings extends persistent {
         return new CFDictionary([
                     'action' => new CFNumber($action),
                     'active' => new CFBoolean(true),
-                    'expression' => new CFString($rulestring),
+                    'expression' => new CFString(trim($rulestring)),
                     'regex' => new CFBoolean($isregex),
                     ]);
     }
