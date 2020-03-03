@@ -366,7 +366,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                     'requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
                     'quizid' => 1,
                     'cmid' => 1,
-                    'expressionsallowed' => "test.com\nsecond.hello",
+                    'expressionsallowed' => "test.com\r\nsecond.hello",
                     'regexallowed' => '',
                     'expressionsblocked' => '',
                     'regexblocked' => '',
@@ -394,7 +394,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                     'cmid' => 1,
                     'expressionsallowed' => '',
                     'regexallowed' => '',
-                    'expressionsblocked' => "test.com\nsecond.hello",
+                    'expressionsblocked' => "test.com\r\nsecond.hello",
                     'regexblocked' => '',
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -419,7 +419,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                     'quizid' => 1,
                     'cmid' => 1,
                     'expressionsallowed' => '',
-                    'regexallowed' => "test.com\nsecond.hello",
+                    'regexallowed' => "test.com\r\nsecond.hello",
                     'expressionsblocked' => '',
                     'regexblocked' => '',
                 ],
@@ -447,7 +447,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                     'expressionsallowed' => '',
                     'regexallowed' => '',
                     'expressionsblocked' => '',
-                    'regexblocked' => "test.com\nsecond.hello",
+                    'regexblocked' => "test.com\r\nsecond.hello",
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
@@ -473,7 +473,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
                     'expressionsallowed' => "*",
                     'regexallowed' => '',
                     'expressionsblocked' => '',
-                    'regexblocked' => "test.com\nsecond.hello",
+                    'regexblocked' => "test.com\r\nsecond.hello",
                 ],
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 . "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
