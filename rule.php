@@ -257,7 +257,6 @@ class quizaccess_seb extends quiz_access_rule_base {
     public static function get_settings_sql($quizid) : array {
         return [
                 'seb.requiresafeexambrowser AS seb_requiresafeexambrowser, '
-                . 'seb.sebconfigfile AS seb_sebconfigfile, '
                 . 'seb.showsebtaskbar AS seb_showsebtaskbar, '
                 . 'seb.showwificontrol AS seb_showwificontrol, '
                 . 'seb.showreloadbutton AS seb_showreloadbutton, '

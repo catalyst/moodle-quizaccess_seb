@@ -10,7 +10,6 @@
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to course module id."/>
         <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quizaccess_seb_template.id."/>
         <FIELD NAME="requiresafeexambrowser" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether to require SEB."/>
-        <FIELD NAME="sebconfigfile" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Item ID for config file on storage."/>
         <FIELD NAME="showsebtaskbar" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show SEB task bar"/>
         <FIELD NAME="showwificontrol" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to allow user to control networking."/>
         <FIELD NAME="showreloadbutton" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show reload button."/>

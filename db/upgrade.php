@@ -212,5 +212,20 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020030402, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020030403) {
+
+        // Define field sebconfigfile to be dropped from quizaccess_seb_quizsettings.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $field = new xmldb_field('sebconfigfile');
+
+        // Conditionally launch drop field sebconfigfile.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020030403, 'quizaccess', 'seb');
+    }
+
     return true;
 }
