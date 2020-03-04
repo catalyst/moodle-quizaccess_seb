@@ -94,26 +94,32 @@ class quiz_settings extends persistent {
             'showsebtaskbar' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'showwificontrol' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'showreloadbutton' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'showtime' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'showkeyboardlayout' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'allowuserquitseb' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'quitpassword' => [
                 'type' => PARAM_TEXT,
@@ -123,34 +129,42 @@ class quiz_settings extends persistent {
             'linkquitseb' => [
                 'type' => PARAM_URL,
                 'default' => '',
+                'null' => NULL_ALLOWED,
             ],
             'userconfirmquit' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'enableaudiocontrol' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'muteonstartup' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'allowspellchecking' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'allowreloadinexam' => [
                 'type' => PARAM_INT,
                 'default' => 1,
+                'null' => NULL_ALLOWED,
             ],
             'activateurlfiltering' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'filterembeddedcontent' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'expressionsallowed' => [
                 'type' => PARAM_TEXT,
@@ -175,10 +189,12 @@ class quiz_settings extends persistent {
             'suppresssebdownloadlink' => [
                 'type' => PARAM_INT,
                 'default' => 0,
+                'null' => NULL_ALLOWED,
             ],
             'allowedbrowserexamkeys' => [
                 'type' => PARAM_TEXT,
                 'default' => '',
+                'null' => NULL_ALLOWED,
             ],
             'configkey' => [
                 'type' => PARAM_TEXT,
@@ -490,10 +506,10 @@ class quiz_settings extends persistent {
     /**
      * This helper method takes list of browser exam keys in a string and splits it into an array of separate keys.
      *
-     * @param string $keys the allowed keys.
+     * @param string|null $keys the allowed keys.
      * @return array of string, the separate keys.
      */
-    private function split_keys(string $keys) : array {
+    private function split_keys($keys) : array {
         $keys = preg_split('~[ \t\n\r,;]+~', $keys, -1, PREG_SPLIT_NO_EMPTY);
         foreach ($keys as $i => $key) {
             $keys[$i] = strtolower($key);
