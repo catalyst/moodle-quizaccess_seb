@@ -337,29 +337,60 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertEquals(0, $quizsettings->get('templateid'));
 
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
-        $quizsettings->save();
+        $template = $this->create_template();
+        $templateid = $template->get('id');
+
+        // Initially set to USE_SEB_TEMPLATE with a template id.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEquals($templateid, $quizsettings->get('templateid'));
+
+        // Case for USE_SEB_NO, ensure template id reverts to 0.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_NO);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertEquals(0, $quizsettings->get('templateid'));
 
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
-        $quizsettings->save();
+        // Reverting back to USE_SEB_TEMPLATE.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
+
+        // Case for USE_SEB_CONFIG_MANUALLY, ensure template id reverts to 0.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_CONFIG_MANUALLY);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertEquals(0, $quizsettings->get('templateid'));
 
+        // Reverting back to USE_SEB_TEMPLATE.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
+
+        // Case for USE_SEB_CLIENT_CONFIG, ensure template id reverts to 0.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_CLIENT_CONFIG);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEquals(0, $quizsettings->get('templateid'));
+
+        // Reverting back to USE_SEB_TEMPLATE.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
+
+        // Case for USE_SEB_UPLOAD_CONFIG, ensure template id reverts to 0.
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $this->create_module_test_file($xml, $this->quiz->cmid);
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $quizsettings->save();
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertEquals(0, $quizsettings->get('templateid'));
 
-        $template = $this->create_template();
-        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
-        $quizsettings->set('templateid', $template->get('id'));
-        $quizsettings->save();
+        // Case for USE_SEB_TEMPLATE, ensure template id is correct.
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertEquals($template->get('id'), $quizsettings->get('templateid'));
+        $this->assertEquals($templateid, $quizsettings->get('templateid'));
+    }
+
+    /**
+     * Helper function in tests to set USE_SEB_TEMPLATE and a template id on the quiz settings.
+     */
+    public function save_settings_with_optional_template($quizsettings, $savetype, $templateid = 0) {
+        $quizsettings->set('requiresafeexambrowser', $savetype);
+        if (!empty($templateid)) {
+            $quizsettings->set('templateid', $templateid);
+        }
+        $quizsettings->save();
     }
 
     /**
