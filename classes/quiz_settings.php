@@ -267,7 +267,7 @@ class quiz_settings extends persistent {
     private function compute_config() {
         switch ($this->get('requiresafeexambrowser')) {
             case settings_provider::USE_SEB_NO:
-                $this->set('templateid', 0);
+                $this->process_seb_config_no();
                 break;
 
             case settings_provider::USE_SEB_CONFIG_MANUALLY:
@@ -288,6 +288,13 @@ class quiz_settings extends persistent {
 
         // Export and save the config, ready for DB.
         $this->set('config', $this->plist->to_xml());
+    }
+
+    /**
+     * Case for USE_SEB_NO.
+     */
+    private function process_seb_config_no() {
+        $this->set('templateid', 0);
     }
 
     /**
