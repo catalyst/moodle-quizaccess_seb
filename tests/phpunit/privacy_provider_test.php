@@ -67,7 +67,7 @@ class quizaccess_seb_provider_testcase extends quizaccess_seb_testcase {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
 
         // Modify settings so usermodified is updated. This is the user data we are testing for.
-        $quizsettings->set('requiresafeexambrowser', 1);
+        $quizsettings->set('requiresafeexambrowser', \quizaccess_seb\settings_provider::USE_SEB_TEMPLATE);
         $quizsettings->set('templateid', $template->get('id'));
         $quizsettings->save();
 

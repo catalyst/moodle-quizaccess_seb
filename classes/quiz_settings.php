@@ -267,9 +267,11 @@ class quiz_settings extends persistent {
     private function compute_config() {
         switch ($this->get('requiresafeexambrowser')) {
             case settings_provider::USE_SEB_NO:
+                $this->set('templateid', 0);
                 break;
 
             case settings_provider::USE_SEB_CONFIG_MANUALLY:
+                $this->set('templateid', 0);
                 $this->process_seb_config_manually();
                 break;
 
@@ -278,10 +280,12 @@ class quiz_settings extends persistent {
                 break;
 
             case settings_provider::USE_SEB_UPLOAD_CONFIG:
+                $this->set('templateid', 0);
                 $this->process_seb_upload_config();
                 break;
 
             default: // Also settings_provider::USE_SEB_CLIENT_CONFIG.
+                $this->set('templateid', 0);
                 $this->process_seb_client_config();
         }
 
