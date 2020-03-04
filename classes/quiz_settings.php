@@ -267,6 +267,7 @@ class quiz_settings extends persistent {
     private function compute_config() {
         switch ($this->get('requiresafeexambrowser')) {
             case settings_provider::USE_SEB_NO:
+                $this->process_seb_config_no();
                 break;
 
             case settings_provider::USE_SEB_CONFIG_MANUALLY:
@@ -290,10 +291,19 @@ class quiz_settings extends persistent {
     }
 
     /**
+     * Case for USE_SEB_NO.
+     */
+    private function process_seb_config_no() {
+        $this->set('templateid', 0);
+    }
+
+    /**
      * Case for USE_SEB_CONFIG_MANUALLY. This creates a plist and applies all settings from the posted form, along with
      * some defaults.
      */
     private function process_seb_config_manually() {
+        $this->set('templateid', 0);
+
         // If at any point a configuration file has been uploaded and parsed, clear the settings.
         $this->plist = new property_list();
 
@@ -325,6 +335,8 @@ class quiz_settings extends persistent {
      * password settings and some defaults.
      */
     private function process_seb_upload_config() {
+        $this->set('templateid', 0);
+
         $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
 
         // If there was no file, create an empty plist so the rest of this wont explode.
@@ -343,6 +355,8 @@ class quiz_settings extends persistent {
      * Case for USE_SEB_CLIENT_CONFIG. This creates an empty plist to remove the config stored.
      */
     private function process_seb_client_config() {
+        $this->set('templateid', 0);
+
         // Just setup an empty plist.
         $this->plist = new property_list();
     }

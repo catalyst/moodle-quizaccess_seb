@@ -117,7 +117,11 @@ class quizaccess_seb extends quiz_access_rule_base {
             return $errors;
         }
 
-        if (settings_provider::is_seb_settings_locked($quizid) || settings_provider::is_conflicting_permissions($context)) {
+        if (settings_provider::is_seb_settings_locked($quizid)) {
+            return $errors;
+        }
+
+        if (settings_provider::is_conflicting_permissions($context)) {
             return $errors;
         }
 
@@ -176,48 +180,42 @@ class quizaccess_seb extends quiz_access_rule_base {
             return;
         }
 
-        if (settings_provider::is_seb_settings_locked($quiz->id) || settings_provider::is_conflicting_permissions($context)) {
+        if (settings_provider::is_seb_settings_locked($quiz->id)) {
             return;
         }
 
-        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course);
+        if (settings_provider::is_conflicting_permissions($context)) {
+            return;
+        }
 
-        // Associate settings with quiz.
+        $cm = get_coursemodule_from_instance('quiz', $quiz->id, $quiz->course, false, MUST_EXIST);
+
         $settings = settings_provider::filter_plugin_settings($quiz);
         $settings->quizid = $quiz->id;
         $settings->cmid = $cm->id;
 
         // Get existing settings or create new settings if none exist.
         $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
-        if (!$quizsettings) {
+        if (empty($quizsettings)) {
             $quizsettings = new quiz_settings(0, $settings);
         } else {
             $settings->id = $quizsettings->get('id');
             $quizsettings->from_record($settings);
         }
 
-        // If specified to not use a template, reset this back to default.
-        if ($quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_TEMPLATE) {
-            $quizsettings->set('templateid', 0);
-        }
-
-        // Ensure that a cm exists before deleting any files.
-        if ($cm && $quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
+        // Process uploaded files if required.
+        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
             $draftitemid = file_get_submitted_draft_itemid('filemanager_sebconfigfile');
             settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $cm->id);
-        } else if ($cm) {
+        } else {
             settings_provider::delete_uploaded_config_file($cm->id);
         }
 
-        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_NO) {
-            if ($quizsettings->get('id')) {
-                $quizsettings->delete();
-            }
-        } else {
-            // Validate and save settings. Settings should already be validated by validate_settings_form_fields but
-            // the validation method also adds in default fields which is useful here.
-            $quizsettings->validate();
+        // Save or delete settings.
+        if ($quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO) {
             $quizsettings->save();
+        } else if ($quizsettings->get('id')) {
+            $quizsettings->delete();
         }
     }
 

@@ -285,6 +285,23 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test exception thrown if cm could not be found while saving settings.
+     */
+    public function test_save_settings_throw_an_exception_if_cm_not_found() {
+        global $DB;
+
+        $this->expectException(dml_missing_record_exception::class);
+        $this->expectExceptionMessage('Can\'t find data record in database.');
+
+        $this->setAdminUser();
+
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $DB->delete_records('quiz', ['id' => $this->quiz->id]);
+        $this->quiz->seb_requiresafeexambrowser = settings_provider::USE_SEB_NO;
+        quizaccess_seb::save_settings($this->quiz);
+    }
+
+    /**
      * Test nothing happens when deleted is called without settings saved.
      */
     public function test_delete_settings_without_existing_settings() {

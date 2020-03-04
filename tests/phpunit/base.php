@@ -223,10 +223,13 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
     /**
      * Create test template.
      *
+     * @param string|null $xml Template content.
      * @return \quizaccess_seb\template Just created template.
      */
-    public function create_template() {
-        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+    public function create_template(string $xml = null) {
+        if (is_null($xml)) {
+            $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        }
         $template = new template();
         $template->set('content', $xml);
         $template->set('name', 'test');
