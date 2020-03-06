@@ -58,6 +58,13 @@ $capabilities = array(
             'editingteacher' => CAP_ALLOW
         )
     ),
+    'quizaccess/seb:manage_seb_suppresssebdownloadlink' => array(
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW
+        )
+    ),
 );
 
 // Individual setting capabilities.

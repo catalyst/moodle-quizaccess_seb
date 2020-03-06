@@ -261,6 +261,25 @@ class settings_provider {
     }
 
     /**
+     * Add Suppress Safe Exam Browser download button.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_suppress_download_link(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        if (self::can_change_seb_suppresssebdownloadlink($quizform->get_context())) {
+            $element = $mform->createElement('selectyesno',
+                'seb_suppresssebdownloadlink',
+                get_string('seb_suppresssebdownloadlink', 'quizaccess_seb')
+            );
+            self::insert_element($quizform, $mform, $element);
+            self::set_type($quizform, $mform, 'seb_suppresssebdownloadlink', PARAM_BOOL);
+            self::set_default($quizform, $mform, 'seb_suppresssebdownloadlink', 0);
+            self::add_help_button($quizform, $mform, 'seb_suppresssebdownloadlink');
+        }
+    }
+
+    /**
      * Add SEB settings elements.
      *
      * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
@@ -388,7 +407,6 @@ class settings_provider {
      */
     public static function get_quiz_elements() : array {
         return [
-            'seb_suppresssebdownloadlink' => 'selectyesno',
             'seb_linkquitseb' => 'text',
             'seb_userconfirmquit' => 'selectyesno',
             'seb_allowuserquitseb' => 'selectyesno',
@@ -419,7 +437,6 @@ class settings_provider {
      */
     public static function get_quiz_element_types() : array {
         return [
-            'seb_suppresssebdownloadlink' => PARAM_BOOL,
             'seb_linkquitseb' => PARAM_RAW,
             'seb_userconfirmquit' => PARAM_BOOL,
             'seb_allowuserquitseb' => PARAM_BOOL,
@@ -550,7 +567,6 @@ class settings_provider {
      */
     public static function get_quiz_defaults() : array {
         return [
-            'seb_suppresssebdownloadlink' => 0,
             'seb_linkquitseb' => '',
             'seb_userconfirmquit' => 1,
             'seb_allowuserquitseb' => 1,
@@ -848,6 +864,16 @@ class settings_provider {
      */
     public static function can_upload_seb_file(\context $context) : bool {
         return has_capability('quizaccess/seb:manage_filemanager_sebconfigfile', $context);
+    }
+
+    /**
+     * Check if the current user can change Suppress Safe Exam Browser download button setting.
+     *
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_change_seb_suppresssebdownloadlink(\context $context) : bool {
+        return has_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', $context);
     }
 
     /**

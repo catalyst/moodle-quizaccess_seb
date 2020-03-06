@@ -91,6 +91,7 @@ class quizaccess_seb extends quiz_access_rule_base {
             settings_provider::add_seb_usage_options($quizform, $mform);
             settings_provider::add_seb_templates($quizform, $mform);
             settings_provider::add_seb_config_file($quizform, $mform);
+            settings_provider::add_seb_suppress_download_link($quizform, $mform);
             settings_provider::add_seb_config_elements($quizform, $mform);
             settings_provider::hide_seb_elements($quizform, $mform);
             settings_provider::lock_seb_elements($quizform, $mform);
