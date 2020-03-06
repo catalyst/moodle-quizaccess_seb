@@ -114,6 +114,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $settingelements['seb_templateid'] = '';
         $settingelements['filemanager_sebconfigfile'] = '';
         $settingelements['seb_suppresssebdownloadlink'] = '';
+        $settingelements['seb_allowedbrowserexamkeys'] = '';
 
         // Get all defaults that have no matching element in settings types.
         $diffelements = array_diff_key($settinghideifs, $settingelements);
@@ -316,6 +317,36 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $roleid, $context->id);
         settings_provider::add_seb_suppress_download_link($quizform, $testform);
         $this->assertTrue($testform->elementExists('seb_suppresssebdownloadlink'));
+    }
+
+    /**
+     * Test Allowed Browser Exam Keys setting in the form.
+     */
+    public function test_allowedbrowserexamkeys_in_form() {
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->create_test_quiz($course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $context = context_module::instance($quiz->cmid);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        $quizform = $this->createMock('mod_quiz_mod_form');
+        $quizform->method('get_context')->willReturn($context);
+        $testform = new \MoodleQuickForm('test', 'post', '');
+        $testform->addElement('static', 'security');
+
+        // Shouldn't be in the form if no permissions.
+        settings_provider::add_seb_allowedbrowserexamkeys($quizform, $testform);
+        $this->assertFalse($testform->elementExists('seb_allowedbrowserexamkeys'));
+
+        // Should be in the form if we grant require permissions.
+        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $roleid, $context->id);
+        settings_provider::add_seb_allowedbrowserexamkeys($quizform, $testform);
+        $this->assertTrue($testform->elementExists('seb_allowedbrowserexamkeys'));
     }
 
     /**
@@ -540,6 +571,28 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $roleid, $context->id);
         $this->assertTrue(settings_provider::can_change_seb_suppresssebdownloadlink($context));
+    }
+
+    /**
+     * Test that users can or can not change Allowed Browser Exam Keys setting.
+     */
+    public function test_can_change_seb_allowedbrowserexamkeys() {
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $context = context_module::instance($quiz->cmid);
+        $this->setAdminUser();
+        $this->assertTrue(settings_provider::can_change_seb_allowedbrowserexamkeys($context));
+
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($user);
+        $roleid = $this->getDataGenerator()->create_role();
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+
+        $this->assertFalse(settings_provider::can_change_seb_allowedbrowserexamkeys($context));
+
+        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $roleid, $context->id);
+        $this->assertTrue(settings_provider::can_change_seb_allowedbrowserexamkeys($context));
     }
 
     /**

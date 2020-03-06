@@ -280,6 +280,25 @@ class settings_provider {
     }
 
     /**
+     * Add Allowed Browser Exam Keys setting.
+     *
+     * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
+     * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
+     */
+    public static function add_seb_allowedbrowserexamkeys(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        if (self::can_change_seb_allowedbrowserexamkeys($quizform->get_context())) {
+            $element = $mform->createElement('textarea',
+                'seb_allowedbrowserexamkeys',
+                get_string('seb_allowedbrowserexamkeys', 'quizaccess_seb')
+            );
+            self::insert_element($quizform, $mform, $element);
+            self::set_type($quizform, $mform, 'seb_allowedbrowserexamkeys', PARAM_RAW);
+            self::set_default($quizform, $mform, 'seb_allowedbrowserexamkeys', '');
+            self::add_help_button($quizform, $mform, 'seb_allowedbrowserexamkeys');
+        }
+    }
+
+    /**
      * Add SEB settings elements.
      *
      * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
@@ -426,7 +445,6 @@ class settings_provider {
             'seb_regexallowed' => 'textarea',
             'seb_expressionsblocked' => 'textarea',
             'seb_regexblocked' => 'textarea',
-            'seb_allowedbrowserexamkeys' => 'textarea',
         ];
     }
 
@@ -456,7 +474,6 @@ class settings_provider {
             'seb_regexallowed' => PARAM_RAW,
             'seb_expressionsblocked' => PARAM_RAW,
             'seb_regexblocked' => PARAM_RAW,
-            'seb_allowedbrowserexamkeys' => PARAM_RAW,
         ];
     }
 
@@ -586,7 +603,6 @@ class settings_provider {
             'seb_regexallowed' => '',
             'seb_expressionsblocked' => '',
             'seb_regexblocked' => '',
-            'seb_allowedbrowserexamkeys' => '',
         ];
     }
 
@@ -874,6 +890,16 @@ class settings_provider {
      */
     public static function can_change_seb_suppresssebdownloadlink(\context $context) : bool {
         return has_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', $context);
+    }
+
+    /**
+     * Check if the current user can change  Allowed Browser Exam Keys setting.
+     *
+     * @param \context $context Context to check access in.
+     * @return bool
+     */
+    public static function can_change_seb_allowedbrowserexamkeys(\context $context) : bool {
+        return has_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', $context);
     }
 
     /**
