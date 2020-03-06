@@ -933,7 +933,7 @@ class settings_provider {
     }
 
     /**
-     * Check if the current user can change  Allowed Browser Exam Keys setting.
+     * Check if the current user can change Allowed Browser Exam Keys setting.
      *
      * @param \context $context Context to check access in.
      * @return bool
