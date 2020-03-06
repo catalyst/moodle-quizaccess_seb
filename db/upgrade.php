@@ -136,5 +136,96 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020020700, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020030402) {
+
+        // Define key cmid (foreign-unique) to be added to quizaccess_seb_quizsettings.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $key = new xmldb_key('cmid', XMLDB_KEY_FOREIGN_UNIQUE, ['cmid'], 'course_modules', ['id']);
+        // Launch add key cmid.
+        $dbman->add_key($table, $key);
+
+        $field = new xmldb_field('sebconfigfile', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'requiresafeexambrowser');
+        // Launch change of type for field sebconfigfile.
+        $dbman->change_field_type($table, $field);
+
+        $field = new xmldb_field('showsebtaskbar', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'sebconfigfile');
+        // Launch change of nullability for field showsebtaskbar.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('showwificontrol', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'showsebtaskbar');
+        // Launch change of nullability for field showwificontrol.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('showreloadbutton', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'showwificontrol');
+        // Launch change of nullability for field showreloadbutton.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('showtime', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'showreloadbutton');
+        // Launch change of nullability for field showtime.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('showkeyboardlayout', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'showtime');
+        // Launch change of nullability for field showkeyboardlayout.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('allowuserquitseb', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'showkeyboardlayout');
+        // Launch change of nullability for field allowuserquitseb.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('linkquitseb', XMLDB_TYPE_TEXT, null, null, null, null, null, 'quitpassword');
+        // Launch change of nullability for field linkquitseb.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('userconfirmquit', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'linkquitseb');
+        // Launch change of nullability for field userconfirmquit.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('enableaudiocontrol', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'userconfirmquit');
+        // Launch change of nullability for field enableaudiocontrol.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('muteonstartup', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'enableaudiocontrol');
+        // Launch change of nullability for field muteonstartup.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('allowspellchecking', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'muteonstartup');
+        // Launch change of nullability for field allowspellchecking.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('allowreloadinexam', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'allowspellchecking');
+        // Launch change of nullability for field allowreloadinexam.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('activateurlfiltering', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'allowreloadinexam');
+        // Launch change of nullability for field activateurlfiltering.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('filterembeddedcontent', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'activateurlfiltering');
+        // Launch change of nullability for field filterembeddedcontent.
+        $dbman->change_field_notnull($table, $field);
+
+        $field = new xmldb_field('suppresssebdownloadlink', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'allowedbrowserexamkeys');
+        // Launch change of nullability for field suppresssebdownloadlink.
+        $dbman->change_field_notnull($table, $field);
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020030402, 'quizaccess', 'seb');
+    }
+
+    if ($oldversion < 2020030403) {
+
+        // Define field sebconfigfile to be dropped from quizaccess_seb_quizsettings.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $field = new xmldb_field('sebconfigfile');
+
+        // Conditionally launch drop field sebconfigfile.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020030403, 'quizaccess', 'seb');
+    }
+
     return true;
 }

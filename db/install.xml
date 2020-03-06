@@ -10,28 +10,27 @@
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to course module id."/>
         <FIELD NAME="templateid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quizaccess_seb_template.id."/>
         <FIELD NAME="requiresafeexambrowser" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether to require SEB."/>
-        <FIELD NAME="sebconfigfile" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Item ID for config file on storage."/>
-        <FIELD NAME="showsebtaskbar" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show SEB task bar"/>
-        <FIELD NAME="showwificontrol" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to allow user to control networking."/>
-        <FIELD NAME="showreloadbutton" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show reload button."/>
+        <FIELD NAME="showsebtaskbar" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show SEB task bar"/>
+        <FIELD NAME="showwificontrol" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to allow user to control networking."/>
+        <FIELD NAME="showreloadbutton" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show reload button."/>
         <FIELD NAME="showtime" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show the clock."/>
-        <FIELD NAME="showkeyboardlayout" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show keyboard layout."/>
-        <FIELD NAME="allowuserquitseb" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show quit button."/>
+        <FIELD NAME="showkeyboardlayout" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show keyboard layout."/>
+        <FIELD NAME="allowuserquitseb" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show quit button."/>
         <FIELD NAME="quitpassword" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Quit password to exit SEB."/>
-        <FIELD NAME="linkquitseb" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Link to exit SEB."/>
-        <FIELD NAME="userconfirmquit" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether confirm quit popup should appear."/>
-        <FIELD NAME="enableaudiocontrol" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show volume and audio controls."/>
-        <FIELD NAME="muteonstartup" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether browser starts muted."/>
-        <FIELD NAME="allowspellchecking" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether spell checking will happen in SEB."/>
-        <FIELD NAME="allowreloadinexam" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether user can reload."/>
-        <FIELD NAME="activateurlfiltering" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether URLs will be filtered."/>
-        <FIELD NAME="filterembeddedcontent" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool wither embedded content will be filtered"/>
+        <FIELD NAME="linkquitseb" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Link to exit SEB."/>
+        <FIELD NAME="userconfirmquit" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether confirm quit popup should appear."/>
+        <FIELD NAME="enableaudiocontrol" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show volume and audio controls."/>
+        <FIELD NAME="muteonstartup" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether browser starts muted."/>
+        <FIELD NAME="allowspellchecking" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether spell checking will happen in SEB."/>
+        <FIELD NAME="allowreloadinexam" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether user can reload."/>
+        <FIELD NAME="activateurlfiltering" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether URLs will be filtered."/>
+        <FIELD NAME="filterembeddedcontent" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool wither embedded content will be filtered"/>
         <FIELD NAME="expressionsallowed" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma or newline separated list of allowed expressions"/>
         <FIELD NAME="regexallowed" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of allowed URLs"/>
         <FIELD NAME="expressionsblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma or newline separated list of blocked expressions"/>
         <FIELD NAME="regexblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of blocked URLs"/>
         <FIELD NAME="allowedbrowserexamkeys" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="List of allowed browser exam keys."/>
-        <FIELD NAME="suppresssebdownloadlink" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool whether SEB download link should appear"/>
+        <FIELD NAME="suppresssebdownloadlink" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether SEB download link should appear"/>
         <FIELD NAME="configkey" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="SEB Config Key hash to validate browser."/>
         <FIELD NAME="config" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Unencrypted SEB Config string."/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -41,6 +40,7 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="quizid" TYPE="foreign-unique" FIELDS="quizid" REFTABLE="quiz" REFFIELDS="id"/>
+        <KEY NAME="cmid" TYPE="foreign-unique" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
         <KEY NAME="templateid" TYPE="foreign" FIELDS="templateid" REFTABLE="quizacces_seb_template" REFFIELDS="id"/>
         <KEY NAME="usermodified" TYPE="foreign" FIELDS="usermodified" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>

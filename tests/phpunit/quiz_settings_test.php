@@ -561,7 +561,6 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
             'quizid' => 1,
             'cmid' => 1,
             'requiresafeexambrowser' => '1',
-            'sebconfigfile' => '373552893',
             'showsebtaskbar' => '1',
             'showwificontrol' => '0',
             'showreloadbutton' => '1',
