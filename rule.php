@@ -86,17 +86,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @param MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     public static function add_settings_form_fields(mod_quiz_mod_form $quizform, MoodleQuickForm $mform) {
-        if (settings_provider::can_configure_seb($quizform->get_context())) {
-            settings_provider::add_seb_header_element($quizform, $mform);
-            settings_provider::add_seb_usage_options($quizform, $mform);
-            settings_provider::add_seb_templates($quizform, $mform);
-            settings_provider::add_seb_config_file($quizform, $mform);
-            settings_provider::add_seb_suppress_download_link($quizform, $mform);
-            settings_provider::add_seb_config_elements($quizform, $mform);
-            settings_provider::add_seb_allowedbrowserexamkeys($quizform, $mform);
-            settings_provider::hide_seb_elements($quizform, $mform);
-            settings_provider::lock_seb_elements($quizform, $mform);
-        }
+        settings_provider::add_seb_settings_fields($quizform, $mform);
     }
 
     /**
