@@ -318,12 +318,11 @@ class settings_provider {
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
     protected static function add_seb_config_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
-        $defaults = self::get_quiz_defaults();
-        $types = self::get_quiz_element_types();
+        $defaults = self::get_seb_config_element_defaults();
+        $types = self::get_seb_config_element_types();
 
-        foreach (self::get_quiz_elements() as $name => $type) {
-
-            if (!self::can_manage_setting($name, $quizform->get_context())) {
+        foreach (self::get_seb_config_elements() as $name => $type) {
+            if (!self::can_manage_seb_config_setting($name, $quizform->get_context())) {
                 $type = 'hidden';
             }
 
@@ -341,7 +340,7 @@ class settings_provider {
                 self::set_type($quizform, $mform, $name, $types[$name]);
             }
 
-            if (!self::can_manage_setting($name, $quizform->get_context())) {
+            if (!self::can_manage_seb_config_setting($name, $quizform->get_context())) {
                 self::freeze_element($quizform, $mform, $name);
             }
         }
@@ -424,7 +423,7 @@ class settings_provider {
             }
 
             // Freeze all SEB specific settings.
-            foreach (self::get_quiz_elements() as $element => $type) {
+            foreach (self::get_seb_config_elements() as $element => $type) {
                 self::freeze_element($quizform, $mform, $element);
             }
         }
@@ -464,7 +463,7 @@ class settings_provider {
      *
      * @return array All quiz form elements to be added and their types.
      */
-    public static function get_quiz_elements() : array {
+    public static function get_seb_config_elements() : array {
         return [
             'seb_linkquitseb' => 'text',
             'seb_userconfirmquit' => 'selectyesno',
@@ -493,7 +492,7 @@ class settings_provider {
      * Get the types of the quiz settings elements.
      * @return array List of types for the setting elements.
      */
-    public static function get_quiz_element_types() : array {
+    public static function get_seb_config_element_types() : array {
         return [
             'seb_linkquitseb' => PARAM_RAW,
             'seb_userconfirmquit' => PARAM_BOOL,
@@ -622,7 +621,7 @@ class settings_provider {
      *
      * @return array List of settings and their defaults.
      */
-    public static function get_quiz_defaults() : array {
+    public static function get_seb_config_element_defaults() : array {
         return [
             'seb_linkquitseb' => '',
             'seb_userconfirmquit' => 1,
@@ -949,8 +948,8 @@ class settings_provider {
      * @return bool
      */
     public static function can_configure_manually(\context $context) : bool {
-        foreach (self::get_quiz_elements() as $name => $type) {
-            if (self::can_manage_setting($name, $context)) {
+        foreach (self::get_seb_config_elements() as $name => $type) {
+            if (self::can_manage_seb_config_setting($name, $context)) {
                 return true;
             }
         }
@@ -965,7 +964,7 @@ class settings_provider {
      * @param \context $context Context to check access in.
      * @return bool
      */
-    public static function can_manage_setting(string $settingname, \context $context) : bool {
+    public static function can_manage_seb_config_setting(string $settingname, \context $context) : bool {
         $capability = self::build_setting_capability_name($settingname);
 
         // Capability must exist.
@@ -983,7 +982,7 @@ class settings_provider {
      * @return string
      */
     public static function build_setting_capability_name(string $settingname) : string {
-        if (!key_exists($settingname, self::get_quiz_elements())) {
+        if (!key_exists($settingname, self::get_seb_config_elements())) {
             throw new \coding_exception('Incorrect SEB quiz setting ' . $settingname);
         }
 

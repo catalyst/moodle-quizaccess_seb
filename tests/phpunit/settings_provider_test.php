@@ -113,7 +113,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     public function settings_capability_data_provider() {
         $data = [];
 
-        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+        foreach (settings_provider::get_seb_config_elements() as $name => $type) {
             $cap = settings_provider::build_setting_capability_name($name);
             $data[] = [$cap];
         }
@@ -126,7 +126,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      */
     public function test_setting_elements_are_part_of_quiz_settings_table() {
         $dbsettings = (array) (new quiz_settings())->to_record();
-        $settingelements = settings_provider::get_quiz_elements();
+        $settingelements = settings_provider::get_seb_config_elements();
         $settingelements = (array) $this->strip_all_prefixes((object) $settingelements);
 
         // Get all elements to be added to form, that are not in the persistent quiz_settings class.
@@ -139,8 +139,8 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test that setting defaults only refer to settings defined in setting types.
      */
     public function test_setting_defaults_are_part_of_file_types() {
-        $settingelements = settings_provider::get_quiz_elements();
-        $settingdefaults = settings_provider::get_quiz_defaults();
+        $settingelements = settings_provider::get_seb_config_elements();
+        $settingdefaults = settings_provider::get_seb_config_element_defaults();
 
         // Get all defaults that have no matching element in settings types.
         $diffelements = array_diff_key($settingdefaults, $settingelements);
@@ -152,8 +152,8 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test that setting types only refer to settings defined in setting types.
      */
     public function test_setting_types_are_part_of_file_types() {
-        $settingelements = settings_provider::get_quiz_elements();
-        $settingtypes = settings_provider::get_quiz_element_types();
+        $settingelements = settings_provider::get_seb_config_elements();
+        $settingtypes = settings_provider::get_seb_config_element_types();
 
         // Get all defaults that have no matching element in settings types.
         $diffelements = array_diff_key($settingtypes, $settingelements);
@@ -165,7 +165,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test that setting hideif rules only refer to settings defined in setting types, including the conditions.
      */
     public function test_setting_hideifs_are_part_of_file_types() {
-        $settingelements = settings_provider::get_quiz_elements();
+        $settingelements = settings_provider::get_seb_config_elements();
         $settinghideifs = settings_provider::get_quiz_hideifs();
 
         // Add known additional elements.
@@ -202,7 +202,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test we can build capability name from the the setting name.
      */
     public function test_build_setting_capability_name_correct_setting() {
-        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+        foreach (settings_provider::get_seb_config_elements() as $name => $type) {
             $expected = 'quizaccess/seb:manage_' . $name;
             $actual = settings_provider::build_setting_capability_name($name);
 
@@ -358,7 +358,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue($this->mockedform->isElementFrozen('seb_suppresssebdownloadlink'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_allowedbrowserexamkeys'));
 
-        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+        foreach (settings_provider::get_seb_config_elements() as $name => $type) {
             $this->assertTrue($this->mockedform->isElementFrozen($name));
         }
     }
@@ -393,7 +393,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue($this->mockedform->isElementFrozen('seb_suppresssebdownloadlink'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_allowedbrowserexamkeys'));
 
-        foreach (settings_provider::get_quiz_elements() as $name => $type) {
+        foreach (settings_provider::get_seb_config_elements() as $name => $type) {
             $this->assertTrue($this->mockedform->isElementFrozen($name));
         }
     }
