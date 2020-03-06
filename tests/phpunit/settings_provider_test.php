@@ -497,7 +497,6 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->context = context_module::instance($this->quiz->cmid);
         $this->set_up_user_and_role();
 
-
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
 
         $draftitemid = $this->create_test_draftarea_file($xml);
