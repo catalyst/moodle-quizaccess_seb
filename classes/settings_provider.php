@@ -317,7 +317,7 @@ class settings_provider {
      * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
-    public static function add_seb_config_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+    protected static function add_seb_config_elements(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
         $defaults = self::get_quiz_defaults();
         $types = self::get_quiz_element_types();
 
