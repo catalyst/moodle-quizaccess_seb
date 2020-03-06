@@ -53,9 +53,21 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
     /**
      * Context for testing.
-     * @var
+     * @var \context
      */
     protected $context;
+
+    /**
+     * Test user.
+     * @var \stdClass
+     */
+    protected $user;
+
+    /**
+     * Test role ID.
+     * @var int
+     */
+    protected $roleid;
 
     /**
      * Called before every test.
@@ -79,6 +91,18 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->mockedquizform->method('get_instance')->willReturn($this->quiz->id);
         $this->mockedform = new \MoodleQuickForm('test', 'post', '');
         $this->mockedform->addElement('static', 'security');
+    }
+
+    /**
+     * Helper method to set up user and role for testing.
+     */
+    protected function set_up_user_and_role() {
+        $this->user = $this->getDataGenerator()->create_user();
+
+        $this->setUser($this->user);
+        $this->roleid = $this->getDataGenerator()->create_role();
+
+        $this->getDataGenerator()->role_assign($this->roleid, $this->user->id, $this->context->id);
     }
 
     /**
@@ -217,12 +241,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_TEMPLATE, $options));
 
         // A new user does not have the capability to use the file manager and template.
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $options = settings_provider::get_requiresafeexambrowser_options($this->context);
 
@@ -233,7 +252,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
 
-        assign_capability($settingcapability, CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability($settingcapability, CAP_ALLOW, $this->roleid, $this->context->id);
         $options = settings_provider::get_requiresafeexambrowser_options($this->context);
         $this->assertCount(3, $options);
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
@@ -242,7 +261,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
 
-        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $this->roleid, $this->context->id);
         $options = settings_provider::get_requiresafeexambrowser_options($this->context);
         $this->assertCount(4, $options);
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
@@ -251,7 +270,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CLIENT_CONFIG, $options));
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_NO, $options));
 
-        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $this->roleid, $this->context->id);
         $options = settings_provider::get_requiresafeexambrowser_options($this->context);
         $this->assertCount(5, $options);
         $this->assertTrue(array_key_exists(settings_provider::USE_SEB_CONFIG_MANUALLY, $options));
@@ -277,11 +296,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
         $settings->save();
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $options = settings_provider::get_requiresafeexambrowser_options($this->context);
 
@@ -306,13 +321,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
         $settings->save();
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
-        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $this->context->id);
-        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $roleid, $this->context->id);
-        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $roleid, $this->context->id);
+        $this->set_up_user_and_role();
+
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $this->roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $this->roleid, $this->context->id);
 
         $this->set_up_form_mocks();
 
@@ -394,12 +407,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
         $this->context = context_module::instance($this->quiz->cmid);
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
-        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->set_up_form_mocks();
 
         // Shouldn't be in the form if no permissions.
@@ -407,7 +417,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertFalse($this->mockedform->elementExists('seb_suppresssebdownloadlink'));
 
         // Should be in the form if we grant require permissions.
-        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
 
         settings_provider::add_seb_settings_fields($this->mockedquizform, $this->mockedform);
         $this->assertTrue($this->mockedform->elementExists('seb_suppresssebdownloadlink'));
@@ -422,12 +432,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
         $this->context = context_module::instance($this->quiz->cmid);
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
-        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->set_up_form_mocks();
 
         // Shouldn't be in the form if no permissions.
@@ -435,7 +442,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertFalse($this->mockedform->elementExists('seb_allowedbrowserexamkeys'));
 
         // Should be in the form if we grant require permissions.
-        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $this->roleid, $this->context->id);
         settings_provider::add_seb_settings_fields($this->mockedquizform, $this->mockedform);
         $this->assertTrue($this->mockedform->elementExists('seb_allowedbrowserexamkeys'));
     }
@@ -487,9 +494,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      */
     public function test_save_filemanager_sebconfigfile_draftarea() {
         $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
-        $user = $this->getDataGenerator()->create_user();
         $this->context = context_module::instance($this->quiz->cmid);
-        $this->setUser($user);
+        $this->set_up_user_and_role();
+
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
 
@@ -508,9 +515,8 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      */
     public function test_delete_uploaded_config_file() {
         $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
-        $user = $this->getDataGenerator()->create_user();
         $this->context = context_module::instance($this->quiz->cmid);
-        $this->setUser($user);
+        $this->set_up_user_and_role();
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $draftitemid = $this->create_test_draftarea_file($xml);
@@ -537,8 +543,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
         $this->context = context_module::instance($this->quiz->cmid);
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $this->set_up_user_and_role();
 
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $draftitemid = $this->create_test_draftarea_file($xml);
@@ -580,15 +585,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertTrue(settings_provider::can_configure_seb($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $this->assertFalse(settings_provider::can_configure_seb($this->context));
 
-        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertTrue(settings_provider::can_configure_seb($this->context));
     }
 
@@ -602,15 +603,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertTrue(settings_provider::can_use_seb_template($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $this->assertFalse(settings_provider::can_use_seb_template($this->context));
 
-        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertTrue(settings_provider::can_use_seb_template($this->context));
     }
 
@@ -624,15 +621,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertTrue(settings_provider::can_upload_seb_file($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $this->assertFalse(settings_provider::can_upload_seb_file($this->context));
 
-        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertTrue(settings_provider::can_upload_seb_file($this->context));
     }
 
@@ -645,15 +638,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->setAdminUser();
         $this->assertTrue(settings_provider::can_change_seb_suppresssebdownloadlink($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $this->assertFalse(settings_provider::can_change_seb_suppresssebdownloadlink($this->context));
 
-        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertTrue(settings_provider::can_change_seb_suppresssebdownloadlink($this->context));
     }
 
@@ -666,15 +655,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->setAdminUser();
         $this->assertTrue(settings_provider::can_change_seb_allowedbrowserexamkeys($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $this->assertFalse(settings_provider::can_change_seb_allowedbrowserexamkeys($this->context));
 
-        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertTrue(settings_provider::can_change_seb_allowedbrowserexamkeys($this->context));
     }
 
@@ -692,15 +677,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertTrue(settings_provider::can_configure_manually($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-
-        $this->setUser($user);
-        $roleid = $this->getDataGenerator()->create_role();
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        $this->set_up_user_and_role();
 
         $this->assertFalse(settings_provider::can_configure_manually($this->context));
 
-        assign_capability($settingcapability, CAP_ALLOW, $roleid, $this->context->id);
+        assign_capability($settingcapability, CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertTrue(settings_provider::can_configure_manually($this->context));
     }
 
@@ -735,13 +716,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertFalse(settings_provider::is_conflicting_permissions($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
+        $this->set_up_user_and_role();
+
         $this->assertTrue(settings_provider::is_conflicting_permissions($this->context));
 
-        $roleid = $this->getDataGenerator()->create_role();
-        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $roleid, $this->context->id);
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_templateid', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertFalse(settings_provider::is_conflicting_permissions($this->context));
     }
 
@@ -764,13 +743,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertFalse(settings_provider::is_conflicting_permissions($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $this->assertTrue(settings_provider::is_conflicting_permissions($this->context));
+        $this->set_up_user_and_role();
 
-        $roleid = $this->getDataGenerator()->create_role();
-        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $roleid, $this->context->id);
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        assign_capability('quizaccess/seb:manage_filemanager_sebconfigfile', CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertFalse(settings_provider::is_conflicting_permissions($this->context));
     }
 
@@ -789,13 +764,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertFalse(settings_provider::is_conflicting_permissions($this->context));
 
-        $user = $this->getDataGenerator()->create_user();
-        $this->setUser($user);
-        $this->assertTrue(settings_provider::is_conflicting_permissions($this->context));
+        $this->set_up_user_and_role();
 
-        $roleid = $this->getDataGenerator()->create_role();
-        assign_capability($settingcapability, CAP_ALLOW, $roleid, $this->context->id);
-        $this->getDataGenerator()->role_assign($roleid, $user->id, $this->context->id);
+        assign_capability($settingcapability, CAP_ALLOW, $this->roleid, $this->context->id);
         $this->assertFalse(settings_provider::is_conflicting_permissions($this->context));
     }
 
