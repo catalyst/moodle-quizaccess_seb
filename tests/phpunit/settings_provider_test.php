@@ -549,9 +549,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         settings_provider::save_filemanager_sebconfigfile_draftarea($draftitemid, $this->quiz->cmid);
 
-        $this->quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
-        $this->quizsettings->save();
+        $settings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $settings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $settings->save();
 
         $file = settings_provider::get_module_context_sebconfig_file($this->quiz->cmid);
 
