@@ -339,10 +339,6 @@ class settings_provider {
             if (isset($types[$name])) {
                 self::set_type($quizform, $mform, $name, $types[$name]);
             }
-
-            if (!self::can_manage_seb_config_setting($name, $quizform->get_context())) {
-                self::freeze_element($quizform, $mform, $name);
-            }
         }
     }
 
