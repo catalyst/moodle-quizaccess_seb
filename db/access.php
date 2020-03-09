@@ -74,8 +74,8 @@ $capabilities = array(
     ),
 );
 
-// Individual SEB setting capabilities.
-foreach (\quizaccess_seb\settings_provider::get_quiz_elements() as $name => $type) {
+// Individual SEB config setting capabilities.
+foreach (\quizaccess_seb\settings_provider::get_seb_config_elements() as $name => $type) {
     $capability = \quizaccess_seb\settings_provider::build_setting_capability_name($name);
 
     $capabilities[$capability] = array(
