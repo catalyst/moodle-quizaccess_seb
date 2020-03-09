@@ -204,7 +204,8 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         // Launch change of nullability for field filterembeddedcontent.
         $dbman->change_field_notnull($table, $field);
 
-        $field = new xmldb_field('suppresssebdownloadlink', XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'allowedbrowserexamkeys');
+        $field = new xmldb_field('suppresssebdownloadlink',
+            XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'allowedbrowserexamkeys');
         // Launch change of nullability for field suppresssebdownloadlink.
         $dbman->change_field_notnull($table, $field);
 
