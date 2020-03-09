@@ -384,6 +384,10 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
 
     /**
      * Helper function in tests to set USE_SEB_TEMPLATE and a template id on the quiz settings.
+     *
+     * @param quiz_settings $quizsettings Given quiz settings instance.
+     * @param int $savetype Type of SEB usage.
+     * @param int $templateid Template ID.
      */
     public function save_settings_with_optional_template($quizsettings, $savetype, $templateid = 0) {
         $quizsettings->set('requiresafeexambrowser', $savetype);
