@@ -642,156 +642,6 @@ class settings_provider {
     }
 
     /**
-     * Get the conditions that an element should be hid in the form. Expects matching using 'eq'.
-     *
-     * Array key is name of 'form element'/'database column (excluding prefix)'.
-     * Values are instances of hideif_rule class.
-     *
-     * @return \quizaccess_seb\hideif_rule[] List of rules per element.
-     */
-    public static function get_quiz_hideifs() : array {
-        return [
-            'seb_templateid' => [
-                new hideif_rule('seb_templateid', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_TEMPLATE),
-            ],
-            'filemanager_sebconfigfile' => [
-                new hideif_rule('filemanager_sebconfigfile', 'seb_requiresafeexambrowser', 'noteq', self::USE_SEB_UPLOAD_CONFIG),
-            ],
-            'seb_showsebtaskbar' => [
-                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_showsebtaskbar', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-            ],
-            'seb_showwificontrol' => [
-                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_showwificontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_showwificontrol', 'seb_showsebtaskbar', 'eq', 0),
-            ],
-            'seb_showreloadbutton' => [
-                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_showreloadbutton', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_showreloadbutton', 'seb_showsebtaskbar', 'eq', 0),
-            ],
-            'seb_showtime' => [
-                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_showtime', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_showtime', 'seb_showsebtaskbar', 'eq', 0),
-            ],
-            'seb_showkeyboardlayout' => [
-                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_showkeyboardlayout', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_showkeyboardlayout', 'seb_showsebtaskbar', 'eq', 0),
-            ],
-            'seb_allowuserquitseb' => [
-                new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-            ],
-            'seb_quitpassword' => [
-                new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_quitpassword', 'seb_allowuserquitseb', 'eq', 0),
-            ],
-            'seb_linkquitseb' => [
-                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_linkquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-            ],
-            'seb_userconfirmquit' => [
-                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_userconfirmquit', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_userconfirmquit', 'seb_linkquitseb', 'eq', 0),
-            ],
-            'seb_enableaudiocontrol' => [
-                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_enableaudiocontrol', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-            ],
-            'seb_muteonstartup' => [
-                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_muteonstartup', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_muteonstartup', 'seb_enableaudiocontrol', 'eq', 0),
-            ],
-            'seb_allowspellchecking' => [
-                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_allowspellchecking', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-            ],
-            'seb_allowreloadinexam' => [
-                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_allowreloadinexam', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-
-            ],
-            'seb_activateurlfiltering' => [
-                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_activateurlfiltering', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-            ],
-            'seb_filterembeddedcontent' => [
-                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_filterembeddedcontent', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_filterembeddedcontent', 'seb_activateurlfiltering', 'eq', 0),
-            ],
-            'seb_expressionsallowed' => [
-                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_expressionsallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_expressionsallowed', 'seb_activateurlfiltering', 'eq', 0),
-            ],
-            'seb_regexallowed' => [
-                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_regexallowed', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_regexallowed', 'seb_activateurlfiltering', 'eq', 0),
-            ],
-            'seb_expressionsblocked' => [
-                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_expressionsblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_expressionsblocked', 'seb_activateurlfiltering', 'eq', 0),
-            ],
-            'seb_regexblocked' => [
-                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_UPLOAD_CONFIG),
-                new hideif_rule('seb_regexblocked', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
-                new hideif_rule('seb_regexblocked', 'seb_activateurlfiltering', 'eq', 0),
-            ],
-            'seb_suppresssebdownloadlink' => [
-                new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-            ],
-            'seb_allowedbrowserexamkeys' => [
-                new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
-                new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CONFIG_MANUALLY),
-                new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
-            ]
-        ];
-    }
-
-    /**
      * Validate that if a file has been uploaded by current user, that it is a valid PLIST XML file.
      * This function is only called if requiresafeexambrowser == settings_provider::USE_SEB_UPLOAD_CONFIG.
      *
@@ -961,14 +811,162 @@ class settings_provider {
      * @return bool
      */
     public static function can_manage_seb_config_setting(string $settingname, \context $context) : bool {
-        $capability = self::build_setting_capability_name($settingname);
+        $capsttocheck = [];
 
-        // Capability must exist.
-        if (!$capinfo = get_capability_info($capability)) {
-            throw new \coding_exception("Capability '{$capability}' was not found! This has to be fixed in code.");
+        foreach (self::get_seb_settings_map() as $type => $settings) {
+            $capsttocheck = self::build_config_capabilities_to_check($settingname, $settings);
+            if (!empty($capsttocheck)) {
+                break;
+            }
         }
 
-        return has_capability($capability, $context);
+        foreach ($capsttocheck as $capability) {
+            // Capability must exist.
+            if (!$capinfo = get_capability_info($capability)) {
+                throw new \coding_exception("Capability '{$capability}' was not found! This has to be fixed in code.");
+            }
+        }
+
+        return has_all_capabilities($capsttocheck, $context);
+    }
+
+    /**
+     * Helper method to build a list of capabilities to check.
+     *
+     * @param string $settingname Given setting name to build caps for.
+     * @param array $settings A list of settings to go through.
+     * @return array
+     */
+    protected static function build_config_capabilities_to_check(string $settingname, array $settings) : array {
+        $capsttocheck = [];
+
+        foreach ($settings as $setting => $children) {
+            if ($setting == $settingname) {
+                $capsttocheck[$setting] = self::build_setting_capability_name($setting);
+                break; // Found what we need exit the loop.
+            }
+
+            // Recursively check all children.
+            $capsttocheck = self::build_config_capabilities_to_check($settingname, $children);
+            if (!empty($capsttocheck)) {
+                // Matching child found, add the parent capability to the list of caps to check.
+                $capsttocheck[$setting] = self::build_setting_capability_name($setting);
+                break; // Found what we need exit the loop.
+            }
+        }
+
+        return $capsttocheck;
+    }
+
+    /**
+     * Helper method to return a map of all settings.
+     *
+     * @return array
+     */
+    public static function get_seb_settings_map() : array {
+        return [
+            self::USE_SEB_NO => [
+
+            ],
+            self::USE_SEB_CONFIG_MANUALLY => [
+                'seb_suppresssebdownloadlink' => [],
+                'seb_linkquitseb' => [],
+                'seb_userconfirmquit' => [],
+                'seb_allowuserquitseb' => [
+                    'seb_quitpassword' => []
+                ],
+                'seb_allowreloadinexam' => [],
+                'seb_showsebtaskbar' => [
+                    'seb_showreloadbutton' => [],
+                    'seb_showtime' => [],
+                    'seb_showkeyboardlayout' => [],
+                    'seb_showwificontrol' => [],
+                ],
+                'seb_enableaudiocontrol' => [
+                    'seb_muteonstartup' => [],
+                ],
+                'seb_allowspellchecking' => [],
+                'seb_activateurlfiltering' => [
+                    'seb_filterembeddedcontent' => [],
+                    'seb_expressionsallowed' => [],
+                    'seb_regexallowed' => [],
+                    'seb_expressionsblocked' => [],
+                    'seb_regexblocked' => [],
+                ],
+            ],
+            self::USE_SEB_TEMPLATE => [
+                'seb_templateid' => [],
+                'seb_suppresssebdownloadlink' => [],
+                'seb_allowuserquitseb' => [
+                    'seb_quitpassword' => [],
+                ],
+            ],
+            self::USE_SEB_UPLOAD_CONFIG => [
+                'filemanager_sebconfigfile' => [],
+                'seb_suppresssebdownloadlink' => [],
+                'seb_allowuserquitseb' => [
+                    'seb_quitpassword' => [],
+                ],
+                'seb_allowedbrowserexamkeys' => [],
+            ],
+            self::USE_SEB_CLIENT_CONFIG => [
+                'seb_suppresssebdownloadlink' => [],
+                'seb_allowedbrowserexamkeys' => [],
+            ],
+        ];
+    }
+
+    /**
+     * Get the conditions that an element should be hid in the form. Expects matching using 'eq'.
+     *
+     * Array key is name of 'form element'/'database column (excluding prefix)'.
+     * Values are instances of hideif_rule class.
+     *
+     * @return array List of rules per element.
+     */
+    public static function get_quiz_hideifs() : array {
+        $hideifs = [];
+
+        // We are building rules based on the settings map, that means children will be dependant on parent.
+        // In most cases it's all pretty standard.
+        // However it could be some specific cases for some fields, which will be overridden later.
+        foreach (self::get_seb_settings_map() as $type => $settings) {
+            foreach ($settings as $setting => $children) {
+                $hideifs[$setting][] = new hideif_rule($setting, 'seb_requiresafeexambrowser', 'noteq', $type);
+
+                foreach ($children as $childname => $child) {
+                    $hideifs[$childname][] = new hideif_rule($childname, 'seb_requiresafeexambrowser', 'noteq', $type);
+                    $hideifs[$childname][] = new hideif_rule($childname, $setting, 'eq', 0);
+                }
+            }
+        }
+
+        // Specific case for "Enable quitting of SEB". It should available for Manual, Template and Uploaded config.
+        $hideifs['seb_allowuserquitseb'] = [
+            new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+            new hideif_rule('seb_allowuserquitseb', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+        ];
+
+        // Specific case for "Quit password". It should be available for Manual, Template and Uploaded config. As it's parent.
+        $hideifs['seb_quitpassword'] = [
+            new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+            new hideif_rule('seb_quitpassword', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CLIENT_CONFIG),
+            new hideif_rule('seb_quitpassword', 'seb_allowuserquitseb', 'eq', 0),
+        ];
+
+        // Specific case for "Suppress Safe Exam Browser download button". It should be available for all cases, except No Seb.
+        $hideifs['seb_suppresssebdownloadlink'] = [
+            new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO)
+        ];
+
+        // Specific case for "Allowed Browser Exam Keys". It should be available for Template and Browser config.
+        $hideifs['seb_allowedbrowserexamkeys'] = [
+            new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO),
+            new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_CONFIG_MANUALLY),
+            new hideif_rule('seb_allowedbrowserexamkeys', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_TEMPLATE),
+        ];
+
+        return $hideifs;
     }
 
     /**
