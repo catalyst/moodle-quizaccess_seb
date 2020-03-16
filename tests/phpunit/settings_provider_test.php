@@ -113,9 +113,12 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     public function settings_capability_data_provider() {
         $data = [];
 
-        foreach (settings_provider::get_seb_config_elements() as $name => $type) {
-            $cap = settings_provider::build_setting_capability_name($name);
-            $data[] = [$cap];
+        // Build first level SEB config settings. Any of this setting let us use SEB manual config.
+        foreach (settings_provider::get_seb_settings_map()[settings_provider::USE_SEB_CONFIG_MANUALLY] as $name => $children) {
+            if (key_exists($name, settings_provider::get_seb_config_elements())) {
+                $cap = settings_provider::build_setting_capability_name($name);
+                $data[] = [$cap];
+            }
         }
 
         return $data;
@@ -159,6 +162,365 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $diffelements = array_diff_key($settingtypes, $settingelements);
 
         $this->assertEmpty($diffelements);
+    }
+
+    /**
+     * Helper method to assert hide if element.
+     * @param \quizaccess_seb\hideif_rule $hideif Rule to check.
+     * @param string $element Expected element.
+     * @param string $dependantname Expected dependant element name.
+     * @param string $condition Expected condition.
+     * @param mixed $value Expected value.
+     */
+    protected function assert_hide_if(\quizaccess_seb\hideif_rule $hideif, $element, $dependantname, $condition, $value) {
+        $this->assertEquals($element, $hideif->get_element());
+        $this->assertEquals($dependantname, $hideif->get_dependantname());
+        $this->assertEquals($condition, $hideif->get_condition());
+        $this->assertEquals($value, $hideif->get_dependantvalue());
+    }
+
+    /**
+     * Test hideif rules.
+     */
+    public function test_hideifs() {
+        $settinghideifs = settings_provider::get_quiz_hideifs();
+
+        $this->assertCount(23, $settinghideifs);
+
+        $this->assertArrayHasKey('seb_templateid', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_templateid']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_templateid'][0],
+            'seb_templateid',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_TEMPLATE
+        );
+
+        $this->assertArrayHasKey('filemanager_sebconfigfile', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['filemanager_sebconfigfile']);
+        $this->assert_hide_if(
+            $settinghideifs['filemanager_sebconfigfile'][0],
+            'filemanager_sebconfigfile',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_UPLOAD_CONFIG
+        );
+
+        $this->assertArrayHasKey('seb_showsebtaskbar', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_showsebtaskbar']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_showsebtaskbar'][0],
+            'seb_showsebtaskbar',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_showwificontrol', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_showwificontrol']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_showwificontrol'][0],
+            'seb_showwificontrol',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_showwificontrol'][1],
+            'seb_showwificontrol',
+            'seb_showsebtaskbar',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_showreloadbutton', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_showreloadbutton']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_showreloadbutton'][0],
+            'seb_showreloadbutton',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_showreloadbutton'][1],
+            'seb_showreloadbutton',
+            'seb_showsebtaskbar',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_showtime', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_showtime']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_showtime'][0],
+            'seb_showtime',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_showtime'][1],
+            'seb_showtime',
+            'seb_showsebtaskbar',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_showkeyboardlayout', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_showkeyboardlayout']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_showkeyboardlayout'][0],
+            'seb_showkeyboardlayout',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_showkeyboardlayout'][1],
+            'seb_showkeyboardlayout',
+            'seb_showsebtaskbar',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_allowuserquitseb', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_allowuserquitseb']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowuserquitseb'][0],
+            'seb_allowuserquitseb',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_NO
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowuserquitseb'][1],
+            'seb_allowuserquitseb',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_CLIENT_CONFIG
+        );
+
+        $this->assertArrayHasKey('seb_quitpassword', $settinghideifs);
+        $this->assertCount(3, $settinghideifs['seb_quitpassword']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_quitpassword'][0],
+            'seb_quitpassword',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_NO
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_quitpassword'][1],
+            'seb_quitpassword',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_CLIENT_CONFIG
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_quitpassword'][2],
+            'seb_quitpassword',
+            'seb_allowuserquitseb',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_linkquitseb', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_linkquitseb']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_linkquitseb'][0],
+            'seb_linkquitseb',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_userconfirmquit', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_userconfirmquit']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_userconfirmquit'][0],
+            'seb_userconfirmquit',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_enableaudiocontrol', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_enableaudiocontrol']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_enableaudiocontrol'][0],
+            'seb_enableaudiocontrol',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_muteonstartup', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_muteonstartup']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_muteonstartup'][0],
+            'seb_muteonstartup',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_muteonstartup'][1],
+            'seb_muteonstartup',
+            'seb_enableaudiocontrol',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_allowspellchecking', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_allowspellchecking']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowspellchecking'][0],
+            'seb_allowspellchecking',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_allowreloadinexam', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_allowreloadinexam']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowreloadinexam'][0],
+            'seb_allowreloadinexam',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_activateurlfiltering', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_activateurlfiltering']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_activateurlfiltering'][0],
+            'seb_activateurlfiltering',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+
+        $this->assertArrayHasKey('seb_filterembeddedcontent', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_filterembeddedcontent']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_filterembeddedcontent'][0],
+            'seb_filterembeddedcontent',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_filterembeddedcontent'][1],
+            'seb_filterembeddedcontent',
+            'seb_activateurlfiltering',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_expressionsallowed', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_expressionsallowed']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_expressionsallowed'][0],
+            'seb_expressionsallowed',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_expressionsallowed'][1],
+            'seb_expressionsallowed',
+            'seb_activateurlfiltering',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_regexallowed', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_regexallowed']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_regexallowed'][0],
+            'seb_regexallowed',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_regexallowed'][1],
+            'seb_regexallowed',
+            'seb_activateurlfiltering',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_expressionsblocked', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_expressionsblocked']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_expressionsblocked'][0],
+            'seb_expressionsblocked',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_expressionsblocked'][1],
+            'seb_expressionsblocked',
+            'seb_activateurlfiltering',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_regexblocked', $settinghideifs);
+        $this->assertCount(2, $settinghideifs['seb_regexblocked']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_regexblocked'][0],
+            'seb_regexblocked',
+            'seb_requiresafeexambrowser',
+            'noteq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_regexblocked'][1],
+            'seb_regexblocked',
+            'seb_activateurlfiltering',
+            'eq',
+            0
+        );
+
+        $this->assertArrayHasKey('seb_suppresssebdownloadlink', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_suppresssebdownloadlink']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_suppresssebdownloadlink'][0],
+            'seb_suppresssebdownloadlink',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_NO
+        );
+
+        $this->assertArrayHasKey('seb_allowedbrowserexamkeys', $settinghideifs);
+        $this->assertCount(3, $settinghideifs['seb_allowedbrowserexamkeys']);
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowedbrowserexamkeys'][0],
+            'seb_allowedbrowserexamkeys',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_NO
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowedbrowserexamkeys'][1],
+            'seb_allowedbrowserexamkeys',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_CONFIG_MANUALLY
+        );
+        $this->assert_hide_if(
+            $settinghideifs['seb_allowedbrowserexamkeys'][2],
+            'seb_allowedbrowserexamkeys',
+            'seb_requiresafeexambrowser',
+            'eq',
+            settings_provider::USE_SEB_TEMPLATE
+        );
     }
 
     /**
@@ -207,6 +569,44 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
             $actual = settings_provider::build_setting_capability_name($name);
 
             $this->assertSame($expected, $actual);
+        }
+    }
+
+    /**
+     * Test can check if can manage SEB settings respecting settings structure.
+     */
+    public function test_can_manage_seb_config_setting() {
+        $this->setAdminUser();
+
+        $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
+        $this->context = context_module::instance($this->quiz->cmid);
+
+        $this->set_up_user_and_role();
+
+        foreach (settings_provider::get_seb_settings_map()[settings_provider::USE_SEB_CONFIG_MANUALLY] as $setting => $children) {
+            // Skip not SEB setting.
+            if ($setting == 'seb_suppresssebdownloadlink') {
+                continue;
+            }
+
+            $this->assertFalse(settings_provider::can_manage_seb_config_setting($setting, $this->context));
+            foreach ($children as $child => $empty) {
+                $this->assertFalse(settings_provider::can_manage_seb_config_setting($child, $this->context));
+
+                // Assign child capability without having parent one. Should not have access to manage child.
+                $childcap = settings_provider::build_setting_capability_name($child);
+                assign_capability($childcap, CAP_ALLOW, $this->roleid, $this->context->id);
+                $this->assertFalse(settings_provider::can_manage_seb_config_setting($child, $this->context));
+            }
+
+            // Assign parent capability. Should be able to manage children now.
+            $parentcap = settings_provider::build_setting_capability_name($setting);
+            assign_capability($parentcap, CAP_ALLOW, $this->roleid, $this->context->id);
+
+            $this->assertTrue(settings_provider::can_manage_seb_config_setting($setting, $this->context));
+            foreach ($children as $child => $empty) {
+                $this->assertTrue(settings_provider::can_manage_seb_config_setting($child, $this->context));
+            }
         }
     }
 
