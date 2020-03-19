@@ -24,7 +24,7 @@
  */
 
 require_once(__DIR__ . '/../../../../config.php');
-require_once('lib.php');
+require_once($CFG->dirroot . '/mod/quiz/accessrule/seb/lib.php');
 
 $cmid = required_param('cmid', PARAM_RAW);
 
