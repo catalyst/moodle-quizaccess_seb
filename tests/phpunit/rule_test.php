@@ -873,7 +873,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     /**
      * Test get_download_button_only, checks for empty config setting quizaccess_seb/downloadlink.
      */
-    public function test_get_download_button_only() {
+    public function test_get_download_seb_button() {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
 
@@ -881,7 +881,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->setUser($user);
 
         $reflection = new \ReflectionClass('quizaccess_seb');
-        $method = $reflection->getMethod('get_download_button_only');
+        $method = $reflection->getMethod('get_download_seb_button');
         $method->setAccessible(true);
 
         // The current default contents.
