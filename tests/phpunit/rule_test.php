@@ -894,9 +894,9 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test display_quit_button. If attempt count is greater than 0
+     * Test get_quit_button. If attempt count is greater than 0
      */
-    public function test_display_quit_button() {
+    public function test_get_quit_button() {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
 
@@ -910,7 +910,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set-up the button to be called.
         $reflection = new \ReflectionClass('quizaccess_seb');
-        $method = $reflection->getMethod('display_quit_button');
+        $method = $reflection->getMethod('get_quit_button');
         $method->setAccessible(true);
 
         $button = $method->invoke($this->make_rule());

@@ -376,7 +376,7 @@ class quizaccess_seb extends quiz_access_rule_base {
     private function get_invalid_key_error_message() : string {
         // Return error message with download link and links to get the seb config.
         return get_string('invalidkeys', 'quizaccess_seb')
-            . $this->prepare_buttons_for_display($this->get_action_buttons());
+            . $this->display_buttons($this->get_action_buttons());
     }
 
     /**
@@ -388,7 +388,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         $message = get_string('clientrequiresseb', 'quizaccess_seb');
 
         if ($this->should_display_download_seb_link()) {
-            $message .= $this->prepare_buttons_for_display($this->get_download_seb_button());
+            $message .= $this->display_buttons($this->get_download_seb_button());
         }
 
         // Return error message with download link.
@@ -400,7 +400,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      *
      * @return string empty or a button which has the configured seb quit link.
      */
-    private function display_quit_button() : string {
+    private function get_quit_button() : string {
         $quizsettings = $this->accessmanager->get_quiz_settings();
         $quitbutton = '';
 
@@ -410,8 +410,7 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Only display if the link has been configured and attempts are greater than 0.
         if ($quizsettings->get('linkquitseb')) {
-            $content = html_writer::link($quizsettings->get('linkquitseb'), get_string('exitsebbutton', 'quizaccess_seb'));
-            $quitbutton = html_writer::div($content, 'btn btn-secondary');
+            $quitbutton = html_writer::link($quizsettings->get('linkquitseb'), get_string('exitsebbutton', 'quizaccess_seb'));
         }
 
         return $quitbutton;
@@ -430,7 +429,7 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Those with higher level access will be able to see the button if they've made an attempt.
         if (!$this->prevent_access()) {
-            $messages[] = $this->display_quit_button();
+            $messages[] = $this->display_buttons($this->get_quit_button(), 'btn btn-secondary');
         }
 
         return $messages;
@@ -454,14 +453,16 @@ class quizaccess_seb extends quiz_access_rule_base {
      * Prepare buttons HTML code for being displayed on the screen.
      *
      * @param string $buttonshtml Html string of the buttons.
+     * @param string $class Optional CSS class (or classes as space-separated list)
+     * @param array $attributes Optional other attributes as array
      *
      * @return string HTML code of the provided buttons.
      */
-    private function prepare_buttons_for_display(string $buttonshtml) : string {
+    private function display_buttons(string $buttonshtml, $class = '', array $attributes = null) : string {
         $html = '';
 
         if (!empty($buttonshtml)) {
-            $html = html_writer::div($buttonshtml);
+            $html = html_writer::div($buttonshtml, $class, $attributes);
         }
 
         return $html;
