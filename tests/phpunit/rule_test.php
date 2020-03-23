@@ -565,8 +565,12 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
     /**
      * A helper method to check invalid browser key.
+     *
+     * @param bool $downloadseblink Make sure download SEB link is present.
+     * @param bool $launchlink Make sure launch SEB link is present.
+     * @param bool $downloadconfiglink Make download config link is present.
      */
-    protected function check_invalid_browser_exam_key() {
+    protected function check_invalid_browser_exam_key($downloadseblink = true, $launchlink = true, $downloadconfiglink = true) {
         // Create an event sink, trigger event and retrieve event.
         $sink = $this->redirectEvents();
 
@@ -575,9 +579,24 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertNotEmpty($errormsg);
         $this->assertContains("The config key or browser exam keys could not be validated. "
             . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
-        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
-        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
-        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+
+        if ($downloadseblink) {
+            $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
+        } else {
+            $this->assertNotContains("https://safeexambrowser.org/download_en.html", $errormsg);
+        }
+
+        if ($launchlink) {
+            $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        } else {
+            $this->assertNotContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        }
+
+        if ($downloadconfiglink) {
+            $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        } else {
+            $this->assertNotContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        }
 
         $events = $sink->get_events();
         $this->assertEquals(1, count($events));
@@ -608,7 +627,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Set up dummy request.
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
 
-        $this->check_invalid_browser_exam_key();
+        $this->check_invalid_browser_exam_key(true, false, false);
     }
 
     /**
