@@ -427,6 +427,11 @@ class quizaccess_seb extends quiz_access_rule_base {
     public function description() : array {
         $messages = [get_string('sebrequired', 'quizaccess_seb')];
 
+        // Display download SEB config link for those who can bypass using SEB.
+        if ($this->accessmanager->can_bypass_seb() && $this->accessmanager->should_validate_config_key()) {
+            $messages[] = $this->display_buttons($this->get_download_config_button());
+        }
+
         // Those with higher level access will be able to see the button if they've made an attempt.
         if (!$this->prevent_access()) {
             $messages[] = $this->display_buttons($this->get_quit_button(), 'btn btn-secondary');
