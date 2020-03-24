@@ -78,6 +78,33 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Helper method to get SEB download link for testing.
+     *
+     * @return string
+     */
+    private function get_seb_download_link() {
+        return 'https://safeexambrowser.org/download_en.html';
+    }
+
+    /**
+     * Helper method to get SEB launch link for testing.
+     *
+     * @return string
+     */
+    private function get_seb_launch_link() {
+        return 'sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php';
+    }
+
+    /**
+     * Helper method to get SEB config download link for testing.
+     *
+     * @return string
+     */
+    private function get_seb_config_download_link() {
+        return 'https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php';
+    }
+
+    /**
      * Provider to return valid form field data when saving settings.
      *
      * @return array
@@ -341,9 +368,9 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertNotEmpty($errormsg);
         $this->assertContains("The config key or browser exam keys could not be validated. "
             . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
-        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
-        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
-        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+        $this->assertContains($this->get_seb_download_link(), $errormsg);
+        $this->assertContains($this->get_seb_launch_link(), $errormsg);
+        $this->assertContains($this->get_seb_config_download_link(), $errormsg);
 
         $events = $sink->get_events();
         $this->assertEquals(1, count($events));
@@ -565,8 +592,12 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
     /**
      * A helper method to check invalid browser key.
+     *
+     * @param bool $downloadseblink Make sure download SEB link is present.
+     * @param bool $launchlink Make sure launch SEB link is present.
+     * @param bool $downloadconfiglink Make download config link is present.
      */
-    protected function check_invalid_browser_exam_key() {
+    protected function check_invalid_browser_exam_key($downloadseblink = true, $launchlink = true, $downloadconfiglink = true) {
         // Create an event sink, trigger event and retrieve event.
         $sink = $this->redirectEvents();
 
@@ -575,9 +606,24 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertNotEmpty($errormsg);
         $this->assertContains("The config key or browser exam keys could not be validated. "
             . "Please ensure you are using the Safe Exam Browser with correct configuration file.", $errormsg);
-        $this->assertContains("https://safeexambrowser.org/download_en.html", $errormsg);
-        $this->assertContains("sebs://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
-        $this->assertContains("https://www.example.com/moodle/mod/quiz/accessrule/seb/config.php", $errormsg);
+
+        if ($downloadseblink) {
+            $this->assertContains($this->get_seb_download_link(), $errormsg);
+        } else {
+            $this->assertNotContains($this->get_seb_download_link(), $errormsg);
+        }
+
+        if ($launchlink) {
+            $this->assertContains($this->get_seb_launch_link(), $errormsg);
+        } else {
+            $this->assertNotContains($this->get_seb_launch_link(), $errormsg);
+        }
+
+        if ($downloadconfiglink) {
+            $this->assertContains($this->get_seb_config_download_link(), $errormsg);
+        } else {
+            $this->assertNotContains($this->get_seb_config_download_link(), $errormsg);
+        }
 
         $events = $sink->get_events();
         $this->assertEquals(1, count($events));
@@ -608,7 +654,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         // Set up dummy request.
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
 
-        $this->check_invalid_browser_exam_key();
+        $this->check_invalid_browser_exam_key(true, false, false);
     }
 
     /**
@@ -871,7 +917,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test get_download_button_only, checks for empty config setting quizaccess_seb/downloadlink.
+     * Test get_download_seb_button, checks for empty config setting quizaccess_seb/downloadlink.
      */
     public function test_get_download_seb_button() {
         $this->setAdminUser();
@@ -885,7 +931,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $method->setAccessible(true);
 
         // The current default contents.
-        $this->assertContains('https://safeexambrowser.org/download_en.html', $method->invoke($this->make_rule()));
+        $this->assertContains($this->get_seb_download_link(), $method->invoke($this->make_rule()));
 
         set_config('downloadlink', '', 'quizaccess_seb');
 
@@ -894,9 +940,102 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test display_quit_button. If attempt count is greater than 0
+     * Test get_download_seb_button shows download SEB link when required,
      */
-    public function test_display_quit_button() {
+    public function test_get_get_action_buttons_shows_download_seb_link() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('get_action_buttons');
+        $method->setAccessible(true);
+
+        $this->assertContains($this->get_seb_download_link(), $method->invoke($this->make_rule()));
+
+        $this->quiz->seb_suppresssebdownloadlink = 1;
+        $this->assertNotContains($this->get_seb_download_link(), $method->invoke($this->make_rule()));
+    }
+
+    /**
+     * Test get_download_seb_button shows SEB config related links when required.
+     */
+    public function test_get_get_action_buttons_shows_launch_and_download_config_links() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('get_action_buttons');
+        $method->setAccessible(true);
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+
+        // Should see link when using manually.
+        $this->assertContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+
+        // Should see links when using template.
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $this->create_template()->get('id'));
+        $quizsettings->save();
+        $this->assertContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+
+        // Should see links when using uploaded config.
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+        $this->assertContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+
+        // Shouldn't see links if using client config.
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $quizsettings->save();
+        $this->assertNotContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertNotContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+    }
+
+    /**
+     * Test get_download_seb_button shows SEB config related links as configured in "showseblinks".
+     */
+    public function test_get_get_action_buttons_shows_launch_and_download_config_links_as_configured() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $user = $this->getDataGenerator()->create_user();
+        $this->setUser($user);
+
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('get_action_buttons');
+        $method->setAccessible(true);
+
+        set_config('showseblinks', 'seb,http', 'quizaccess_seb');
+        $this->assertContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+
+        set_config('showseblinks', 'http', 'quizaccess_seb');
+        $this->assertNotContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+
+        set_config('showseblinks', 'seb', 'quizaccess_seb');
+        $this->assertContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertNotContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+
+        set_config('showseblinks', '', 'quizaccess_seb');
+        $this->assertNotContains($this->get_seb_launch_link(), $method->invoke($this->make_rule()));
+        $this->assertNotContains($this->get_seb_config_download_link(), $method->invoke($this->make_rule()));
+    }
+
+    /**
+     * Test get_quit_button. If attempt count is greater than 0
+     */
+    public function test_get_quit_button() {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
 
@@ -910,7 +1049,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set-up the button to be called.
         $reflection = new \ReflectionClass('quizaccess_seb');
-        $method = $reflection->getMethod('display_quit_button');
+        $method = $reflection->getMethod('get_quit_button');
         $method->setAccessible(true);
 
         $button = $method->invoke($this->make_rule());
