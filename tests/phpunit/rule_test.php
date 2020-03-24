@@ -1089,6 +1089,42 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test description displays download SEB config button when required.
+     */
+    public function test_description_shows_download_config_link_when_required() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+
+        $user = $this->getDataGenerator()->create_user();
+        $roleid = $this->getDataGenerator()->create_role();
+        $context = context_module::instance($this->quiz->cmid);
+        assign_capability('quizaccess/seb:bypassseb', CAP_ALLOW, $roleid, $context->id);
+
+        $this->setUser($user);
+
+        // Can see just basic description with standard perms.
+        $description = $this->make_rule()->description();
+        $this->assertCount(1, $description);
+        $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
+
+        // Can see download config link as have bypass SEB permissions.
+        $this->getDataGenerator()->role_assign($roleid, $user->id, $context->id);
+        $description = $this->make_rule()->description();
+        $this->assertCount(3, $description);
+        $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
+        $this->assertContains($this->get_seb_config_download_link(), $description[1]);
+
+        // Can't see download config link as usage method doesn't have SEB config to download.
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $quizsettings->save();
+        $description = $this->make_rule()->description();
+        $this->assertCount(2, $description);
+        $this->assertEquals($description[0], get_string('sebrequired', 'quizaccess_seb'));
+    }
+
+    /**
      * Test block display before a quiz started.
      */
     public function test_blocks_display_before_attempt_started() {
