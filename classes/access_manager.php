@@ -144,10 +144,23 @@ class access_manager {
      * @return bool
      */
     public function validate_basic_header() : bool {
-        if (isset($_SERVER['HTTP_USER_AGENT']) && $this->get_seb_use_type() == settings_provider::USE_SEB_CLIENT_CONFIG) {
-            return strpos($_SERVER['HTTP_USER_AGENT'], 'SEB') !== false;
+        if ($this->get_seb_use_type() == settings_provider::USE_SEB_CLIENT_CONFIG) {
+            return $this->is_using_seb();
         }
         return true;
+    }
+
+    /**
+     * Check if using Safe Exam Browser.
+     *
+     * @return bool
+     */
+    public function is_using_seb() : bool {
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            return strpos($_SERVER['HTTP_USER_AGENT'], 'SEB') !== false;
+        }
+
+        return false;
     }
 
     /**
