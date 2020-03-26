@@ -30,6 +30,11 @@ global $ADMIN;
 
 if ($hassiteconfig) {
 
+    $settings->add(new admin_setting_configcheckbox('quizaccess_seb/autoreconfigureseb',
+        get_string('setting:autoreconfigureseb', 'quizaccess_seb'),
+        get_string('setting:autoreconfigureseb_desc', 'quizaccess_seb'),
+        '1'));
+
     $links = [
         'seb' => get_string('setting:showseblink', 'quizaccess_seb'),
         'http' => get_string('setting:showhttplink', 'quizaccess_seb')

@@ -56,6 +56,8 @@ $string['setting:displayblocksbeforestart'] = 'Display blocks before quiz starte
 $string['setting:displayblocksbeforestart_desc'] = 'If enabled blocks will be displayed before students start a quiz.';
 $string['setting:displayblockswhenfinihsed'] = 'Display blocks after quiz finished';
 $string['setting:displayblockswhenfinihsed_desc'] = 'If enabled blocks will be displayed after students finished a quiz.';
+$string['setting:autoreconfigureseb'] = 'Auto configure SEB';
+$string['setting:autoreconfigureseb_desc'] = 'If enabled, users who navigate to the quiz using the Safe Exam Browser will be automatically forced to reconfigure their Safe Exam Browser.';
 
 // Quiz form settings.
 $string['seb'] = 'Safe Exam Browser';
