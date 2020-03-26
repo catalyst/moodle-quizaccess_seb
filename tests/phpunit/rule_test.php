@@ -1195,4 +1195,28 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertFalse($property->getValue($PAGE->blocks));
     }
+
+    /**
+     * Test we can decide if need to redirect to SEB config link.
+     */
+    public function test_should_redirect_to_seb_config_link() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('should_redirect_to_seb_config_link');
+        $method->setAccessible(true);
+
+        set_config('autoreconfigureseb', '0', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'NOT SEB';
+        $this->assertFalse($method->invoke($this->make_rule()));
+
+        set_config('autoreconfigureseb', '0', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
+        $this->assertFalse($method->invoke($this->make_rule()));
+
+        set_config('autoreconfigureseb', '1', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
+        $this->assertTrue($method->invoke($this->make_rule()));
+    }
 }
