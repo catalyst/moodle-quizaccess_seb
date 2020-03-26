@@ -578,7 +578,7 @@ class quizaccess_seb extends quiz_access_rule_base {
     }
 
     /**
-     * Check if we need to redirect to SEb config link.
+     * Check if we need to redirect to SEB config link.
      * @return bool
      */
     private function should_redirect_to_seb_config_link() : bool {
