@@ -305,6 +305,13 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         if ($this->accessmanager->should_validate_config_key() && !$this->accessmanager->validate_config_key()) {
+
+            // If already using SEB, but config is wrong, then redirect to the link to reconfigure SEB.
+            if ($this->accessmanager->is_using_seb()) {
+                $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
+                $PAGE->requires->js_amd_inline("document.location.replace('" . $seblink . "')");
+            }
+
             access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
             return $this->get_invalid_key_error_message();
         }
