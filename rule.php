@@ -305,6 +305,10 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         if ($this->accessmanager->should_validate_config_key() && !$this->accessmanager->validate_config_key()) {
+            if ($this->should_redirect_to_seb_config_link()) {
+                $this->redirect_to_seb_config_link();
+            }
+
             access_prevented::create_strict($this->accessmanager, $this->get_reason_text('invalid_config_key'))->trigger();
             return $this->get_invalid_key_error_message();
         }
@@ -561,6 +565,24 @@ class quizaccess_seb extends quiz_access_rule_base {
      */
     private function should_display_download_seb_link() : bool {
         return empty($this->quiz->seb_suppresssebdownloadlink);
+    }
+
+    /**
+     * Redirect to SEB config link. This will force Safe Exam Browser to be reconfigured.
+     */
+    private function redirect_to_seb_config_link() {
+        global $PAGE;
+
+        $seblink = \quizaccess_seb\link_generator::get_link($this->quiz->cmid, true, is_https());
+        $PAGE->requires->js_amd_inline("document.location.replace('" . $seblink . "')");
+    }
+
+    /**
+     * Check if we need to redirect to SEB config link.
+     * @return bool
+     */
+    private function should_redirect_to_seb_config_link() : bool {
+        return $this->accessmanager->is_using_seb() && get_config('quizaccess_seb', 'autoreconfigureseb');
     }
 
 }

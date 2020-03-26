@@ -122,6 +122,24 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test we can detect SEB usage.
+     */
+    public function test_is_using_seb() {
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $accessmanager = new access_manager(new quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+
+        $this->assertFalse($accessmanager->is_using_seb());
+
+        $_SERVER['HTTP_USER_AGENT'] = 'Test';
+        $this->assertFalse($accessmanager->is_using_seb());
+
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
+        $this->assertTrue($accessmanager->is_using_seb());
+    }
+
+    /**
      * Test that the quiz Config Key matches the incoming request header.
      */
     public function test_access_keys_validate_with_config_key() {

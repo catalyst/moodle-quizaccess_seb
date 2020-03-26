@@ -553,6 +553,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
         $expectedhash = hash('sha256', $FULLME . $browserexamkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
 
         // Check that correct error message is returned.
         $this->assertFalse($this->make_rule()->prevent_access());
@@ -653,6 +654,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
 
         $this->check_invalid_browser_exam_key(true, false, false);
     }
@@ -1192,5 +1194,33 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertFalse($property->getValue($PAGE->blocks));
+    }
+
+    /**
+     * Test we can decide if need to redirect to SEB config link.
+     */
+    public function test_should_redirect_to_seb_config_link() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $reflection = new \ReflectionClass('quizaccess_seb');
+        $method = $reflection->getMethod('should_redirect_to_seb_config_link');
+        $method->setAccessible(true);
+
+        set_config('autoreconfigureseb', '0', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'TEST';
+        $this->assertFalse($method->invoke($this->make_rule()));
+
+        set_config('autoreconfigureseb', '0', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
+        $this->assertFalse($method->invoke($this->make_rule()));
+
+        set_config('autoreconfigureseb', '1', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'TEST';
+        $this->assertFalse($method->invoke($this->make_rule()));
+
+        set_config('autoreconfigureseb', '1', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
+        $this->assertTrue($method->invoke($this->make_rule()));
     }
 }
