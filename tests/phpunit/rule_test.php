@@ -553,6 +553,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
         $expectedhash = hash('sha256', $FULLME . $browserexamkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedhash;
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
 
         // Check that correct error message is returned.
         $this->assertFalse($this->make_rule()->prevent_access());
@@ -653,6 +654,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = 'Broken browser key';
+        $_SERVER['HTTP_USER_AGENT'] = 'SEB';
 
         $this->check_invalid_browser_exam_key(true, false, false);
     }
