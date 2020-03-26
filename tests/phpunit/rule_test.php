@@ -1208,11 +1208,15 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $method->setAccessible(true);
 
         set_config('autoreconfigureseb', '0', 'quizaccess_seb');
-        $_SERVER['HTTP_USER_AGENT'] = 'NOT SEB';
+        $_SERVER['HTTP_USER_AGENT'] = 'TEST';
         $this->assertFalse($method->invoke($this->make_rule()));
 
         set_config('autoreconfigureseb', '0', 'quizaccess_seb');
         $_SERVER['HTTP_USER_AGENT'] = 'SEB';
+        $this->assertFalse($method->invoke($this->make_rule()));
+
+        set_config('autoreconfigureseb', '1', 'quizaccess_seb');
+        $_SERVER['HTTP_USER_AGENT'] = 'TEST';
         $this->assertFalse($method->invoke($this->make_rule()));
 
         set_config('autoreconfigureseb', '1', 'quizaccess_seb');
