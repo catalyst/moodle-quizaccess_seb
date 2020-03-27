@@ -59,10 +59,11 @@ class quiz_settings extends persistent {
      */
     public function __construct($id = 0, \stdClass $record = null) {
         parent::__construct($id, $record);
-        // Get existing config.
+
         $config = $this->get('config');
-        // Parse basic settings into a property list.
-        $this->plist = new property_list($config);
+        if (!empty($config)) {
+            $this->plist = new property_list($config);
+        }
     }
 
     /**
@@ -267,9 +268,11 @@ class quiz_settings extends persistent {
      * Generate the config key from the config string.
      */
     private function compute_config_key() {
-        $config = $this->get('config');
-        $configkey = config_key::generate($config)->get_hash();
-        $this->set('configkey', $configkey);
+        if (empty($this->get('config'))) {
+            $this->set('configkey', null);
+        } else {
+            $this->set('configkey', config_key::generate($this->get('config'))->get_hash());
+        }
     }
 
     /**
@@ -296,9 +299,6 @@ class quiz_settings extends persistent {
             default: // Also settings_provider::USE_SEB_CLIENT_CONFIG.
                 $this->process_seb_client_config();
         }
-
-        // Export and save the config, ready for DB.
-        $this->set('config', $this->plist->to_xml());
     }
 
     /**
@@ -306,6 +306,7 @@ class quiz_settings extends persistent {
      */
     private function process_seb_config_no() {
         $this->set('templateid', 0);
+        $this->set('config', null);
     }
 
     /**
@@ -326,6 +327,7 @@ class quiz_settings extends persistent {
 
         // One of the requirements for USE_SEB_CONFIG_MANUALLY is setting examSessionClearCookiesOnStart to false.
         $this->plist->set_or_update_value('examSessionClearCookiesOnStart', new CFBoolean(false));
+        $this->set('config', $this->plist->to_xml());
     }
 
     /**
@@ -339,6 +341,8 @@ class quiz_settings extends persistent {
         $this->process_quit_password_settings();
         $this->process_quit_url_from_template_or_config();
         $this->process_required_enforced_settings();
+
+        $this->set('config', $this->plist->to_xml());
     }
 
     /**
@@ -360,6 +364,8 @@ class quiz_settings extends persistent {
         $this->process_quit_password_settings();
         $this->process_quit_url_from_template_or_config();
         $this->process_required_enforced_settings();
+
+        $this->set('config', $this->plist->to_xml());
     }
 
     /**
@@ -367,9 +373,7 @@ class quiz_settings extends persistent {
      */
     private function process_seb_client_config() {
         $this->set('templateid', 0);
-
-        // Just setup an empty plist.
-        $this->plist = new property_list();
+        $this->set('config', null);
     }
 
     /**
