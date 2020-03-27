@@ -265,6 +265,16 @@ class quiz_settings extends persistent {
     }
 
     /**
+     * Before validate hook.
+     */
+    protected function before_validate() {
+        // Template can't be null.
+        if (is_null($this->get('templateid'))) {
+            $this->set('templateid', 0);
+        }
+    }
+
+    /**
      * Generate the config key from the config string.
      */
     private function compute_config_key() {
