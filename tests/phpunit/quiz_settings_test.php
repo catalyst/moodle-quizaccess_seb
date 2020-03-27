@@ -556,6 +556,42 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test that config and config key are saved as expected.
+     */
+    public function test_saves_config_values_as_expected() {
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertNotNull($quizsettings->get('config'));
+        $this->assertNotNull($quizsettings->get('configkey'));
+
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
+        $quizsettings->save();
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertNull($quizsettings->get('config'));
+        $this->assertNull($quizsettings->get('config'));
+
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
+        $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
+        $this->create_module_test_file($xml, $this->quiz->cmid);
+        $quizsettings->save();
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertNotNull($quizsettings->get('config'));
+        $this->assertNotNull($quizsettings->get('configkey'));
+
+        $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
+        $quizsettings->save();
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertNull($quizsettings->get('config'));
+        $this->assertNull($quizsettings->get('configkey'));
+
+        $template = $this->create_template();
+        $templateid = $template->get('id');
+        $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertNotNull($quizsettings->get('config'));
+        $this->assertNotNull($quizsettings->get('configkey'));
+    }
+
+    /**
      * Get a test object containing mock test settings.
      *
      * @return stdClass Settings.

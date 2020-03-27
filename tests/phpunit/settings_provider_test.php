@@ -1170,46 +1170,6 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
-     * Test filter_by_prefix helper method.
-     */
-    public function test_filter_by_prefix() {
-        $test = new stdClass();
-        $test->one = 'one';
-        $test->seb_two = 'two';
-        $test->seb_seb_three = 'three';
-        $test->four = 'four';
-
-        $newsettings = (array)settings_provider::filter_by_prefix($test);
-        $this->assertFalse(key_exists('one', $newsettings));
-        $this->assertFalse(key_exists('four', $newsettings));
-
-        $this->assertCount(2, $newsettings);
-        $this->assertEquals('two', $newsettings['seb_two']);
-        $this->assertEquals('three', $newsettings['seb_seb_three']);
-    }
-
-    /**
-     * Test strip_all_prefixes helper method.
-     */
-    public function test_strip_all_prefixes() {
-        $test = new stdClass();
-        $test->one = 'one';
-        $test->seb_two = 'two';
-        $test->seb_seb_three = 'three';
-        $test->four = 'four';
-
-        $newsettings = (array)settings_provider::strip_all_prefixes($test);
-        $this->assertFalse(key_exists('seb_two', $newsettings));
-        $this->assertFalse(key_exists('seb_seb_three', $newsettings));
-
-        $this->assertCount(4, $newsettings);
-        $this->assertEquals('one', $newsettings['one']);
-        $this->assertEquals('two', $newsettings['two']);
-        $this->assertEquals('three', $newsettings['seb_three']);
-        $this->assertEquals('four', $newsettings['four']);
-    }
-
-    /**
      * Test add_prefix helper method.
      */
     public function test_add_prefix() {
@@ -1239,6 +1199,171 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertCount(2, $newsettings);
         $this->assertEquals('two', $newsettings['two']);
         $this->assertEquals('three', $newsettings['seb_three']);
+    }
+
+    /**
+     * Helper method to get a list of settings.
+     *
+     * @return \stdClass
+     */
+    protected function get_settings() {
+        $allsettings = new stdClass();
+        $allsettings->seb_suppresssebdownloadlink = 1;
+        $allsettings->seb_linkquitseb = 2;
+        $allsettings->seb_userconfirmquit = 3;
+        $allsettings->seb_allowuserquitseb = 4;
+        $allsettings->seb_quitpassword = 5;
+        $allsettings->seb_allowreloadinexam = 6;
+        $allsettings->seb_showsebtaskbar = 7;
+        $allsettings->seb_showreloadbutton = 8;
+        $allsettings->seb_showtime = 9;
+        $allsettings->seb_showkeyboardlayout = 10;
+        $allsettings->seb_showwificontrol = 11;
+        $allsettings->seb_enableaudiocontrol = 12;
+        $allsettings->seb_muteonstartup = 13;
+        $allsettings->seb_allowspellchecking = 14;
+        $allsettings->seb_activateurlfiltering = 15;
+        $allsettings->seb_filterembeddedcontent = 16;
+        $allsettings->seb_expressionsallowed = 17;
+        $allsettings->seb_regexallowed = 18;
+        $allsettings->seb_expressionsblocked = 19;
+        $allsettings->seb_regexblocked = 20;
+        $allsettings->seb_templateid = 21;
+        $allsettings->seb_allowedbrowserexamkeys = 22;
+
+        return $allsettings;
+    }
+
+    /**
+     * Helper method to assert results of filter_plugin_settings
+     *
+     * @param int $type Type of SEB usage.
+     * @param array $notnulls A list of expected not null settings.
+     */
+    protected function assert_filter_plugin_settings(int $type, array $notnulls) {
+        $allsettings = $this->get_settings();
+        $allsettings->seb_requiresafeexambrowser = $type;
+        $actual = settings_provider::filter_plugin_settings($allsettings);
+
+        $expected = (array)$allsettings;
+        foreach ($actual as $name => $value) {
+            if (in_array($name, $notnulls)) {
+                $this->assertEquals($expected['seb_' . $name], $value);
+            } else {
+                $this->assertNull($value);
+            }
+        }
+    }
+
+    /**
+     * Test filter_plugin_settings method for no SEB case.
+     */
+    public function test_filter_plugin_settings_for_no_seb() {
+        $notnulls = ['requiresafeexambrowser'];
+        $this->assert_filter_plugin_settings(settings_provider::USE_SEB_NO, $notnulls);
+    }
+
+    /**
+     * Test filter_plugin_settings method for using uploaded config.
+     */
+    public function test_filter_plugin_settings_for_uploaded_config() {
+        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowuserquitseb', 'quitpassword', 'allowedbrowserexamkeys'];
+        $this->assert_filter_plugin_settings(settings_provider::USE_SEB_UPLOAD_CONFIG, $notnulls);
+    }
+
+    /**
+     * Test filter_plugin_settings method for using template.
+     */
+    public function test_filter_plugin_settings_for_template() {
+        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowuserquitseb', 'quitpassword', 'templateid'];
+        $this->assert_filter_plugin_settings(settings_provider::USE_SEB_TEMPLATE, $notnulls);
+    }
+
+    /**
+     * Test filter_plugin_settings method for using client config.
+     */
+    public function test_filter_plugin_settings_for_client_config() {
+        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowedbrowserexamkeys'];
+        $this->assert_filter_plugin_settings(settings_provider::USE_SEB_CLIENT_CONFIG, $notnulls);
+    }
+
+    /**
+     * Test filter_plugin_settings method for manually configured SEB.
+     */
+    public function test_filter_plugin_settings_for_configure_manually() {
+        $allsettings = $this->get_settings();
+        $allsettings->seb_requiresafeexambrowser = settings_provider::USE_SEB_CONFIG_MANUALLY;
+        $actual = settings_provider::filter_plugin_settings($allsettings);
+
+        // For manual it's easier to check nulls, as most of the settings are not null.
+        $nulls = ['templateid', 'allowedbrowserexamkeys'];
+
+        $expected = (array)$allsettings;
+        foreach ($actual as $name => $value) {
+            if (in_array($name, $nulls)) {
+                $this->assertNull($value);
+            } else {
+                $this->assertEquals($expected['seb_' . $name], $value);
+            }
+        }
+    }
+
+    /**
+     * Test settings map.
+     */
+    public function test_get_seb_settings_map() {
+        $expected = [
+            settings_provider::USE_SEB_NO => [
+
+            ],
+            settings_provider::USE_SEB_CONFIG_MANUALLY => [
+                'seb_suppresssebdownloadlink' => [],
+                'seb_linkquitseb' => [],
+                'seb_userconfirmquit' => [],
+                'seb_allowuserquitseb' => [
+                    'seb_quitpassword' => []
+                ],
+                'seb_allowreloadinexam' => [],
+                'seb_showsebtaskbar' => [
+                    'seb_showreloadbutton' => [],
+                    'seb_showtime' => [],
+                    'seb_showkeyboardlayout' => [],
+                    'seb_showwificontrol' => [],
+                ],
+                'seb_enableaudiocontrol' => [
+                    'seb_muteonstartup' => [],
+                ],
+                'seb_allowspellchecking' => [],
+                'seb_activateurlfiltering' => [
+                    'seb_filterembeddedcontent' => [],
+                    'seb_expressionsallowed' => [],
+                    'seb_regexallowed' => [],
+                    'seb_expressionsblocked' => [],
+                    'seb_regexblocked' => [],
+                ],
+            ],
+            settings_provider::USE_SEB_TEMPLATE => [
+                'seb_templateid' => [],
+                'seb_suppresssebdownloadlink' => [],
+                'seb_allowuserquitseb' => [
+                    'seb_quitpassword' => [],
+                ],
+            ],
+            settings_provider::USE_SEB_UPLOAD_CONFIG => [
+                'filemanager_sebconfigfile' => [],
+                'seb_suppresssebdownloadlink' => [],
+                'seb_allowuserquitseb' => [
+                    'seb_quitpassword' => [],
+                ],
+                'seb_allowedbrowserexamkeys' => [],
+            ],
+            settings_provider::USE_SEB_CLIENT_CONFIG => [
+                'seb_suppresssebdownloadlink' => [],
+                'seb_allowedbrowserexamkeys' => [],
+            ],
+        ];
+
+        $this->assertEquals($expected, settings_provider::get_seb_settings_map());
     }
 
 }
