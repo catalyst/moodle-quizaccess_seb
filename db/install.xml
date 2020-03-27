@@ -13,7 +13,7 @@
         <FIELD NAME="showsebtaskbar" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show SEB task bar"/>
         <FIELD NAME="showwificontrol" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to allow user to control networking."/>
         <FIELD NAME="showreloadbutton" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show reload button."/>
-        <FIELD NAME="showtime" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Bool to show the clock."/>
+        <FIELD NAME="showtime" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show the clock."/>
         <FIELD NAME="showkeyboardlayout" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show keyboard layout."/>
         <FIELD NAME="allowuserquitseb" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool to show quit button."/>
         <FIELD NAME="quitpassword" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Quit password to exit SEB."/>
