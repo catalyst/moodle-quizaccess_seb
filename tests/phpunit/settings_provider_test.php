@@ -1267,7 +1267,8 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test filter_plugin_settings method for using uploaded config.
      */
     public function test_filter_plugin_settings_for_uploaded_config() {
-        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowuserquitseb', 'quitpassword', 'allowedbrowserexamkeys'];
+        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowuserquitseb',
+            'quitpassword', 'allowedbrowserexamkeys'];
         $this->assert_filter_plugin_settings(settings_provider::USE_SEB_UPLOAD_CONFIG, $notnulls);
     }
 
