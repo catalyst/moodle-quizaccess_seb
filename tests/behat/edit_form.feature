@@ -1,10 +1,13 @@
 @javascript @mod_quiz @quizaccess @quizaccess_seb
-Feature: Safe Exam Browser setting in quiz form
+Feature: Safe Exam Browser settings in quiz edit form
 
   Background:
     Given the following "courses" exist:
       | fullname | shortname |
       | Course 1 | C1        |
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
     And I log in as "admin"
     And I am on "Course 1" course homepage
     And I turn editing mode on
@@ -15,6 +18,7 @@ Feature: Safe Exam Browser setting in quiz form
     And I set the field "Require the use of Safe Exam Browser" to "No"
     Then I should not see "Upload Safe Exam Browser config file"
     Then I should not see "Safe Exam Browser config template"
+    Then I should not see "Template 1"
     Then I should not see "Suppress Safe Exam Browser download button"
     Then I should not see "Enable quitting of SEB"
     Then I should not see "Quit password"
@@ -45,6 +49,7 @@ Feature: Safe Exam Browser setting in quiz form
     Then I should see "Allowed Browser Exam Keys"
     Then I should not see "Upload Safe Exam Browser config file"
     Then I should not see "Safe Exam Browser config template"
+    Then I should not see "Template 1"
     Then I should not see "Enable quitting of SEB"
     Then I should not see "Quit password"
     Then I should not see "Show Exit Safe Exam Browser button, configured with this quit link"
@@ -92,6 +97,38 @@ Feature: Safe Exam Browser setting in quiz form
     Then I should not see "Expressions blocked"
     Then I should not see "Regex blocked"
     Then I should not see "Safe Exam Browser config template"
+    Then I should not see "Template 1"
+    And I set the field "Enable quitting of SEB" to "No"
+    Then I should not see "Quit password"
+
+  Scenario: SEB settings if using Use an existing template
+    When I add a "Quiz" to section "1"
+    And I expand all fieldsets
+    And I set the field "Require the use of Safe Exam Browser" to "Yes – Use an existing template"
+    Then I should see "Safe Exam Browser config template"
+    Then I should see "Template 1"
+    Then I should see "Suppress Safe Exam Browser download button"
+    Then I should see "Enable quitting of SEB"
+    Then I should see "Quit password"
+    Then I should not see "Allowed Browser Exam Keys"
+    Then I should not see "Upload Safe Exam Browser config file"
+    Then I should not see "Show Exit Safe Exam Browser button, configured with this quit link"
+    Then I should not see "Ask user to confirm quitting"
+    Then I should not see "Enable reload in exam"
+    Then I should not see "Show SEB task bar"
+    Then I should not see "Show reload button"
+    Then I should not see "Show time"
+    Then I should not see "Show keyboard layout"
+    Then I should not see "Show Wi-Fi control"
+    Then I should not see "Enable audio controls"
+    Then I should not see "Mute on startup"
+    Then I should not see "Enable spell checking"
+    Then I should not see "Enable URL filtering"
+    Then I should not see "Filter also embedded content"
+    Then I should not see "Expressions allowed"
+    Then I should not see "Regex allowed"
+    Then I should not see "Expressions blocked"
+    Then I should not see "Regex blocked"
     And I set the field "Enable quitting of SEB" to "No"
     Then I should not see "Quit password"
 
@@ -129,7 +166,6 @@ Feature: Safe Exam Browser setting in quiz form
     And I set the field "Enable audio controls" to "Yes"
     Then I should see "Mute on startup"
     And I set the field "Enable URL filtering" to "Yes"
-    Then I should see "Mute on startup"
     Then I should see "Filter also embedded content"
     Then I should see "Expressions allowed"
     Then I should see "Regex allowed"
@@ -138,3 +174,4 @@ Feature: Safe Exam Browser setting in quiz form
     Then I should not see "Upload Safe Exam Browser config file"
     Then I should not see "Allowed Browser Exam Keys"
     Then I should not see "Safe Exam Browser config template"
+    Then I should not see "Template 1"
