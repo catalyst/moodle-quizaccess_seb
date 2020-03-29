@@ -24,10 +24,8 @@
  */
 
 require_once(__DIR__ . '/../../../../config.php');
-require_once($CFG->dirroot . '/mod/quiz/accessrule/seb/lib.php');
 
 $cmid = required_param('cmid', PARAM_RAW);
 
-$config = quizaccess_seb_get_config($cmid);
-
-quizaccess_seb_send_file($config);
+$config = \quizaccess_seb\helper::get_seb_config_content($cmid);
+\quizaccess_seb\helper::send_seb_config_file($config);

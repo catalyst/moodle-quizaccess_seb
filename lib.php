@@ -27,43 +27,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Serve a seb config file for a particular quiz.
- *
- * @param string $cmid The course module ID for a quiz with config.
- * @return string SEB config string.
- */
-function quizaccess_seb_get_config(string $cmid) : string {
-    // Try and get the course module.
-    $cm = get_coursemodule_from_id('quiz', $cmid, 0, false, MUST_EXIST);
-
-    // Make sure the user is logged in and has access to the module.
-    require_login($cm->course, false, $cm);
-
-    // Retrieve the config for quiz.
-    $settings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $cm->instance]);
-    // If no settings found, config is false, otherwise get config.
-    $config = $settings !== false ? $settings->get('config') : false;
-    if (empty($config)) {
-        throw new moodle_exception('noconfigfound', 'quizaccess_seb', '', $cm->id);
-    }
-    return $config;
-}
-
-/**
- * Serve a file to browser for download.
- *
- * @param string $contents Contents of file.
- */
-function quizaccess_seb_send_file(string $contents) {
-    // We can now send the file back to the browser.
-    foreach (\quizaccess_seb\helper::get_seb_file_headers() as $header) {
-        header($header);
-    }
-
-    echo($contents);
-}
-
-/**
  * Serve the files.
  *
  * @param stdClass $course the course object
