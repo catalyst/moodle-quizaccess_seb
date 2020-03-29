@@ -5,14 +5,35 @@ Feature: Safe Exam Browser settings in quiz edit form
     Given the following "courses" exist:
       | fullname | shortname |
       | Course 1 | C1        |
-    Given the following "quizaccess_seb > seb templates" exist:
-      | name       |
-      | Template 1 |
     And I log in as "admin"
     And I am on "Course 1" course homepage
     And I turn editing mode on
 
+  Scenario: Quiz setting "Require the use of Safe Exam Browser" has all types, except "Use an existing template".
+    When I add a "Quiz" to section "1"
+    And I expand all fieldsets
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Configure manually"
+    And the "Require the use of Safe Exam Browser" select box should not contain "Yes – Use an existing template"
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Upload my own config"
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Use SEB client config"
+    And the field "Require the use of Safe Exam Browser" matches value "No"
+
+  Scenario: Quiz setting "Require the use of Safe Exam Browser" has all types if at least one template has been added.
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
+    When I add a "Quiz" to section "1"
+    And I expand all fieldsets
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Configure manually"
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Use an existing template"
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Upload my own config"
+    And the "Require the use of Safe Exam Browser" select box should contain "Yes – Use SEB client config"
+    And the field "Require the use of Safe Exam Browser" matches value "No"
+
   Scenario: SEB settings if using No SEB
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
     When I add a "Quiz" to section "1"
     And I expand all fieldsets
     And I set the field "Require the use of Safe Exam Browser" to "No"
@@ -42,6 +63,9 @@ Feature: Safe Exam Browser settings in quiz edit form
     Then I should not see "Regex blocked"
 
   Scenario: SEB settings if using Use SEB client config
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
     When I add a "Quiz" to section "1"
     And I expand all fieldsets
     And I set the field "Require the use of Safe Exam Browser" to "Yes – Use SEB client config"
@@ -71,6 +95,9 @@ Feature: Safe Exam Browser settings in quiz edit form
     Then I should not see "Regex blocked"
 
   Scenario: SEB settings if using Upload my own config
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
     When I add a "Quiz" to section "1"
     And I expand all fieldsets
     And I set the field "Require the use of Safe Exam Browser" to "Yes – Upload my own config"
@@ -102,6 +129,9 @@ Feature: Safe Exam Browser settings in quiz edit form
     Then I should not see "Quit password"
 
   Scenario: SEB settings if using Use an existing template
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
     When I add a "Quiz" to section "1"
     And I expand all fieldsets
     And I set the field "Require the use of Safe Exam Browser" to "Yes – Use an existing template"
@@ -133,6 +163,9 @@ Feature: Safe Exam Browser settings in quiz edit form
     Then I should not see "Quit password"
 
   Scenario: SEB settings if using Configure manually
+    Given the following "quizaccess_seb > seb templates" exist:
+      | name       |
+      | Template 1 |
     When I add a "Quiz" to section "1"
     And I expand all fieldsets
     And I set the field "Require the use of Safe Exam Browser" to "Yes – Configure manually"
