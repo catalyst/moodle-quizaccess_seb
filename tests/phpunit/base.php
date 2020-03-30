@@ -26,7 +26,6 @@
 namespace quizaccess_seb\tests\phpunit;
 
 use quizaccess_seb\settings_provider;
-use quizaccess_seb\template;
 
 defined('MOODLE_INTERNAL') || die();
 
