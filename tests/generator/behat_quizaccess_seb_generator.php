@@ -33,6 +33,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 class behat_quizaccess_seb_generator extends behat_generator_base {
 
+    /**
+     * Get a list of the entities that can be created.
+
+     * @return array entity name => information about how to generate.
+     */
     protected function get_creatable_entities(): array {
         return [
             'seb templates' => [
