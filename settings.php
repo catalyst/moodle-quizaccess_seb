@@ -30,6 +30,11 @@ global $ADMIN;
 
 if ($hassiteconfig) {
 
+    $settings->add(new admin_setting_heading(
+        'quizaccess_seb/supportedversions',
+        '',
+        $OUTPUT->notification(get_string('setting:supportedversions', 'quizaccess_seb'), 'warning')));
+
     $settings->add(new admin_setting_configcheckbox('quizaccess_seb/autoreconfigureseb',
         get_string('setting:autoreconfigureseb', 'quizaccess_seb'),
         get_string('setting:autoreconfigureseb_desc', 'quizaccess_seb'),
