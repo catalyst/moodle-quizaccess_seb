@@ -133,19 +133,16 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         // Edge case for filemanager_sebconfig.
-        $requiresetting = $quizsettings->get('requiresafeexambrowser');
-        if ($requiresetting == settings_provider::USE_SEB_UPLOAD_CONFIG) {
-            $itemid = $data['filemanager_sebconfigfile'];
-            $drafterror = settings_provider::validate_draftarea_configfile($itemid);
-            if (!empty($drafterror)) {
-                $errors['filemanager_sebconfigfile'] = $drafterror;
+        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_UPLOAD_CONFIG) {
+            $errorvalidatefile = settings_provider::validate_draftarea_configfile($data['filemanager_sebconfigfile']);
+            if (!empty($errorvalidatefile)) {
+                $errors['filemanager_sebconfigfile'] = $errorvalidatefile;
             }
         }
 
         // Edge case to force user to select a template.
-        if ($requiresetting == settings_provider::USE_SEB_TEMPLATE) {
-            $templateid = $data['seb_templateid'];
-            if (empty($templateid)) {
+        if ($quizsettings->get('requiresafeexambrowser') == settings_provider::USE_SEB_TEMPLATE) {
+            if (empty($data['seb_templateid'])) {
                 $errors['seb_templateid'] = get_string('invalidtemplate', 'quizaccess_seb');
             }
         }
