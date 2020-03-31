@@ -875,6 +875,47 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
+     * Test that quiz form cannot be saved if using template, but not actually pick one.
+     */
+    public function test_mod_quiz_form_cannot_be_saved_using_template_and_template_is_not_set() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid,
+            'seb_requiresafeexambrowser' => settings_provider::USE_SEB_TEMPLATE
+        ], [], $form);
+
+        $this->assertContains(get_string('invalidtemplate', 'quizaccess_seb'), $errors);
+    }
+
+    /**
+     * Test that quiz form cannot be saved if uploaded invalid file.
+     */
+    public function test_mod_quiz_form_cannot_be_saved_using_uploaded_file_and_file_is_not_valid() {
+        $this->setAdminUser();
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid,
+            'seb_requiresafeexambrowser' => settings_provider::USE_SEB_UPLOAD_CONFIG,
+            'filemanager_sebconfigfile' => 0,
+        ], [], $form);
+
+        $this->assertContains(get_string('filenotpresent', 'quizaccess_seb'), $errors);
+    }
+
+    /**
      * Test that quiz form cannot be saved if the global settings are set to require a password and no password is set.
      */
     public function test_mod_quiz_form_cannot_be_saved_if_global_settings_force_quiz_password_and_none_is_set() {
