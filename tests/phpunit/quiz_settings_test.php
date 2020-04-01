@@ -553,9 +553,9 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test that config and config key are genrated as expected.
+     * Test that config and config key are null when expected.
      */
-    public function test_saves_config_values_as_expected() {
+    public function test_generates_config_values_as_null_when_expected() {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertNotNull($quizsettings->get_config());
         $this->assertNotNull($quizsettings->get_configkey());
