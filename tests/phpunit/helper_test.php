@@ -154,16 +154,11 @@ class quizaccess_seb_helper_testcase extends quizaccess_seb_testcase {
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_NO);
 
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id);
         $this->setUser($user); // Log user in.
-
-        // Update database with empty config.
-        $settingsrecord = $DB->get_record('quizaccess_seb_quizsettings', ['quizid' => $quiz->id], '*');
-        $settingsrecord->config = '';
-        $this->assertTrue($DB->update_record('quizaccess_seb_quizsettings', $settingsrecord));
 
         $this->expectException(moodle_exception::class);
         $this->expectExceptionMessage("No SEB config could be found for quiz with cmid: $quiz->cmid");

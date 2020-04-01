@@ -468,7 +468,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Check that correct error message is returned.
@@ -495,7 +495,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Check that correct error message is returned.
@@ -523,7 +523,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Check that correct error message is returned.
@@ -581,7 +581,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
         $expectedbrowserkey = hash('sha256', $FULLME . $browserexamkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedbrowserkey;
-        $expectedconfigkey = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedconfigkey = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedconfigkey;
 
         $user = $this->getDataGenerator()->create_user();
@@ -679,7 +679,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Set  up broken browser key.
@@ -710,7 +710,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Set  up broken browser key.
@@ -799,7 +799,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
         $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
 
@@ -827,7 +827,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get('configkey'));
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
         $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
 

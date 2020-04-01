@@ -675,7 +675,7 @@ class settings_provider {
      * @param string $itemid Item ID of the file.
      * @return stored_file|null Returns null if no file is found.
      */
-    public static function get_current_user_draft_file(string $itemid) : ?stored_file { // @codingStandardsIgnoreLine
+    public static function get_current_user_draft_file(string $itemid) : ?stored_file {
         global $USER;
         $context = context_user::instance($USER->id);
         $fs = get_file_storage();
@@ -691,7 +691,7 @@ class settings_provider {
      * @param string $cmid The course module id which is used as an itemid reference.
      * @return stored_file|null Returns null if no file is found.
      */
-    public static function get_module_context_sebconfig_file(string $cmid) : ?stored_file { // @codingStandardsIgnoreLine
+    public static function get_module_context_sebconfig_file(string $cmid) : ?stored_file {
         $fs = new \file_storage();
         $context = context_module::instance($cmid);
 

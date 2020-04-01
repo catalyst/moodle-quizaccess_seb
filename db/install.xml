@@ -31,8 +31,6 @@
         <FIELD NAME="regexblocked" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Regex of blocked URLs"/>
         <FIELD NAME="allowedbrowserexamkeys" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="List of allowed browser exam keys."/>
         <FIELD NAME="suppresssebdownloadlink" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false" COMMENT="Bool whether SEB download link should appear"/>
-        <FIELD NAME="configkey" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="SEB Config Key hash to validate browser."/>
-        <FIELD NAME="config" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Unencrypted SEB Config string."/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

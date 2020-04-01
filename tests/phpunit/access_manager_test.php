@@ -149,7 +149,7 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
         $accessmanager = new access_manager(new quiz($this->quiz,
                 get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
 
-        $configkey = quiz_settings::get_record(['quizid' => $this->quiz->id])->get('configkey');
+        $configkey = quiz_settings::get_record(['quizid' => $this->quiz->id])->get_configkey();
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';

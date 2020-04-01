@@ -228,5 +228,23 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020030403, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020040101) {
+        // Drop config and configkey fields.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $config = new xmldb_field('config');
+        $configkey = new xmldb_field('configkey');
+
+        if ($dbman->field_exists($table, $config)) {
+            $dbman->drop_field($table, $config);
+        }
+
+        if ($dbman->field_exists($table, $configkey)) {
+            $dbman->drop_field($table, $configkey);
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020040101, 'quizaccess', 'seb');
+    }
+
     return true;
 }

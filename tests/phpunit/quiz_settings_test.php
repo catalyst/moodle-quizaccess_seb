@@ -24,7 +24,6 @@
  */
 
 use quizaccess_seb\quiz_settings;
-use quizaccess_seb\template;
 use quizaccess_seb\settings_provider;
 use quizaccess_seb\tests\phpunit\quizaccess_seb_testcase;
 
@@ -74,7 +73,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->from_record($settings);
         $quizsettings->save();
 
-        $config = $quizsettings->get('config');
+        $config = $quizsettings->get_config();
         $this->assertEquals(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
@@ -106,7 +105,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->from_record($settings);
         $quizsettings->save();
 
-        $config = $quizsettings->get('config');
+        $config = $quizsettings->get_config();
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
@@ -121,7 +120,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
 
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
-        $config = $quizsettings->get('config');
+        $config = $quizsettings->get_config();
         $this->assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
 <plist version=\"1.0\"><dict><key>showTaskBar</key><true/><key>allowWlan</key><false/><key>showReloadButton</key><true/>"
@@ -142,11 +141,11 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $settings = $this->get_test_settings();
 
         $quizsettings = new quiz_settings(0, $settings);
-        $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
-        $configkey = $quizsettings->get('configkey');
+        $configkey = $quizsettings->get_configkey();
         $this->assertEquals("89557366c34cb64a33781e1fb767cb15380731efdfb967e037476ef420f1d7b8",
-                $configkey);
+            $configkey
+        );
     }
 
     /**
@@ -156,14 +155,13 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $settings = $this->get_test_settings();
 
         $quizsettings = new quiz_settings(0, $settings);
-        $this->assertEmpty($quizsettings->get('configkey'));
         $quizsettings->create();
-        $configkey = $quizsettings->get('configkey');
+        $configkey = $quizsettings->get_configkey();
         $this->assertEquals("89557366c34cb64a33781e1fb767cb15380731efdfb967e037476ef420f1d7b8",
                 $configkey);
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
-        $configkey = $quizsettings->get('configkey');
+        $configkey = $quizsettings->get_configkey();
         $this->assertEquals("4476e7fc1e4e769c930685535b0f6377e6f736cd6c24b68db512455a95f028b5",
             $configkey);
     }
@@ -178,9 +176,8 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
      */
     public function test_filter_rules_added_to_config(stdClass $settings, string $expectedxml) {
         $quizsettings = new quiz_settings(0, $settings);
-        $this->assertEmpty($quizsettings->get('config'));
         $quizsettings->create();
-        $config = $quizsettings->get('config');
+        $config = $quizsettings->get_config();
         $this->assertEquals($expectedxml, $config);
     }
 
@@ -224,7 +221,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings->save();
-        $config = $quizsettings->get('config');
+        $config = $quizsettings->get_config();
         $this->assertEquals($xml, $config);
     }
 
@@ -237,7 +234,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $cmid = $quizsettings->get('cmid');
         $this->expectException(moodle_exception::class);
         $this->expectExceptionMessage("No uploaded SEB config file could be found for quiz with cmid: {$cmid}");
-        $quizsettings->save();
+        $quizsettings->get_config();
     }
 
     /**
@@ -256,12 +253,12 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->save();
         $this->assertContains(
             "<key>startURL</key><string>https://www.example.com/moodle/mod/quiz/view.php?id={$this->quiz->cmid}</string>",
-            $quizsettings->get('config')
+            $quizsettings->get_config()
         );
-        $this->assertContains("<key>allowQuit</key><true/>", $quizsettings->get('config'));
+        $this->assertContains("<key>allowQuit</key><true/>", $quizsettings->get_config());
         $hashedpassword = hash('SHA256', '123');
-        $this->assertNotContains("<key>hashedQuitPassword</key><string>123</string>", $quizsettings->get('config'));
-        $this->assertContains("<key>hashedQuitPassword</key><string>{$hashedpassword}</string>", $quizsettings->get('config'));
+        $this->assertNotContains("<key>hashedQuitPassword</key><string>123</string>", $quizsettings->get_config());
+        $this->assertContains("<key>hashedQuitPassword</key><string>{$hashedpassword}</string>", $quizsettings->get_config());
     }
 
     /**
@@ -279,7 +276,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $quizsettings->set('quitpassword', '123');
         $quizsettings->save();
-        $config = $quizsettings->get('config');
+        $config = $quizsettings->get_config();
 
         $hashedpassword = hash('SHA256', '123');
         $this->assertNotContains("<key>hashedQuitPassword</key><string>hashedpassword</string>", $config);
@@ -556,39 +553,39 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * Test that config and config key are saved as expected.
+     * Test that config and config key are null when expected.
      */
-    public function test_saves_config_values_as_expected() {
+    public function test_generates_config_values_as_null_when_expected() {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertNotNull($quizsettings->get('config'));
-        $this->assertNotNull($quizsettings->get('configkey'));
+        $this->assertNotNull($quizsettings->get_config());
+        $this->assertNotNull($quizsettings->get_configkey());
 
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
         $quizsettings->save();
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertNull($quizsettings->get('config'));
-        $this->assertNull($quizsettings->get('config'));
+        $this->assertNull($quizsettings->get_config());
+        $this->assertNull($quizsettings->get_config());
 
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_UPLOAD_CONFIG);
         $xml = file_get_contents(__DIR__ . '/sample_data/unencrypted.seb');
         $this->create_module_test_file($xml, $this->quiz->cmid);
         $quizsettings->save();
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertNotNull($quizsettings->get('config'));
-        $this->assertNotNull($quizsettings->get('configkey'));
+        $this->assertNotNull($quizsettings->get_config());
+        $this->assertNotNull($quizsettings->get_configkey());
 
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
         $quizsettings->save();
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertNull($quizsettings->get('config'));
-        $this->assertNull($quizsettings->get('configkey'));
+        $this->assertNull($quizsettings->get_config());
+        $this->assertNull($quizsettings->get_configkey());
 
         $template = $this->create_template();
         $templateid = $template->get('id');
         $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $this->assertNotNull($quizsettings->get('config'));
-        $this->assertNotNull($quizsettings->get('configkey'));
+        $this->assertNotNull($quizsettings->get_config());
+        $this->assertNotNull($quizsettings->get_configkey());
     }
 
     /**
