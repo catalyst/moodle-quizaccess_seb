@@ -106,7 +106,7 @@ class access_manager {
             return true;
         }
 
-        $savedconfigkey = $this->quizsettings->get('configkey');
+        $savedconfigkey = $this->quizsettings->get_configkey();
         if (empty($savedconfigkey)) {
             return false; // No config key has been saved.
         }

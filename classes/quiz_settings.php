@@ -51,27 +51,15 @@ class quiz_settings extends persistent {
     /** @var property_list $plist The SEB config represented as a Property List object. */
     private $plist;
 
-    /**
-     * Create an instance of this class.
-     *
-     * @param int $id If set, this is the id of an existing record, used to load the data.
-     * @param \stdClass $record If set will be passed to {@link self::from_record()}.
-     */
-    public function __construct($id = 0, \stdClass $record = null) {
-        parent::__construct($id, $record);
-
-        $config = $this->get('config');
-        if (!empty($config)) {
-            $this->plist = new property_list($config);
-        }
-    }
+    /** @var string $config The SEB config represented as a string. */
+    private $config;
 
     /**
      * Return the definition of the properties of this model.
      *
      * @return array
      */
-    protected static function define_properties() {
+    protected static function define_properties() : array {
         return [
             'quizid' => [
                 'type' => PARAM_INT,
@@ -192,16 +180,6 @@ class quiz_settings extends persistent {
                 'default' => '',
                 'null' => NULL_ALLOWED,
             ],
-            'configkey' => [
-                'type' => PARAM_TEXT,
-                'default' => '',
-                'null' => NULL_ALLOWED,
-            ],
-            'config' => [
-                'type' => PARAM_RAW,
-                'default' => '',
-                'null' => NULL_ALLOWED,
-            ],
         ];
     }
 
@@ -259,9 +237,13 @@ class quiz_settings extends persistent {
      * As there is no hook for before both create and update, this function is called by both hooks.
      */
     private function before_save() {
-        // Recalculate config and config key.
-        $this->compute_config();
-        $this->compute_config_key();
+        // Set template to 0 if using anything different to template.
+        if ($this->get('requiresafeexambrowser') != settings_provider::USE_SEB_TEMPLATE) {
+            $this->set('templateid', 0);
+        }
+
+        // Process configs to make sure that all data is set correctly.
+        $this->process_config();
     }
 
     /**
@@ -275,20 +257,9 @@ class quiz_settings extends persistent {
     }
 
     /**
-     * Generate the config key from the config string.
-     */
-    private function compute_config_key() {
-        if (empty($this->get('config'))) {
-            $this->set('configkey', null);
-        } else {
-            $this->set('configkey', config_key::generate($this->get('config'))->get_hash());
-        }
-    }
-
-    /**
      * Create or update the config string based on the current quiz settings.
      */
-    private function compute_config() {
+    private function process_config() {
         switch ($this->get('requiresafeexambrowser')) {
             case settings_provider::USE_SEB_NO:
                 $this->process_seb_config_no();
@@ -312,11 +283,36 @@ class quiz_settings extends persistent {
     }
 
     /**
+     * Return SEB config key.
+     *
+     * @return string|null
+     */
+    public function get_configkey() : ?string {
+        $config = $this->get_config();
+
+        if (!empty($config)) {
+            return config_key::generate($config)->get_hash();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Return string representation of the config.
+     *
+     * @return string|null
+     */
+    public function get_config() : ?string {
+        $this->process_config();
+
+        return $this->config;
+    }
+
+    /**
      * Case for USE_SEB_NO.
      */
     private function process_seb_config_no() {
-        $this->set('templateid', 0);
-        $this->set('config', null);
+        $this->config = null;
     }
 
     /**
@@ -324,8 +320,6 @@ class quiz_settings extends persistent {
      * some defaults.
      */
     private function process_seb_config_manually() {
-        $this->set('templateid', 0);
-
         // If at any point a configuration file has been uploaded and parsed, clear the settings.
         $this->plist = new property_list();
 
@@ -337,7 +331,7 @@ class quiz_settings extends persistent {
 
         // One of the requirements for USE_SEB_CONFIG_MANUALLY is setting examSessionClearCookiesOnStart to false.
         $this->plist->set_or_update_value('examSessionClearCookiesOnStart', new CFBoolean(false));
-        $this->set('config', $this->plist->to_xml());
+        $this->config = $this->plist->to_xml();
     }
 
     /**
@@ -352,7 +346,7 @@ class quiz_settings extends persistent {
         $this->process_quit_url_from_template_or_config();
         $this->process_required_enforced_settings();
 
-        $this->set('config', $this->plist->to_xml());
+        $this->config = $this->plist->to_xml();
     }
 
     /**
@@ -360,8 +354,6 @@ class quiz_settings extends persistent {
      * password settings and some defaults.
      */
     private function process_seb_upload_config() {
-        $this->set('templateid', 0);
-
         $file = settings_provider::get_module_context_sebconfig_file($this->get('cmid'));
 
         // If there was no file, create an empty plist so the rest of this wont explode.
@@ -375,15 +367,14 @@ class quiz_settings extends persistent {
         $this->process_quit_url_from_template_or_config();
         $this->process_required_enforced_settings();
 
-        $this->set('config', $this->plist->to_xml());
+        $this->config = $this->plist->to_xml();
     }
 
     /**
      * Case for USE_SEB_CLIENT_CONFIG. This creates an empty plist to remove the config stored.
      */
     private function process_seb_client_config() {
-        $this->set('templateid', 0);
-        $this->set('config', null);
+        $this->config = null;
     }
 
     /**
