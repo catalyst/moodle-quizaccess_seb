@@ -361,9 +361,6 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
 
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->save();
-
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = 'Broken config key';
