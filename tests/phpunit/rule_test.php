@@ -931,6 +931,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $errors = quizaccess_seb::validate_settings_form_fields([], [
             'instance' => $this->quiz->id,
             'coursemodule' => $this->quiz->cmid,
+            'seb_requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
         ], [], $form);
 
         $this->assertContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
@@ -954,8 +955,31 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $errors = quizaccess_seb::validate_settings_form_fields([], [
             'instance' => $this->quiz->id,
             'coursemodule' => $this->quiz->cmid,
-            'quizpassword' => 'set'
+            'quizpassword' => 'set',
+            'seb_requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,
         ], [], $form);
+        $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
+    }
+
+    /**
+     * Test that quiz form can be saved if the global settings are set to require a password and no seb usage selected.
+     */
+    public function test_mod_quiz_form_can_be_saved_if_global_settings_force_quiz_password_and_none_no_seb() {
+        $this->setAdminUser();
+        // Set global settings to require quiz password but set password to be empty.
+        set_config('quizpasswordrequired', '1', 'quizaccess_seb');
+        $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_NO);
+
+        $form = $this->createMock('mod_quiz_mod_form');
+        $form->method('get_context')->willReturn(context_module::instance($this->quiz->cmid));
+
+        // Validate settings with a dummy form.
+        $errors = quizaccess_seb::validate_settings_form_fields([], [
+            'instance' => $this->quiz->id,
+            'coursemodule' => $this->quiz->cmid,
+            'seb_requiresafeexambrowser' => settings_provider::USE_SEB_NO,
+        ], [], $form);
+
         $this->assertNotContains(get_string('passwordnotset', 'quizaccess_seb'), $errors);
     }
 
