@@ -287,7 +287,7 @@ class settings_provider {
             );
             self::insert_element($quizform, $mform, $element);
             self::set_type($quizform, $mform, 'seb_showsebdownloadlink', PARAM_BOOL);
-            self::set_default($quizform, $mform, 'seb_showsebdownloadlink', 0);
+            self::set_default($quizform, $mform, 'seb_showsebdownloadlink', 1);
             self::add_help_button($quizform, $mform, 'seb_showsebdownloadlink');
         }
     }
