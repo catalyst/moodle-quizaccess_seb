@@ -351,7 +351,7 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
 
             // Don't display blocks after finishing an attempt.
-            if (!empty($attempts) && !get_config('quizaccess_seb', 'displayblockswhenfinihsed')) {
+            if (!empty($attempts) && !get_config('quizaccess_seb', 'displayblockswhenfinished')) {
                 $PAGE->blocks->show_only_fake_blocks();
             }
         }

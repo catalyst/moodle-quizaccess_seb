@@ -65,9 +65,9 @@ if ($hassiteconfig) {
         get_string('setting:displayblocksbeforestart_desc', 'quizaccess_seb'),
         '0'));
 
-    $settings->add(new admin_setting_configcheckbox('quizaccess_seb/displayblockswhenfinihsed',
-        get_string('setting:displayblockswhenfinihsed', 'quizaccess_seb'),
-        get_string('setting:displayblockswhenfinihsed_desc', 'quizaccess_seb'),
+    $settings->add(new admin_setting_configcheckbox('quizaccess_seb/displayblockswhenfinished',
+        get_string('setting:displayblockswhenfinished', 'quizaccess_seb'),
+        get_string('setting:displayblockswhenfinished_desc', 'quizaccess_seb'),
         '1'));
 }
 

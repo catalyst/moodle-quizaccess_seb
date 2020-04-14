@@ -1247,14 +1247,14 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->assertFalse($property->getValue($PAGE->blocks));
 
         // Don't display blocks after finish.
-        set_config('displayblockswhenfinihsed', 0, 'quizaccess_seb');
+        set_config('displayblockswhenfinished', 0, 'quizaccess_seb');
         $this->set_up_quiz_view_page();
         $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
         $this->assertTrue($property->getValue($PAGE->blocks));
 
         // Display blocks after finish.
-        set_config('displayblockswhenfinihsed', 1, 'quizaccess_seb');
+        set_config('displayblockswhenfinished', 1, 'quizaccess_seb');
         $this->set_up_quiz_view_page();
         $this->make_rule()->prevent_access();
         $this->assertEquals('secure', $PAGE->pagelayout);
