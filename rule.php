@@ -186,7 +186,7 @@ class quizaccess_seb extends quiz_access_rule_base {
         $settings->cmid = $cm->id;
 
         // Get existing settings or create new settings if none exist.
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_by_quiz_id($quiz->id);
         if (empty($quizsettings)) {
             $quizsettings = new quiz_settings(0, $settings);
         } else {
@@ -218,7 +218,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      *      which is the id of the quiz being deleted.
      */
     public static function delete_settings($quiz) {
-        $quizsettings = quiz_settings::get_record(['quizid' => $quiz->id]);
+        $quizsettings = quiz_settings::get_by_quiz_id($quiz->id);
         // Check that there are existing settings.
         if ($quizsettings !== false) {
             $quizsettings->delete();
@@ -404,7 +404,6 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return string empty or a button which has the configured seb quit link.
      */
     private function get_quit_button() : string {
-        $quizsettings = $this->accessmanager->get_quiz_settings();
         $quitbutton = '';
 
         if (empty($this->get_user_finished_attempts())) {
@@ -412,9 +411,9 @@ class quizaccess_seb extends quiz_access_rule_base {
         }
 
         // Only display if the link has been configured and attempts are greater than 0.
-        if ($quizsettings->get('linkquitseb')) {
+        if (!empty($this->quiz->seb_linkquitseb)) {
             $quitbutton = html_writer::link(
-                $quizsettings->get('linkquitseb'),
+                $this->quiz->seb_linkquitseb,
                 get_string('exitsebbutton', 'quizaccess_seb'),
                 ['class' => 'btn btn-secondary']
             );

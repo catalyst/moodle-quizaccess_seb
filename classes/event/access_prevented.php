@@ -53,7 +53,7 @@ class access_prevented extends base {
 
         $other = [];
         $other['reason'] = $reason;
-        $other['savedconfigkey'] = $accessmanager->get_quiz_settings()->get_configkey();
+        $other['savedconfigkey'] = $accessmanager->get_valid_config_key();
         $other['receivedconfigkey'] = $accessmanager->get_received_config_key();
         $other['receivedbrowserexamkey'] = $accessmanager->get_received_browser_exam_key();
 

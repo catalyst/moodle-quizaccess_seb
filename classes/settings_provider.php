@@ -397,7 +397,7 @@ class settings_provider {
             self::freeze_element($quizform, $mform, 'seb_suppresssebdownloadlink');
             self::freeze_element($quizform, $mform, 'seb_allowedbrowserexamkeys');
 
-            $quizsettings = quiz_settings::get_record(['quizid' => (int) $quizform->get_instance()]);
+            $quizsettings = quiz_settings::get_by_quiz_id((int) $quizform->get_instance());
 
             // If the file has been uploaded, then replace it with the link to download the file.
             if (!empty($quizsettings) && $quizsettings->get('requiresafeexambrowser') == self::USE_SEB_UPLOAD_CONFIG) {

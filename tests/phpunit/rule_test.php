@@ -49,35 +49,6 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     }
 
     /**
-     * A helper method to make the rule form the currently created quiz and  course.
-     *
-     * @return \quiz_access_rule_base|null
-     */
-    private function make_rule() {
-        return quizaccess_seb::make(
-            new quiz($this->quiz, get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course),
-            0,
-            true
-        );
-    }
-
-    /**
-     * A helper method to set up quiz view page.
-     */
-    private function set_up_quiz_view_page() {
-        global $PAGE;
-
-        $page = new moodle_page();
-        $page->set_context(context_module::instance($this->quiz->cmid));
-        $page->set_course($this->course);
-        $page->set_pagelayout('standard');
-        $page->set_pagetype("mod-quiz-view");
-        $page->set_url('/mod/quiz/view.php?id=' . $this->quiz->cmid);
-
-        $PAGE = $page;
-    }
-
-    /**
      * Helper method to get SEB download link for testing.
      *
      * @return string
@@ -468,7 +439,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Check that correct error message is returned.
@@ -495,7 +466,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Check that correct error message is returned.
@@ -523,7 +494,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Check that correct error message is returned.
@@ -581,7 +552,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
         $expectedbrowserkey = hash('sha256', $FULLME . $browserexamkey);
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_REQUESTHASH'] = $expectedbrowserkey;
-        $expectedconfigkey = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedconfigkey = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedconfigkey;
 
         $user = $this->getDataGenerator()->create_user();
@@ -679,7 +650,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Set  up broken browser key.
@@ -710,7 +681,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
 
         // Set  up broken browser key.
@@ -799,7 +770,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
         $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
 
@@ -827,7 +798,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
         // Set up dummy request.
         $FULLME = 'https://example.com/moodle/mod/quiz/attempt.php?attemptid=123&page=4';
-        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_configkey());
+        $expectedhash = hash('sha256', $FULLME . $quizsettings->get_config_key());
         $_SERVER['HTTP_X_SAFEEXAMBROWSER_CONFIGKEYHASH'] = $expectedhash;
         $_SERVER['HTTP_USER_AGENT'] = 'WRONG_TEST_SITE';
 
@@ -1105,10 +1076,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
     public function test_get_quit_button() {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
-
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->set('linkquitseb', "http://test.quit.link");
-        $quizsettings->save();
+        $this->quiz->seb_linkquitseb = "http://test.quit.link";
 
         $user = $this->getDataGenerator()->create_user();
         $this->attempt_quiz($this->quiz, $user);
@@ -1130,9 +1098,7 @@ class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
         $this->setAdminUser();
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CLIENT_CONFIG);
 
-        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
-        $quizsettings->set('linkquitseb', "http://test.quit.link");
-        $quizsettings->save();
+        $this->quiz->seb_linkquitseb = "http://test.quit.link";
 
         // Set up basic dummy request.
         $_SERVER['HTTP_USER_AGENT'] = 'SEB_TEST_SITE';

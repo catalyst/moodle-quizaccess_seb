@@ -25,6 +25,7 @@
 
 namespace quizaccess_seb\tests\phpunit;
 
+use quizaccess_seb\access_manager;
 use quizaccess_seb\settings_provider;
 
 defined('MOODLE_INTERNAL') || die();
@@ -233,5 +234,77 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
         }
 
         return $this->getDataGenerator()->get_plugin_generator('quizaccess_seb')->create_template($data);
+    }
+
+    /**
+     * Get access manager for testing.
+     *
+     * @return \quizaccess_seb\access_manager
+     */
+    protected function get_access_manager() {
+        return new access_manager(new \quiz($this->quiz,
+            get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course));
+    }
+
+    /**
+     * A helper method to make the rule form the currently created quiz and  course.
+     *
+     * @return \quiz_access_rule_base|null
+     */
+    protected function make_rule() {
+        return \quizaccess_seb::make(
+            new \quiz($this->quiz, get_coursemodule_from_id('quiz', $this->quiz->cmid), $this->course),
+            0,
+            true
+        );
+    }
+
+    /**
+     * A helper method to set up quiz view page.
+     */
+    protected function set_up_quiz_view_page() {
+        global $PAGE;
+
+        $page = new \moodle_page();
+        $page->set_context(\context_module::instance($this->quiz->cmid));
+        $page->set_course($this->course);
+        $page->set_pagelayout('standard');
+        $page->set_pagetype("mod-quiz-view");
+        $page->set_url('/mod/quiz/view.php?id=' . $this->quiz->cmid);
+
+        $PAGE = $page;
+    }
+
+    /**
+     * Get a test object containing mock test settings.
+     *
+     * @return \stdClass Settings.
+     */
+    protected function get_test_settings() : \stdClass {
+        return (object) [
+            'quizid' => 1,
+            'cmid' => 1,
+            'requiresafeexambrowser' => '1',
+            'showsebtaskbar' => '1',
+            'showwificontrol' => '0',
+            'showreloadbutton' => '1',
+            'showtime' => '0',
+            'showkeyboardlayout' => '1',
+            'allowuserquitseb' => '1',
+            'quitpassword' => 'test',
+            'linkquitseb' => '',
+            'userconfirmquit' => '1',
+            'enableaudiocontrol' => '1',
+            'muteonstartup' => '0',
+            'allowspellchecking' => '0',
+            'allowreloadinexam' => '1',
+            'activateurlfiltering' => '1',
+            'filterembeddedcontent' => '0',
+            'expressionsallowed' => 'test.com',
+            'regexallowed' => '',
+            'expressionsblocked' => '',
+            'regexblocked' => '',
+            'suppresssebdownloadlink' => '1',
+        ];
     }
 }

@@ -54,6 +54,10 @@ class quiz_settings extends persistent {
     /** @var string $config The SEB config represented as a string. */
     private $config;
 
+    /** @var string $configkey The SEB config key represented as a string. */
+    private $configkey;
+
+
     /**
      * Return the definition of the properties of this model.
      *
@@ -184,6 +188,128 @@ class quiz_settings extends persistent {
     }
 
     /**
+     * Return an instance by quiz id.
+     *
+     * This method gets data from cache before doing any DB calls.
+     *
+     * @param int $quizid Quiz id.
+     * @return false|\quizaccess_seb\quiz_settings
+     */
+    public static function get_by_quiz_id(int $quizid) {
+        if ($data = self::get_quiz_settings_cache()->get($quizid)) {
+            return new static(0, $data);
+        }
+
+        return self::get_record(['quizid' => $quizid]);
+    }
+
+    /**
+     * Return cached SEB config represented as a string by quiz ID.
+     *
+     * @param int $quizid Quiz id.
+     * @return string|null
+     */
+    public static function get_config_by_quiz_id(int $quizid) : ?string {
+        $config = self::get_config_cache()->get($quizid);
+
+        if ($config !== false) {
+            return $config;
+        }
+
+        $config = null;
+        if ($settings = self::get_by_quiz_id($quizid)) {
+            $config = $settings->get_config();
+            self::get_config_cache()->set($quizid, $config);
+        }
+
+        return $config;
+    }
+
+    /**
+     * Return cached SEB config key by quiz ID.
+     *
+     * @param int $quizid Quiz id.
+     * @return string|null
+     */
+    public static function get_config_key_by_quiz_id(int $quizid) : ?string {
+        $configkey = self::get_config_key_cache()->get($quizid);
+
+        if ($configkey !== false) {
+            return $configkey;
+        }
+
+        $configkey = null;
+        if ($settings = self::get_by_quiz_id($quizid)) {
+            $configkey = $settings->get_config_key();
+            self::get_config_key_cache()->set($quizid, $configkey);
+        }
+
+        return $configkey;
+    }
+
+    /**
+     * Return SEB config key cache instance.
+     *
+     * @return \cache_application
+     */
+    private static function get_config_key_cache() : \cache_application {
+        return \cache::make('quizaccess_seb', 'configkey');
+    }
+
+    /**
+     * Return SEB config cache instance.
+     *
+     * @return \cache_application
+     */
+    private static function get_config_cache() : \cache_application {
+        return \cache::make('quizaccess_seb', 'config');
+    }
+
+    /**
+     * Return quiz settings cache object,
+     *
+     * @return \cache_application
+     */
+    private static function get_quiz_settings_cache() : \cache_application {
+        return \cache::make('quizaccess_seb', 'quizsettings');
+    }
+
+    /**
+     * Adds the new record to the cache.
+     */
+    protected function after_create() {
+        $this->after_save();
+    }
+
+    /**
+     * Updates the cache record.
+     *
+     * @param bool $result
+     */
+    protected function after_update($result) {
+        $this->after_save();
+    }
+
+    /**
+     * Helper method to execute common stuff after create and update.
+     */
+    private function after_save() {
+        self::get_quiz_settings_cache()->set($this->get('quizid'), $this->to_record());
+        self::get_config_cache()->set($this->get('quizid'), $this->config);
+        self::get_config_key_cache()->set($this->get('quizid'), $this->configkey);
+    }
+
+    /**
+     * Removes unnecessary stuff from db.
+     */
+    protected function before_delete() {
+        $key = $this->get('quizid');
+        self::get_quiz_settings_cache()->delete($key);
+        self::get_config_cache()->delete($key);
+        self::get_config_key_cache()->delete($key);
+    }
+
+    /**
      * Validate the browser exam keys string.
      *
      * @param string $keys Newline separated browser exam keys.
@@ -243,7 +369,7 @@ class quiz_settings extends persistent {
         }
 
         // Process configs to make sure that all data is set correctly.
-        $this->process_config();
+        $this->process_configs();
     }
 
     /**
@@ -259,7 +385,7 @@ class quiz_settings extends persistent {
     /**
      * Create or update the config string based on the current quiz settings.
      */
-    private function process_config() {
+    private function process_configs() {
         switch ($this->get('requiresafeexambrowser')) {
             case settings_provider::USE_SEB_NO:
                 $this->process_seb_config_no();
@@ -280,6 +406,13 @@ class quiz_settings extends persistent {
             default: // Also settings_provider::USE_SEB_CLIENT_CONFIG.
                 $this->process_seb_client_config();
         }
+
+        // Generate config key based on given SEB config.
+        if (!empty($this->config)) {
+            $this->configkey = config_key::generate($this->config)->get_hash();
+        } else {
+            $this->configkey = null;
+        }
     }
 
     /**
@@ -287,14 +420,10 @@ class quiz_settings extends persistent {
      *
      * @return string|null
      */
-    public function get_configkey() : ?string {
-        $config = $this->get_config();
+    public function get_config_key() : ?string {
+        $this->process_configs();
 
-        if (!empty($config)) {
-            return config_key::generate($config)->get_hash();
-        } else {
-            return null;
-        }
+        return $this->configkey;
     }
 
     /**
@@ -303,7 +432,7 @@ class quiz_settings extends persistent {
      * @return string|null
      */
     public function get_config() : ?string {
-        $this->process_config();
+        $this->process_configs();
 
         return $this->config;
     }

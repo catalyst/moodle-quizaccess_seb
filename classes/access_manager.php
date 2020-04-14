@@ -56,6 +56,10 @@ class access_manager {
     /** @var context_module $context Context of this quiz activity. */
     private $context;
 
+    /** @var string|null $validconfigkey Expected valid SEB config key.
+     */
+    private $validconfigkey = null;
+
     /**
      * The access_manager constructor.
      *
@@ -64,7 +68,8 @@ class access_manager {
     public function __construct(quiz $quiz) {
         $this->quiz = $quiz;
         $this->context = context_module::instance($quiz->get_cmid());
-        $this->quizsettings = quiz_settings::get_record(['quizid' => $quiz->get_quizid()]);
+        $this->quizsettings = quiz_settings::get_by_quiz_id($quiz->get_quizid());
+        $this->validconfigkey = quiz_settings::get_config_key_by_quiz_id($quiz->get_quizid());
     }
 
     /**
@@ -106,8 +111,7 @@ class access_manager {
             return true;
         }
 
-        $savedconfigkey = $this->quizsettings->get_configkey();
-        if (empty($savedconfigkey)) {
+        if (empty($this->validconfigkey)) {
             return false; // No config key has been saved.
         }
 
@@ -120,7 +124,7 @@ class access_manager {
             $pageurl = $this->get_this_page_url();
         }
 
-        return $this->check_key($savedconfigkey, $pageurl, $this->get_received_config_key());
+        return $this->check_key($this->validconfigkey, $pageurl, $this->get_received_config_key());
     }
 
     /**
@@ -186,12 +190,12 @@ class access_manager {
     }
 
     /**
-     * Getter for the quiz_settings object.
+     * Return expected SEB config key.
      *
-     * @return quiz_settings
+     * @return string|null
      */
-    public function get_quiz_settings() : quiz_settings {
-        return $this->quizsettings;
+    public function get_valid_config_key() : ?string {
+        return $this->validconfigkey;
     }
 
     /**

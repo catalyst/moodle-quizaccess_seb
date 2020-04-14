@@ -65,7 +65,7 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
         $this->assertEquals(1, count($events));
         $event = reset($events);
 
-        $expectedconfigkey = $accessmanager->get_quiz_settings()->get_configkey();
+        $expectedconfigkey = $accessmanager->get_valid_config_key();
 
         // Test that the event data is as expected.
         $this->assertInstanceOf('\quizaccess_seb\event\access_prevented', $event);
@@ -81,7 +81,7 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
         $this->assertEquals($quiz->id, $event->objectid);
         $this->assertEquals($course->id, $event->courseid);
         $this->assertEquals('Because I said so.', $event->other['reason']);
-        $this->assertEquals($accessmanager->get_quiz_settings()->get_configkey(), $event->other['savedconfigkey']);
+        $this->assertEquals($expectedconfigkey, $event->other['savedconfigkey']);
         $this->assertEquals('configkey', $event->other['receivedconfigkey']);
         $this->assertEquals('browserexamkey', $event->other['receivedbrowserexamkey']);
     }

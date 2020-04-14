@@ -123,9 +123,7 @@ class helper {
         require_login($cm->course, false, $cm);
 
         // Retrieve the config for quiz.
-        $settings = quiz_settings::get_record(['quizid' => $cm->instance]);
-        // If no settings found, config is false, otherwise get config.
-        $config = $settings !== false ? $settings->get_config() : false;
+        $config = quiz_settings::get_config_by_quiz_id($cm->instance);
         if (empty($config)) {
             throw new \moodle_exception('noconfigfound', 'quizaccess_seb', '', $cm->id);
         }

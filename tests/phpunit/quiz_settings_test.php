@@ -142,7 +142,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
 
         $quizsettings = new quiz_settings(0, $settings);
         $quizsettings->create();
-        $configkey = $quizsettings->get_configkey();
+        $configkey = $quizsettings->get_config_key();
         $this->assertEquals("89557366c34cb64a33781e1fb767cb15380731efdfb967e037476ef420f1d7b8",
             $configkey
         );
@@ -156,12 +156,12 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
 
         $quizsettings = new quiz_settings(0, $settings);
         $quizsettings->create();
-        $configkey = $quizsettings->get_configkey();
+        $configkey = $quizsettings->get_config_key();
         $this->assertEquals("89557366c34cb64a33781e1fb767cb15380731efdfb967e037476ef420f1d7b8",
                 $configkey);
         $quizsettings->set('filterembeddedcontent', 1); // Alter the settings.
         $quizsettings->save();
-        $configkey = $quizsettings->get_configkey();
+        $configkey = $quizsettings->get_config_key();
         $this->assertEquals("4476e7fc1e4e769c930685535b0f6377e6f736cd6c24b68db512455a95f028b5",
             $configkey);
     }
@@ -558,7 +558,7 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
     public function test_generates_config_values_as_null_when_expected() {
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertNotNull($quizsettings->get_config());
-        $this->assertNotNull($quizsettings->get_configkey());
+        $this->assertNotNull($quizsettings->get_config_key());
 
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_NO);
         $quizsettings->save();
@@ -572,53 +572,140 @@ class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
         $quizsettings->save();
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertNotNull($quizsettings->get_config());
-        $this->assertNotNull($quizsettings->get_configkey());
+        $this->assertNotNull($quizsettings->get_config_key());
 
         $quizsettings->set('requiresafeexambrowser', settings_provider::USE_SEB_CLIENT_CONFIG);
         $quizsettings->save();
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertNull($quizsettings->get_config());
-        $this->assertNull($quizsettings->get_configkey());
+        $this->assertNull($quizsettings->get_config_key());
 
         $template = $this->create_template();
         $templateid = $template->get('id');
         $this->save_settings_with_optional_template($quizsettings, settings_provider::USE_SEB_TEMPLATE, $templateid);
         $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertNotNull($quizsettings->get_config());
-        $this->assertNotNull($quizsettings->get_configkey());
+        $this->assertNotNull($quizsettings->get_config_key());
     }
 
     /**
-     * Get a test object containing mock test settings.
-     *
-     * @return stdClass Settings.
+     * Test that quizsettings cache exists after creation.
      */
-    private function get_test_settings() : stdClass {
-        return (object) [
-            'quizid' => 1,
-            'cmid' => 1,
-            'requiresafeexambrowser' => '1',
-            'showsebtaskbar' => '1',
-            'showwificontrol' => '0',
-            'showreloadbutton' => '1',
-            'showtime' => '0',
-            'showkeyboardlayout' => '1',
-            'allowuserquitseb' => '1',
-            'quitpassword' => 'test',
-            'linkquitseb' => '',
-            'userconfirmquit' => '1',
-            'enableaudiocontrol' => '1',
-            'muteonstartup' => '0',
-            'allowspellchecking' => '0',
-            'allowreloadinexam' => '1',
-            'activateurlfiltering' => '1',
-            'filterembeddedcontent' => '0',
-            'expressionsallowed' => 'test.com',
-            'regexallowed' => '',
-            'expressionsblocked' => '',
-            'regexblocked' => '',
-            'suppresssebdownloadlink' => '1',
-        ];
+    public function test_quizsettings_cache_exists_after_creation() {
+        $expected = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $this->assertEquals($expected->to_record(), \cache::make('quizaccess_seb', 'quizsettings')->get($this->quiz->id));
+    }
+
+    /**
+     * Test that quizsettings cache gets deleted after deletion.
+     */
+    public function test_quizsettings_cache_purged_after_deletion() {
+        $this->assertNotEmpty(\cache::make('quizaccess_seb', 'quizsettings')->get($this->quiz->id));
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->delete();
+
+        $this->assertFalse(\cache::make('quizaccess_seb', 'quizsettings')->get($this->quiz->id));
+    }
+
+    /**
+     * Test that we can get quiz_settings by quiz id.
+     */
+    public function test_get_quiz_settings_by_quiz_id() {
+        $expected = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+
+        $this->assertEquals($expected->to_record(), quiz_settings::get_by_quiz_id($this->quiz->id)->to_record());
+
+        // Check that data is getting from cache.
+        $expected->set('showsebtaskbar', 0);
+        $this->assertNotEquals($expected->to_record(), quiz_settings::get_by_quiz_id($this->quiz->id)->to_record());
+
+        // Now save and check that cached as been updated.
+        $expected->save();
+        $this->assertEquals($expected->to_record(), quiz_settings::get_by_quiz_id($this->quiz->id)->to_record());
+
+        // Returns false for non existing quiz.
+        $this->assertFalse(quiz_settings::get_by_quiz_id(7777777));
+    }
+
+    /**
+     * Test that SEB config cache exists after creation of the quiz.
+     */
+    public function test_config_cache_exists_after_creation() {
+        $this->assertNotEmpty(\cache::make('quizaccess_seb', 'config')->get($this->quiz->id));
+    }
+
+    /**
+     * Test that SEB config cache gets deleted after deletion.
+     */
+    public function test_config_cache_purged_after_deletion() {
+        $this->assertNotEmpty(\cache::make('quizaccess_seb', 'config')->get($this->quiz->id));
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->delete();
+
+        $this->assertFalse(\cache::make('quizaccess_seb', 'config')->get($this->quiz->id));
+    }
+
+    /**
+     * Test that we can get SEB config by quiz id.
+     */
+    public function test_get_config_by_quiz_id() {
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $expected = $quizsettings->get_config();
+
+        $this->assertEquals($expected, quiz_settings::get_config_by_quiz_id($this->quiz->id));
+
+        // Check that data is getting from cache.
+        $quizsettings->set('showsebtaskbar', 0);
+        $this->assertNotEquals($quizsettings->get_config(), quiz_settings::get_config_by_quiz_id($this->quiz->id));
+
+        // Now save and check that cached as been updated.
+        $quizsettings->save();
+        $this->assertEquals($quizsettings->get_config(), quiz_settings::get_config_by_quiz_id($this->quiz->id));
+
+        // Returns null for non existing quiz.
+        $this->assertNull(quiz_settings::get_config_by_quiz_id(7777777));
+    }
+
+    /**
+     * Test that SEB config key cache exists after creation of the quiz.
+     */
+    public function test_config_key_cache_exists_after_creation() {
+        $this->assertNotEmpty(\cache::make('quizaccess_seb', 'configkey')->get($this->quiz->id));
+    }
+
+    /**
+     * Test that SEB config key cache gets deleted after deletion.
+     */
+    public function test_config_key_cache_purged_after_deletion() {
+        $this->assertNotEmpty(\cache::make('quizaccess_seb', 'configkey')->get($this->quiz->id));
+
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->delete();
+
+        $this->assertFalse(\cache::make('quizaccess_seb', 'configkey')->get($this->quiz->id));
+    }
+
+    /**
+     * Test that we can get SEB config key by quiz id.
+     */
+    public function test_get_config_key_by_quiz_id() {
+        $quizsettings = quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $expected = $quizsettings->get_config_key();
+
+        $this->assertEquals($expected, quiz_settings::get_config_key_by_quiz_id($this->quiz->id));
+
+        // Check that data is getting from cache.
+        $quizsettings->set('showsebtaskbar', 0);
+        $this->assertNotEquals($quizsettings->get_config_key(), quiz_settings::get_config_key_by_quiz_id($this->quiz->id));
+
+        // Now save and check that cached as been updated.
+        $quizsettings->save();
+        $this->assertEquals($quizsettings->get_config_key(), quiz_settings::get_config_key_by_quiz_id($this->quiz->id));
+
+        // Returns null for non existing quiz.
+        $this->assertNull(quiz_settings::get_config_key_by_quiz_id(7777777));
     }
 
 }
