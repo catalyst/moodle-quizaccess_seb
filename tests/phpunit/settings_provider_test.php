@@ -488,11 +488,11 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
             0
         );
 
-        $this->assertArrayHasKey('seb_suppresssebdownloadlink', $settinghideifs);
-        $this->assertCount(1, $settinghideifs['seb_suppresssebdownloadlink']);
+        $this->assertArrayHasKey('seb_showsebdownloadlink', $settinghideifs);
+        $this->assertCount(1, $settinghideifs['seb_showsebdownloadlink']);
         $this->assert_hide_if(
-            $settinghideifs['seb_suppresssebdownloadlink'][0],
-            'seb_suppresssebdownloadlink',
+            $settinghideifs['seb_showsebdownloadlink'][0],
+            'seb_showsebdownloadlink',
             'seb_requiresafeexambrowser',
             'eq',
             settings_provider::USE_SEB_NO
@@ -533,7 +533,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         // Add known additional elements.
         $settingelements['seb_templateid'] = '';
         $settingelements['filemanager_sebconfigfile'] = '';
-        $settingelements['seb_suppresssebdownloadlink'] = '';
+        $settingelements['seb_showsebdownloadlink'] = '';
         $settingelements['seb_allowedbrowserexamkeys'] = '';
 
         // Get all defaults that have no matching element in settings types.
@@ -585,7 +585,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         foreach (settings_provider::get_seb_settings_map()[settings_provider::USE_SEB_CONFIG_MANUALLY] as $setting => $children) {
             // Skip not SEB setting.
-            if ($setting == 'seb_suppresssebdownloadlink') {
+            if ($setting == 'seb_showsebdownloadlink') {
                 continue;
             }
 
@@ -724,7 +724,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->set_up_user_and_role();
 
         assign_capability('quizaccess/seb:manage_seb_requiresafeexambrowser', CAP_ALLOW, $this->roleid, $this->context->id);
-        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_showsebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
         assign_capability('quizaccess/seb:manage_seb_allowedbrowserexamkeys', CAP_ALLOW, $this->roleid, $this->context->id);
 
         $this->set_up_form_mocks();
@@ -733,7 +733,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         $this->assertTrue($this->mockedform->isElementFrozen('seb_requiresafeexambrowser'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_templateid'));
-        $this->assertTrue($this->mockedform->isElementFrozen('seb_suppresssebdownloadlink'));
+        $this->assertTrue($this->mockedform->isElementFrozen('seb_showsebdownloadlink'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_allowedbrowserexamkeys'));
     }
 
@@ -755,7 +755,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue($this->mockedform->isElementFrozen('seb_requiresafeexambrowser'));
         $this->assertTrue($this->mockedform->elementExists('filemanager_sebconfigfile'));
         $this->assertFalse($this->mockedform->elementExists('seb_templateid'));
-        $this->assertTrue($this->mockedform->isElementFrozen('seb_suppresssebdownloadlink'));
+        $this->assertTrue($this->mockedform->isElementFrozen('seb_showsebdownloadlink'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_allowedbrowserexamkeys'));
 
         foreach (settings_provider::get_seb_config_elements() as $name => $type) {
@@ -790,7 +790,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $this->assertTrue($this->mockedform->isElementFrozen('seb_requiresafeexambrowser'));
         $this->assertTrue($this->mockedform->elementExists('filemanager_sebconfigfile'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_templateid'));
-        $this->assertTrue($this->mockedform->isElementFrozen('seb_suppresssebdownloadlink'));
+        $this->assertTrue($this->mockedform->isElementFrozen('seb_showsebdownloadlink'));
         $this->assertTrue($this->mockedform->isElementFrozen('seb_allowedbrowserexamkeys'));
 
         foreach (settings_provider::get_seb_config_elements() as $name => $type) {
@@ -799,9 +799,9 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
-     * Test Suppress Safe Exam Browser download button setting in the form.
+     * Test Show Safe Exam Browser download button setting in the form.
      */
-    public function test_suppresssebdownloadlink_in_form() {
+    public function test_showsebdownloadlink_in_form() {
         $this->setAdminUser();
 
         $this->quiz = $this->create_test_quiz($this->course, settings_provider::USE_SEB_CONFIG_MANUALLY);
@@ -814,13 +814,13 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
         // Shouldn't be in the form if no permissions.
         settings_provider::add_seb_settings_fields($this->mockedquizform, $this->mockedform);
-        $this->assertFalse($this->mockedform->elementExists('seb_suppresssebdownloadlink'));
+        $this->assertFalse($this->mockedform->elementExists('seb_showsebdownloadlink'));
 
         // Should be in the form if we grant require permissions.
-        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
+        assign_capability('quizaccess/seb:manage_seb_showsebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
 
         settings_provider::add_seb_settings_fields($this->mockedquizform, $this->mockedform);
-        $this->assertTrue($this->mockedform->elementExists('seb_suppresssebdownloadlink'));
+        $this->assertTrue($this->mockedform->elementExists('seb_showsebdownloadlink'));
     }
 
     /**
@@ -1029,20 +1029,20 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
-     * Test that users can or can not change Suppress Safe Exam Browser download button setting.
+     * Test that users can or can not change Show Safe Exam Browser download button setting.
      */
-    public function test_can_change_seb_suppresssebdownloadlink() {
+    public function test_can_change_seb_showsebdownloadlink() {
         $this->quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $this->course->id]);
         $this->context = context_module::instance($this->quiz->cmid);
         $this->setAdminUser();
-        $this->assertTrue(settings_provider::can_change_seb_suppresssebdownloadlink($this->context));
+        $this->assertTrue(settings_provider::can_change_seb_showsebdownloadlink($this->context));
 
         $this->set_up_user_and_role();
 
-        $this->assertFalse(settings_provider::can_change_seb_suppresssebdownloadlink($this->context));
+        $this->assertFalse(settings_provider::can_change_seb_showsebdownloadlink($this->context));
 
-        assign_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
-        $this->assertTrue(settings_provider::can_change_seb_suppresssebdownloadlink($this->context));
+        assign_capability('quizaccess/seb:manage_seb_showsebdownloadlink', CAP_ALLOW, $this->roleid, $this->context->id);
+        $this->assertTrue(settings_provider::can_change_seb_showsebdownloadlink($this->context));
     }
 
     /**
@@ -1208,7 +1208,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      */
     protected function get_settings() {
         $allsettings = new stdClass();
-        $allsettings->seb_suppresssebdownloadlink = 1;
+        $allsettings->seb_showsebdownloadlink = 0;
         $allsettings->seb_linkquitseb = 2;
         $allsettings->seb_userconfirmquit = 3;
         $allsettings->seb_allowuserquitseb = 4;
@@ -1267,7 +1267,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test filter_plugin_settings method for using uploaded config.
      */
     public function test_filter_plugin_settings_for_uploaded_config() {
-        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowuserquitseb',
+        $notnulls = ['requiresafeexambrowser', 'showsebdownloadlink', 'allowuserquitseb',
             'quitpassword', 'allowedbrowserexamkeys'];
         $this->assert_filter_plugin_settings(settings_provider::USE_SEB_UPLOAD_CONFIG, $notnulls);
     }
@@ -1276,7 +1276,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test filter_plugin_settings method for using template.
      */
     public function test_filter_plugin_settings_for_template() {
-        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowuserquitseb', 'quitpassword', 'templateid'];
+        $notnulls = ['requiresafeexambrowser', 'showsebdownloadlink', 'allowuserquitseb', 'quitpassword', 'templateid'];
         $this->assert_filter_plugin_settings(settings_provider::USE_SEB_TEMPLATE, $notnulls);
     }
 
@@ -1284,7 +1284,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
      * Test filter_plugin_settings method for using client config.
      */
     public function test_filter_plugin_settings_for_client_config() {
-        $notnulls = ['requiresafeexambrowser', 'suppresssebdownloadlink', 'allowedbrowserexamkeys'];
+        $notnulls = ['requiresafeexambrowser', 'showsebdownloadlink', 'allowedbrowserexamkeys'];
         $this->assert_filter_plugin_settings(settings_provider::USE_SEB_CLIENT_CONFIG, $notnulls);
     }
 
@@ -1318,7 +1318,7 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
 
             ],
             settings_provider::USE_SEB_CONFIG_MANUALLY => [
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_linkquitseb' => [],
                 'seb_userconfirmquit' => [],
                 'seb_allowuserquitseb' => [
@@ -1345,21 +1345,21 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
             ],
             settings_provider::USE_SEB_TEMPLATE => [
                 'seb_templateid' => [],
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_allowuserquitseb' => [
                     'seb_quitpassword' => [],
                 ],
             ],
             settings_provider::USE_SEB_UPLOAD_CONFIG => [
                 'filemanager_sebconfigfile' => [],
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_allowuserquitseb' => [
                     'seb_quitpassword' => [],
                 ],
                 'seb_allowedbrowserexamkeys' => [],
             ],
             settings_provider::USE_SEB_CLIENT_CONFIG => [
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_allowedbrowserexamkeys' => [],
             ],
         ];

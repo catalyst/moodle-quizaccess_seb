@@ -246,5 +246,29 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020040101, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020040703) {
+
+        // Rename the field.
+        $table = new xmldb_table('quizaccess_seb_quizsettings');
+        $field = new xmldb_field('suppresssebdownloadlink');
+
+        if ($dbman->field_exists($table, $field)) {
+            $field->set_attributes(XMLDB_TYPE_INTEGER, '1', null, null, null, null, 'allowedbrowserexamkeys');
+            $dbman->rename_field($table, $field, 'showsebdownloadlink');
+        }
+
+        // Reverse the field values as the logic has been changed from suppress to show.
+        $records = $DB->get_records('quizaccess_seb_quizsettings');
+        foreach ($records as $record) {
+            if (!is_null($record->showsebdownloadlink)) {
+                $record->showsebdownloadlink = !$record->showsebdownloadlink;
+                $DB->update_record('quizaccess_seb_quizsettings', $record);
+            }
+        }
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020040703, 'quizaccess', 'seb');
+    }
+
     return true;
 }

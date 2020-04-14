@@ -274,21 +274,21 @@ class settings_provider {
     }
 
     /**
-     * Add Suppress Safe Exam Browser download button.
+     * Add Show Safe Exam Browser download button.
      *
      * @param \mod_quiz_mod_form $quizform the quiz settings form that is being built.
      * @param \MoodleQuickForm $mform the wrapped MoodleQuickForm.
      */
-    protected static function add_seb_suppress_download_link(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
-        if (self::can_change_seb_suppresssebdownloadlink($quizform->get_context())) {
+    protected static function add_seb_show_download_link(\mod_quiz_mod_form $quizform, \MoodleQuickForm $mform) {
+        if (self::can_change_seb_showsebdownloadlink($quizform->get_context())) {
             $element = $mform->createElement('selectyesno',
-                'seb_suppresssebdownloadlink',
-                get_string('seb_suppresssebdownloadlink', 'quizaccess_seb')
+                'seb_showsebdownloadlink',
+                get_string('seb_showsebdownloadlink', 'quizaccess_seb')
             );
             self::insert_element($quizform, $mform, $element);
-            self::set_type($quizform, $mform, 'seb_suppresssebdownloadlink', PARAM_BOOL);
-            self::set_default($quizform, $mform, 'seb_suppresssebdownloadlink', 0);
-            self::add_help_button($quizform, $mform, 'seb_suppresssebdownloadlink');
+            self::set_type($quizform, $mform, 'seb_showsebdownloadlink', PARAM_BOOL);
+            self::set_default($quizform, $mform, 'seb_showsebdownloadlink', 0);
+            self::add_help_button($quizform, $mform, 'seb_showsebdownloadlink');
         }
     }
 
@@ -354,7 +354,7 @@ class settings_provider {
             self::add_seb_usage_options($quizform, $mform);
             self::add_seb_templates($quizform, $mform);
             self::add_seb_config_file($quizform, $mform);
-            self::add_seb_suppress_download_link($quizform, $mform);
+            self::add_seb_show_download_link($quizform, $mform);
             self::add_seb_config_elements($quizform, $mform);
             self::add_seb_allowedbrowserexamkeys($quizform, $mform);
             self::hide_seb_elements($quizform, $mform);
@@ -394,7 +394,7 @@ class settings_provider {
             // Freeze common quiz settings.
             self::freeze_element($quizform, $mform, 'seb_requiresafeexambrowser');
             self::freeze_element($quizform, $mform, 'seb_templateid');
-            self::freeze_element($quizform, $mform, 'seb_suppresssebdownloadlink');
+            self::freeze_element($quizform, $mform, 'seb_showsebdownloadlink');
             self::freeze_element($quizform, $mform, 'seb_allowedbrowserexamkeys');
 
             $quizsettings = quiz_settings::get_by_quiz_id((int) $quizform->get_instance());
@@ -409,7 +409,7 @@ class settings_provider {
                         get_string('filemanager_sebconfigfile', 'quizaccess_seb'),
                         $link
                     );
-                    self::insert_element($quizform, $mform, $element, 'seb_suppresssebdownloadlink');
+                    self::insert_element($quizform, $mform, $element, 'seb_showsebdownloadlink');
                 }
             }
 
@@ -768,13 +768,13 @@ class settings_provider {
     }
 
     /**
-     * Check if the current user can change Suppress Safe Exam Browser download button setting.
+     * Check if the current user can change Show Safe Exam Browser download button setting.
      *
      * @param \context $context Context to check access in.
      * @return bool
      */
-    public static function can_change_seb_suppresssebdownloadlink(\context $context) : bool {
-        return has_capability('quizaccess/seb:manage_seb_suppresssebdownloadlink', $context);
+    public static function can_change_seb_showsebdownloadlink(\context $context) : bool {
+        return has_capability('quizaccess/seb:manage_seb_showsebdownloadlink', $context);
     }
 
     /**
@@ -869,7 +869,7 @@ class settings_provider {
 
             ],
             self::USE_SEB_CONFIG_MANUALLY => [
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_linkquitseb' => [],
                 'seb_userconfirmquit' => [],
                 'seb_allowuserquitseb' => [
@@ -896,21 +896,21 @@ class settings_provider {
             ],
             self::USE_SEB_TEMPLATE => [
                 'seb_templateid' => [],
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_allowuserquitseb' => [
                     'seb_quitpassword' => [],
                 ],
             ],
             self::USE_SEB_UPLOAD_CONFIG => [
                 'filemanager_sebconfigfile' => [],
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_allowuserquitseb' => [
                     'seb_quitpassword' => [],
                 ],
                 'seb_allowedbrowserexamkeys' => [],
             ],
             self::USE_SEB_CLIENT_CONFIG => [
-                'seb_suppresssebdownloadlink' => [],
+                'seb_showsebdownloadlink' => [],
                 'seb_allowedbrowserexamkeys' => [],
             ],
         ];
@@ -991,9 +991,9 @@ class settings_provider {
             new hideif_rule('seb_quitpassword', 'seb_allowuserquitseb', 'eq', 0),
         ];
 
-        // Specific case for "Suppress Safe Exam Browser download button". It should be available for all cases, except No Seb.
-        $hideifs['seb_suppresssebdownloadlink'] = [
-            new hideif_rule('seb_suppresssebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO)
+        // Specific case for "Show Safe Exam Browser download button". It should be available for all cases, except No Seb.
+        $hideifs['seb_showsebdownloadlink'] = [
+            new hideif_rule('seb_showsebdownloadlink', 'seb_requiresafeexambrowser', 'eq', self::USE_SEB_NO)
         ];
 
         // Specific case for "Allowed Browser Exam Keys". It should be available for Template and Browser config.
