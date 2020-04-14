@@ -147,9 +147,11 @@ class quizaccess_seb extends quiz_access_rule_base {
             }
         }
 
-        // Global settings may be active which require a quiz password to be set.
-        if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired')) && empty($data['quizpassword'])) {
-            $errors['quizpassword'] = get_string('passwordnotset', 'quizaccess_seb');
+        if ($quizsettings->get('requiresafeexambrowser') != settings_provider::USE_SEB_NO) {
+            // Global settings may be active which require a quiz password to be set if using SEB.
+            if (!empty(get_config('quizaccess_seb', 'quizpasswordrequired')) && empty($data['quizpassword'])) {
+                $errors['quizpassword'] = get_string('passwordnotset', 'quizaccess_seb');
+            }
         }
 
         return $errors;
