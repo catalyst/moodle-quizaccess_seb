@@ -268,7 +268,7 @@ class quizaccess_seb extends quiz_access_rule_base {
                 . 'seb.expressionsblocked AS seb_expressionsblocked, '
                 . 'seb.regexblocked AS seb_regexblocked, '
                 . 'seb.allowedbrowserexamkeys AS seb_allowedbrowserexamkeys, '
-                . 'seb.suppresssebdownloadlink AS seb_suppresssebdownloadlink, '
+                . 'seb.showsebdownloadlink AS seb_showsebdownloadlink, '
                 . 'sebtemplate.id AS seb_templateid '
                 , 'LEFT JOIN {quizaccess_seb_quizsettings} seb ON seb.quizid = quiz.id '
                 . 'LEFT JOIN {quizaccess_seb_template} sebtemplate ON seb.templateid = sebtemplate.id '
@@ -566,7 +566,7 @@ class quizaccess_seb extends quiz_access_rule_base {
      * @return bool
      */
     private function should_display_download_seb_link() : bool {
-        return empty($this->quiz->seb_suppresssebdownloadlink);
+        return !empty($this->quiz->seb_showsebdownloadlink);
     }
 
     /**

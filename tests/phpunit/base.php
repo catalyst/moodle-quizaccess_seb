@@ -166,6 +166,7 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
             'sumgrades' => 2,
             'seb_requiresafeexambrowser' => $requiresafeexambrowser,
         ]);
+        $quiz->seb_showsebdownloadlink = 1;
         $quiz->coursemodule = $quiz->cmid;
 
         // Create a couple of questions.
@@ -304,7 +305,7 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
             'regexallowed' => '',
             'expressionsblocked' => '',
             'regexblocked' => '',
-            'suppresssebdownloadlink' => '1',
+            'showsebdownloadlink' => '1',
         ];
     }
 }

@@ -174,9 +174,9 @@ class quiz_settings extends persistent {
                 'default' => '',
                 'null' => NULL_ALLOWED,
             ],
-            'suppresssebdownloadlink' => [
+            'showsebdownloadlink' => [
                 'type' => PARAM_INT,
-                'default' => 0,
+                'default' => 1,
                 'null' => NULL_ALLOWED,
             ],
             'allowedbrowserexamkeys' => [

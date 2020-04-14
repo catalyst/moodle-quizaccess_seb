@@ -142,7 +142,7 @@ class quizaccess_seb_template_testcase extends advanced_testcase {
             'regexallowed' => '',
             'expressionsblocked' => '',
             'regexblocked' => '',
-            'suppresssebdownloadlink' => '1',
+            'showsebdownloadlink' => '1',
             'config' => '',
         ]);
 
