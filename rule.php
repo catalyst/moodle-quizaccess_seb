@@ -413,7 +413,11 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Only display if the link has been configured and attempts are greater than 0.
         if ($quizsettings->get('linkquitseb')) {
-            $quitbutton = html_writer::link($quizsettings->get('linkquitseb'), get_string('exitsebbutton', 'quizaccess_seb'));
+            $quitbutton = html_writer::link(
+                $quizsettings->get('linkquitseb'),
+                get_string('exitsebbutton', 'quizaccess_seb'),
+                ['class' => 'btn btn-secondary']
+            );
         }
 
         return $quitbutton;
@@ -437,7 +441,7 @@ class quizaccess_seb extends quiz_access_rule_base {
 
         // Those with higher level access will be able to see the button if they've made an attempt.
         if (!$this->prevent_access()) {
-            $messages[] = $this->display_buttons($this->get_quit_button(), 'btn btn-secondary');
+            $messages[] = $this->display_buttons($this->get_quit_button());
         }
 
         return $messages;
