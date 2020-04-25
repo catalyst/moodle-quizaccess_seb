@@ -139,6 +139,15 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     }
 
     /**
+     * Make sure that all SEB settings have related capabilities.
+     */
+    public function test_that_all_seb_settings_have_capabilities() {
+        foreach (settings_provider::get_seb_config_elements() as $name => $notused) {
+            $this->assertNotEmpty(get_capability_info(settings_provider::build_setting_capability_name($name)));
+        }
+    }
+
+    /**
      * Test that setting defaults only refer to settings defined in setting types.
      */
     public function test_setting_defaults_are_part_of_file_types() {
