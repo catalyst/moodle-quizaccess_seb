@@ -43,9 +43,6 @@ class quizaccess_seb_backup_restore_testcase extends quizaccess_seb_testcase {
     public function setUp() {
         parent::setUp();
         $this->setAdminUser();
-        $this->resetAfterTest();
-
-        $this->course = $this->getDataGenerator()->create_course();
     }
 
     /**

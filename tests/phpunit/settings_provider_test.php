@@ -70,15 +70,6 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     protected $roleid;
 
     /**
-     * Called before every test.
-     */
-    public function setUp() {
-        parent::setUp();
-        $this->resetAfterTest();
-        $this->course = $this->getDataGenerator()->create_course();
-    }
-
-    /**
      * Helper method to set up form mocks.
      */
     protected function set_up_form_mocks() {

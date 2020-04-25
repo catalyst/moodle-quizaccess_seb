@@ -40,15 +40,6 @@ require_once(__DIR__ . '/base.php');
 class quizaccess_seb_rule_testcase extends quizaccess_seb_testcase {
 
     /**
-     * Called before every test.
-     */
-    public function setUp() {
-        parent::setUp();
-        $this->resetAfterTest();
-        $this->course = $this->getDataGenerator()->create_course();
-    }
-
-    /**
      * Helper method to get SEB download link for testing.
      *
      * @return string

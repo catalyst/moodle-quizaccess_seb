@@ -38,17 +38,19 @@ require_once(__DIR__ . '/base.php');
  */
 class quizaccess_seb_quiz_settings_testcase extends quizaccess_seb_testcase {
 
+    /** @var context_module $context Test context. */
+    protected $context;
+
+    /** @var moodle_url $url Test quiz URL. */
+    protected $url;
+
     /**
      * Called before every test.
      */
     public function setUp() {
         parent::setUp();
 
-        $this->resetAfterTest();
-
-        // Setup test data.
         $this->setAdminUser();
-        $this->course = $this->getDataGenerator()->create_course();
         $this->quiz = $this->getDataGenerator()->create_module('quiz', [
             'course' => $this->course->id,
             'seb_requiresafeexambrowser' => settings_provider::USE_SEB_CONFIG_MANUALLY,

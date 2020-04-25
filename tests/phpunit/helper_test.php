@@ -38,14 +38,6 @@ require_once(__DIR__ . '/base.php');
 class quizaccess_seb_helper_testcase extends quizaccess_seb_testcase {
 
     /**
-     * Called before every test.
-     */
-    public function setUp() {
-        parent::setUp();
-        $this->resetAfterTest();
-    }
-
-    /**
      * Test that we can check valid seb string.
      */
     public function test_is_valid_seb_config() {

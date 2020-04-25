@@ -45,8 +45,6 @@ class quizacces_seb_access_manager_testcase extends quizaccess_seb_testcase {
      */
     public function setUp() {
         parent::setUp();
-        $this->resetAfterTest();
-        $this->course = $this->getDataGenerator()->create_course();
         $this->setAdminUser();
     }
 
