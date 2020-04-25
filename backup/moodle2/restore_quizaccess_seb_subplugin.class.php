@@ -94,20 +94,23 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         $template = null;
         if ($this->task->is_samesite()) {
             $template = \quizaccess_seb\template::get_record(['id' => $data->id]);
+        } else {
+            $candidates = \quizaccess_seb\template::get_records(['name' => $data->name]);
+            foreach ($candidates as $candidate) {
+                if ($candidate->get('content') == $data->content) {
+                    $template = $candidate;
+                    break;
+                }
+            }
         }
 
-        // Either its not the same site, or the template does not exist.
         if (empty($template)) {
             unset($data->id);
-            // Create a new template if its not the same site.
             $template = new \quizaccess_seb\template(0, $data);
-            $name = $template->get('name');
-            $newname = get_string('restoredfrom', 'quizaccess_seb', ['name' => $name, 'cmid' => $this->task->get_moduleid()]);
-            $template->set('name', $newname);
             $template->save();
         }
 
-        // Update the restored quiz to use this template.
+        // Update the restored quiz settings to use restored template.
         $DB->set_field_select(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'),
             'quizid = :quizid', ['quizid' => $parent]);
     }

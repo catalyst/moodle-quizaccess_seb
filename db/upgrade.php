@@ -270,5 +270,16 @@ function xmldb_quizaccess_seb_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020040703, 'quizaccess', 'seb');
     }
 
+    if ($oldversion < 2020042600) {
+
+        $table = new xmldb_table('quizaccess_seb_template');
+
+        $field = new xmldb_field('name', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL);
+        $dbman->change_field_type($table, $field);
+
+        // Seb savepoint reached.
+        upgrade_plugin_savepoint(true, 2020042600, 'quizaccess', 'seb');
+    }
+
     return true;
 }
