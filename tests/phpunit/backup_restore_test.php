@@ -54,7 +54,6 @@ class quizaccess_seb_backup_restore_testcase extends quizaccess_seb_testcase {
         $this->assertEquals(2, quizaccess_seb\quiz_settings::count_records());
         $actual = \quizaccess_seb\quiz_settings::get_record(['quizid' => $newcm->instance]);
 
-
         $expected = \quizaccess_seb\quiz_settings::get_record(['quizid' => $this->quiz->id]);
         $this->assertEquals($expected->get('templateid'), $actual->get('templateid'));
         $this->assertEquals($expected->get('requiresafeexambrowser'), $actual->get('requiresafeexambrowser'));
