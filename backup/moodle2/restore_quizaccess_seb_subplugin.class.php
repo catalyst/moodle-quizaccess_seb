@@ -65,9 +65,6 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
     public function process_quizaccess_seb_quizsettings($data) {
         global $DB, $USER;
 
-        // Process the files first as we will need them when saving quiz_setting.
-        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
-
         // Process quizsettings.
         $data = (object) $data;
         $data->quizid = $this->get_new_parentid('quiz'); // Update quizid with new reference.
@@ -77,6 +74,9 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         $data->timecreated = $data->timemodified = time();
         $data->usermodified = $USER->id;
         $DB->insert_record(quizaccess_seb\quiz_settings::TABLE, $data);
+
+        // Process attached files.
+        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
     }
 
     /**
