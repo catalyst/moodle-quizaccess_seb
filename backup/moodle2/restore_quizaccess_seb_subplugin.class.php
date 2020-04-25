@@ -63,6 +63,8 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
      * @param stdClass $data Data for quizaccess_seb_quizsettings retrieved from backup xml.
      */
     public function process_quizaccess_seb_quizsettings($data) {
+        global $DB, $USER;
+
         // Process the files first as we will need them when saving quiz_setting.
         $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
 
@@ -71,8 +73,10 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         $data->quizid = $this->get_new_parentid('quiz'); // Update quizid with new reference.
         $data->cmid = $this->task->get_moduleid();
 
-        $quizsettings = new quiz_settings(0, $data);
-        $quizsettings->save();
+        unset($data->id);
+        $data->timecreated = $data->timemodified = time();
+        $data->usermodified = $USER->id;
+        $DB->insert_record(quizaccess_seb\quiz_settings::TABLE, $data);
     }
 
     /**
@@ -94,11 +98,11 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
 
         // Either its not the same site, or the template does not exist.
         if (empty($template)) {
-            unset($data['id']);
+            unset($data->id);
             // Create a new template if its not the same site.
             $template = new \quizaccess_seb\template(0, $data);
             $name = $template->get('name');
-            $newname = get_string('restoredfrom', 'quizaccess_seb', ['name' => $name, 'cmid' => $parent]);
+            $newname = get_string('restoredfrom', 'quizaccess_seb', ['name' => $name, 'cmid' => $this->task->get_moduleid()]);
             $template->set('name', $newname);
             $template->save();
         }
