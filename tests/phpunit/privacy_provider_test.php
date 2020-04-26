@@ -44,20 +44,11 @@ require_once(__DIR__ . '/base.php');
 class quizaccess_seb_provider_testcase extends quizaccess_seb_testcase {
 
     /**
-     * Called before every test.
-     */
-    public function setUp() {
-        parent::setUp();
-        $this->resetAfterTest();
-    }
-
-    /**
      * Setup the user, the quiz and ensure that the user is the last user to modify the SEB quiz settings.
      */
     public function setup_test_data() {
         $this->setAdminUser();
-        $course = $this->getDataGenerator()->create_course();
-        $this->quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $this->quiz = $this->create_test_quiz($this->course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
 
         $this->user = $this->getDataGenerator()->create_user();
         $this->setUser($this->user);

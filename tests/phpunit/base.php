@@ -51,6 +51,15 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
     /** @var \stdClass $user A test logged-in user. */
     protected $user;
 
+    /**
+     * Called before every test.
+     */
+    public function setUp() {
+        parent::setUp();
+
+        $this->resetAfterTest();
+        $this->course = $this->getDataGenerator()->create_course();
+    }
 
     /**
      * Assign a capability to $USER
@@ -308,4 +317,5 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
             'showsebdownloadlink' => '1',
         ];
     }
+
 }

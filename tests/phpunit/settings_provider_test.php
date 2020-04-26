@@ -70,15 +70,6 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
     protected $roleid;
 
     /**
-     * Called before every test.
-     */
-    public function setUp() {
-        parent::setUp();
-        $this->resetAfterTest();
-        $this->course = $this->getDataGenerator()->create_course();
-    }
-
-    /**
      * Helper method to set up form mocks.
      */
     protected function set_up_form_mocks() {
@@ -136,6 +127,15 @@ class quizaccess_seb_settings_provider_testcase extends quizaccess_seb_testcase 
         $diffelements = array_diff_key($settingelements, $dbsettings);
 
         $this->assertEmpty($diffelements);
+    }
+
+    /**
+     * Make sure that all SEB settings have related capabilities.
+     */
+    public function test_that_all_seb_settings_have_capabilities() {
+        foreach (settings_provider::get_seb_config_elements() as $name => $notused) {
+            $this->assertNotEmpty(get_capability_info(settings_provider::build_setting_capability_name($name)));
+        }
     }
 
     /**

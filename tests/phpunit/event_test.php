@@ -44,10 +44,9 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
         $this->resetAfterTest();
 
         $this->setAdminUser();
-        $course = $this->getDataGenerator()->create_course();
-        $quiz = $this->create_test_quiz($course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $quiz = $this->create_test_quiz($this->course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
         $accessmanager = new \quizaccess_seb\access_manager(new quiz($quiz,
-            get_coursemodule_from_id('quiz', $quiz->cmid), $course));
+            get_coursemodule_from_id('quiz', $quiz->cmid), $this->course));
 
         // Set up event with data.
         $user = $this->getDataGenerator()->create_user();
@@ -79,7 +78,7 @@ class quizaccess_seb_event_testcase extends quizaccess_seb_testcase {
         $this->assertEquals(context_module::instance($quiz->cmid), $event->get_context());
         $this->assertEquals($user->id, $event->userid);
         $this->assertEquals($quiz->id, $event->objectid);
-        $this->assertEquals($course->id, $event->courseid);
+        $this->assertEquals($this->course->id, $event->courseid);
         $this->assertEquals('Because I said so.', $event->other['reason']);
         $this->assertEquals($expectedconfigkey, $event->other['savedconfigkey']);
         $this->assertEquals('configkey', $event->other['receivedconfigkey']);

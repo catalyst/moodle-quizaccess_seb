@@ -63,16 +63,20 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
      * @param stdClass $data Data for quizaccess_seb_quizsettings retrieved from backup xml.
      */
     public function process_quizaccess_seb_quizsettings($data) {
-        // Process the files first as we will need them when saving quiz_setting.
-        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
+        global $DB, $USER;
 
         // Process quizsettings.
         $data = (object) $data;
         $data->quizid = $this->get_new_parentid('quiz'); // Update quizid with new reference.
         $data->cmid = $this->task->get_moduleid();
 
-        $quizsettings = new quiz_settings(0, $data);
-        $quizsettings->save();
+        unset($data->id);
+        $data->timecreated = $data->timemodified = time();
+        $data->usermodified = $USER->id;
+        $DB->insert_record(quizaccess_seb\quiz_settings::TABLE, $data);
+
+        // Process attached files.
+        $this->add_related_files('quizaccess_seb', 'filemanager_sebconfigfile', null);
     }
 
     /**
@@ -85,27 +89,30 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
 
         $data = (object) $data;
 
-        $parent = $this->get_new_parentid('quiz');
+        $quizid = $this->get_new_parentid('quiz');
 
         $template = null;
         if ($this->task->is_samesite()) {
             $template = \quizaccess_seb\template::get_record(['id' => $data->id]);
+        } else {
+            // In a different site, try to find existing template with the same name and content.
+            $candidates = \quizaccess_seb\template::get_records(['name' => $data->name]);
+            foreach ($candidates as $candidate) {
+                if ($candidate->get('content') == $data->content) {
+                    $template = $candidate;
+                    break;
+                }
+            }
         }
 
-        // Either its not the same site, or the template does not exist.
         if (empty($template)) {
-            unset($data['id']);
-            // Create a new template if its not the same site.
+            unset($data->id);
             $template = new \quizaccess_seb\template(0, $data);
-            $name = $template->get('name');
-            $newname = get_string('restoredfrom', 'quizaccess_seb', ['name' => $name, 'cmid' => $parent]);
-            $template->set('name', $newname);
             $template->save();
         }
 
-        // Update the restored quiz to use this template.
-        $DB->set_field_select(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'),
-            'quizid = :quizid', ['quizid' => $parent]);
+        // Update the restored quiz settings to use restored template.
+        $DB->set_field(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'), ['quizid' => $quizid]);
     }
 
 }

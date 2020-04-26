@@ -37,14 +37,14 @@ define(
                         component:  'moodle'
                     }
                 ])
-                    .then(function(s) {
-                        notification.confirm(s[0], s[1], s[2], s[3], function() {
-                            window.location = targetUrl;
-                        });
+                .then(function(s) {
+                    notification.confirm(s[0], s[1], s[2], s[3], function() {
+                        window.location = targetUrl;
+                    });
 
-                        return;
-                    })
-                    .catch();
+                    return;
+                })
+                .catch();
             },
 
             /**

@@ -55,10 +55,10 @@ class template extends \core\form\persistent {
 
         if ($this->get_persistent()->get('id')) {
             $mform->addElement('textarea', 'content', get_string('content', 'quizaccess_seb'), ['rows' => 20, 'cols' => 60]);
-            $mform->addRule('content', get_string('uploadnofilefound'), 'required');
+            $mform->addRule('content', get_string('required'), 'required');
         } else {
             $mform->addElement('filepicker', 'content', get_string('content', 'quizaccess_seb'));
-            $mform->addRule('content', get_string('uploadnofilefound'), 'required');
+            $mform->addRule('content', get_string('required'), 'required');
         }
 
         $mform->addElement('selectyesno', 'enabled', get_string('enabled', 'quizaccess_seb'));
@@ -108,11 +108,6 @@ class template extends \core\form\persistent {
         // Check name.
         if (empty($data->name)) {
             $newerrors['name'] = get_string('namerequired', 'quizaccess_seb');
-        }
-
-        // Check submitted template as a text.
-        if (!empty($this->get_persistent()->get('id')) && empty($data->content)) {
-            $newerrors['content'] = get_string('invalidtemplate', 'quizaccess_seb');
         }
 
         return $newerrors;
