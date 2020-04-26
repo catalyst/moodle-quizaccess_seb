@@ -89,12 +89,13 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
 
         $data = (object) $data;
 
-        $parent = $this->get_new_parentid('quiz');
+        $quizid = $this->get_new_parentid('quiz');
 
         $template = null;
         if ($this->task->is_samesite()) {
             $template = \quizaccess_seb\template::get_record(['id' => $data->id]);
         } else {
+            // In a different site, try to find existing template with the same name and content.
             $candidates = \quizaccess_seb\template::get_records(['name' => $data->name]);
             foreach ($candidates as $candidate) {
                 if ($candidate->get('content') == $data->content) {
@@ -111,8 +112,7 @@ class restore_quizaccess_seb_subplugin extends restore_mod_quiz_access_subplugin
         }
 
         // Update the restored quiz settings to use restored template.
-        $DB->set_field_select(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'),
-            'quizid = :quizid', ['quizid' => $parent]);
+        $DB->set_field(\quizaccess_seb\quiz_settings::TABLE, 'templateid', $template->get('id'), ['quizid' => $quizid]);
     }
 
 }
