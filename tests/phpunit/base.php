@@ -318,12 +318,4 @@ abstract class quizaccess_seb_testcase extends \advanced_testcase {
         ];
     }
 
-    /**
-     * A helper method to emulate backup and restore of the quiz.
-     *
-     * @return \cm_info|null
-     */
-    protected function backup_and_restore_quiz() {
-        return duplicate_module($this->course, get_fast_modinfo($this->course)->get_cm($this->quiz->cmid));
-    }
 }

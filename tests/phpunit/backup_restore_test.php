@@ -37,12 +37,90 @@ require_once(__DIR__ . '/base.php');
  */
 class quizaccess_seb_backup_restore_testcase extends quizaccess_seb_testcase {
 
+    /** @var \quizaccess_seb\template $template A test template. */
+    protected $template;
+
     /**
      * Called before every test.
      */
     public function setUp() {
+        global $USER;
+
         parent::setUp();
         $this->setAdminUser();
+        $this->template = $this->create_template();
+        $this->user = $USER;
+    }
+
+    /**
+     * A helper method to create a quiz with template usage of SEB.
+     *
+     * @return \quizaccess_seb\quiz_settings
+     */
+    protected function create_quiz_with_template() {
+        $this->quiz = $this->create_test_quiz($this->course, \quizaccess_seb\settings_provider::USE_SEB_CONFIG_MANUALLY);
+        $quizsettings = \quizaccess_seb\quiz_settings::get_record(['quizid' => $this->quiz->id]);
+        $quizsettings->set('requiresafeexambrowser', \quizaccess_seb\settings_provider::USE_SEB_TEMPLATE);
+        $quizsettings->set('templateid', $this->template->get('id'));
+        $quizsettings->save();
+
+        return $quizsettings;
+    }
+
+    /**
+     * A helper method to emulate backup and restore of the quiz.
+     *
+     * @return \cm_info|null
+     */
+    protected function backup_and_restore_quiz() {
+        return duplicate_module($this->course, get_fast_modinfo($this->course)->get_cm($this->quiz->cmid));
+    }
+
+    /**
+     * A helper method to backup test quiz.
+     *
+     * @return mixed A backup ID ready to be restored.
+     */
+    protected function backup_quiz() {
+        global $CFG;
+
+        // Get the necessary files to perform backup and restore.
+        require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
+        require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
+
+        $backupid = 'test-seb-backup-restore';
+
+        $bc = new backup_controller(backup::TYPE_1ACTIVITY, $this->quiz->coursemodule, backup::FORMAT_MOODLE,
+            backup::INTERACTIVE_NO, backup::MODE_GENERAL, $this->user->id);
+        $bc->execute_plan();
+
+        $results = $bc->get_results();
+        $file = $results['backup_destination'];
+        $fp = get_file_packer('application/vnd.moodle.backup');
+        $filepath = $CFG->dataroot . '/temp/backup/' . $backupid;
+        $file->extract_to_pathname($fp, $filepath);
+        $bc->destroy();
+
+        return $backupid;
+    }
+
+    /**
+     * A helper method to restore provided backup.
+     *
+     * @param string $backupid Backup ID to restore.
+     */
+    protected function restore_quiz($backupid) {
+        $rc = new restore_controller($backupid, $this->course->id,
+            backup::INTERACTIVE_NO, backup::MODE_GENERAL, $this->user->id, backup::TARGET_CURRENT_ADDING);
+        $this->assertTrue($rc->execute_precheck());
+        $rc->execute_plan();
+    }
+
+    /**
+     * A helper method to emulate restoring to a different site.
+     */
+    protected function change_site() {
+        set_config('siteidentifier', random_string(32) . 'not the same site');
     }
 
     /**
@@ -136,6 +214,72 @@ class quizaccess_seb_backup_restore_testcase extends quizaccess_seb_testcase {
         $actualfile = \quizaccess_seb\settings_provider::get_module_context_sebconfig_file($newcm->id);
 
         $this->assertEquals($expectedfile->get_content(), $actualfile->get_content());
+    }
+
+    /**
+     * No new template should be restored if restoring to a different site,
+     * but the template with  the same name and content exists..
+     */
+    public function test_restore_template_to_a_different_site_when_the_same_template_exists() {
+        $this->create_quiz_with_template();
+        $backupid = $this->backup_quiz();
+
+        $this->assertEquals(1, quizaccess_seb\quiz_settings::count_records());
+        $this->assertEquals(1, quizaccess_seb\template::count_records());
+
+        $this->change_site();
+        $this->restore_quiz($backupid);
+
+        // Should see additional setting record, but no new template record.
+        $this->assertEquals(2, quizaccess_seb\quiz_settings::count_records());
+        $this->assertEquals(1, quizaccess_seb\template::count_records());
+    }
+
+    /**
+     * A new template should be restored if restoring to a different site, but existing template
+     * has the same content, but different name.
+     */
+    public function test_restore_template_to_a_different_site_when_the_same_content_but_different_name() {
+        $this->create_quiz_with_template();
+        $backupid = $this->backup_quiz();
+
+        $this->assertEquals(1, quizaccess_seb\quiz_settings::count_records());
+        $this->assertEquals(1, quizaccess_seb\template::count_records());
+
+        $this->template->set('name', 'New name for template');
+        $this->template->save();
+
+        $this->change_site();
+        $this->restore_quiz($backupid);
+
+        // Should see additional setting record, and new template record.
+        $this->assertEquals(2, quizaccess_seb\quiz_settings::count_records());
+        $this->assertEquals(2, quizaccess_seb\template::count_records());
+    }
+
+    /**
+     * A new template should be restored if restoring to a different site, but existing template
+     * has the same name, but different content.
+     */
+    public function test_restore_template_to_a_different_site_when_the_same_name_but_different_content() {
+        global $CFG;
+
+        $this->create_quiz_with_template();
+        $backupid = $this->backup_quiz();
+
+        $this->assertEquals(1, quizaccess_seb\quiz_settings::count_records());
+        $this->assertEquals(1, quizaccess_seb\template::count_records());
+
+        $newxml = file_get_contents($CFG->dirroot . '/mod/quiz/accessrule/seb/tests/phpunit/sample_data/simpleunencrypted.seb');
+        $this->template->set('content', $newxml);
+        $this->template->save();
+
+        $this->change_site();
+        $this->restore_quiz($backupid);
+
+        // Should see additional setting record, and new template record.
+        $this->assertEquals(2, quizaccess_seb\quiz_settings::count_records());
+        $this->assertEquals(2, quizaccess_seb\template::count_records());
     }
 
 }
