@@ -2,6 +2,8 @@ language: php
 
 os: linux
 
+dist: xenial
+
 addons:
   firefox: "47.0.1"
   postgresql: "9.6"
