@@ -1,6 +1,6 @@
 language: php
 
-sudo: required
+os: linux
 
 addons:
   firefox: "47.0.1"
@@ -18,7 +18,7 @@ cache:
     - $HOME/.composer/cache
     - $HOME/.npm
 
-matrix:
+jobs:
   include:
     - php: 7.2
       env:
