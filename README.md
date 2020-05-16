@@ -17,7 +17,7 @@ If you found any issue please raise a new Moodle tracker https://tracker.moodle.
  
 https://docs.moodle.org/dev/Safe_Exam_Browser_access_rule
 
-### Min Safe Exam Browser versions
+### Safe Exam Browser Config Key
 
 The following minimum versions of the Safe Exam Browser client are required for use of the Config Key.
 
