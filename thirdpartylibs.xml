@@ -1,10 +1,24 @@
 <?xml version="1.0"?>
 <libraries>
     <library>
+        <location>vendor/autoload.php</location>
+        <name>Composer autoloader</name>
+        <version>1.10.5</version>
+        <license>MIT</license>
+        <licenseversion>1.0</licenseversion>
+    </library>
+    <library>
+        <location>vendor/composer</location>
+        <name>Composer</name>
+        <version>1.10.5</version>
+        <license>MIT</license>
+        <licenseversion>1.0</licenseversion>
+    </library>
+    <library>
         <location>vendor/rodneyrehm/plist/</location>
         <name>plist</name>
         <version>2.0.1</version>
         <license>MIT</license>
-        <licenseversion></licenseversion>
+        <licenseversion>1.0</licenseversion>
     </library>
 </libraries>
