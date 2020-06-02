@@ -121,7 +121,28 @@ class template_controller {
      * Set external page for the manager.
      */
     protected function set_external_page() {
-        admin_externalpage_setup('quizaccess_seb/template');
+        if ($extpage = admin_get_root(false, false)->locate('quizaccess_seb/template', true)) {
+            admin_externalpage_setup('quizaccess_seb/template');
+        } else {
+            global $PAGE;
+
+            $PAGE->set_context(null);
+            $PAGE->set_url(self::get_base_url());
+            require_capability('quizaccess/seb:managetemplates', \context_system::instance());
+
+            $PAGE->navbar->add(get_string('administrationsite'), new \moodle_url('/admin/search.php'));
+            $PAGE->navbar->add(get_string('plugins', 'admin'), new \moodle_url('/admin/category.php?category=modules'));
+            $PAGE->navbar->add(get_string('activitymodules'), new \moodle_url('/admin/category.php?category=modsettings'));
+            $PAGE->navbar->add(
+                get_string('pluginname', 'quiz'),
+                new \moodle_url('/admin/category.php?category=modsettingsquizcat')
+            );
+            $PAGE->navbar->add(
+                get_string('pluginname', 'quizaccess_seb'),
+                new \moodle_url('/admin/settings.php?section=modsettingsquizcatseb')
+            );
+            $PAGE->navbar->add(get_string('manage_templates', 'quizaccess_seb'));
+        }
     }
 
     /**

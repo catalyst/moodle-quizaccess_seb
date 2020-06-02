@@ -35,6 +35,12 @@ if ($hassiteconfig) {
         '',
         $OUTPUT->notification(get_string('setting:supportedversions', 'quizaccess_seb'), 'warning')));
 
+    $settings->add(new admin_setting_statictext('quizaccess_seb/templates',
+        get_string('manage_templates', 'quizaccess_seb'),
+        get_string('manage_templates', 'quizaccess_seb'),
+        html_writer::link(new moodle_url('/mod/quiz/accessrule/seb/template.php'), get_string('manage_templates', 'quizaccess_seb'))
+    ));
+
     $settings->add(new admin_setting_configcheckbox('quizaccess_seb/autoreconfigureseb',
         get_string('setting:autoreconfigureseb', 'quizaccess_seb'),
         get_string('setting:autoreconfigureseb_desc', 'quizaccess_seb'),
