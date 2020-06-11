@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2020042600;
-$plugin->release = 2020042600; // Match to version.
+$plugin->version = 2020042601;
+$plugin->release = 2020042601; // Match to version.
 $plugin->requires = 2019052000; // Moodle 3.7.
 $plugin->component = 'quizaccess_seb';
 $plugin->maturity = MATURITY_STABLE;
